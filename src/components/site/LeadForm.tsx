@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useMemo, useState } from 'react'
+import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
 
 type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date'
@@ -15,16 +16,7 @@ type Field = {
 }
 
 type LeadFormProps = {
-  variant:
-    | 'consultation'
-    | 'housing'
-    | 'registration'
-    | 'recruitment'
-    | 'candidate'
-    | 'training'
-    | 'technology'
-    | 'tender'
-    | 'compliance'
+  variant: ServiceFormVariant
   title?: string
   intro?: string
 }
@@ -55,7 +47,7 @@ const baseFields: Field[] = [
   }
 ]
 
-const variantFields: Record<LeadFormProps['variant'], Field[]> = {
+const variantFields: Record<ServiceFormVariant, Field[]> = {
   consultation: [
     {
       id: 'service',
@@ -116,6 +108,10 @@ const variantFields: Record<LeadFormProps['variant'], Field[]> = {
         'Care worker',
         'Support worker',
         'Senior carer',
+        'Bank staff',
+        'Nurse',
+        'Care coordinator',
+        'Care manager',
         'Registered manager',
         'Deputy manager',
         'Multiple roles'
@@ -131,6 +127,109 @@ const variantFields: Record<LeadFormProps['variant'], Field[]> = {
     },
     { id: 'message', label: 'Role details', type: 'textarea', required: true }
   ],
+  agencyStaffing: [
+    {
+      id: 'roleNeeded',
+      label: 'Temporary role needed',
+      type: 'select',
+      required: true,
+      options: [
+        'General carer',
+        'Support worker',
+        'Bank staff',
+        'Senior carer',
+        'Nurse',
+        'Care coordinator',
+        'Care manager',
+        'Registered manager candidate',
+        'Multiple roles'
+      ]
+    },
+    { id: 'location', label: 'Shift location', type: 'text', required: true, placeholder: 'Town, city or UK region' },
+    {
+      id: 'coverType',
+      label: 'Cover type',
+      type: 'select',
+      required: true,
+      options: ['Sickness cover', 'Annual leave', 'Rota gap', 'Growth cover', 'Emergency cover', 'Ongoing bank pool']
+    },
+    {
+      id: 'shiftPattern',
+      label: 'Shift pattern',
+      type: 'select',
+      required: true,
+      options: ['Days', 'Nights', 'Sleep-ins', 'Live-in', 'Mixed rota', 'To be confirmed']
+    },
+    { id: 'startDate', label: 'Earliest start date', type: 'date' },
+    { id: 'message', label: 'Staffing requirement and compliance context', type: 'textarea', required: true }
+  ],
+  permanentRecruitment: [
+    {
+      id: 'roleNeeded',
+      label: 'Permanent or long-term role',
+      type: 'select',
+      required: true,
+      options: [
+        'Carer',
+        'Support worker',
+        'Senior carer',
+        'Bank staff',
+        'Nurse',
+        'Care coordinator',
+        'Care manager',
+        'Registered manager',
+        'Multiple roles'
+      ]
+    },
+    {
+      id: 'contractType',
+      label: 'Contract type',
+      type: 'select',
+      required: true,
+      options: ['Permanent full-time', 'Permanent part-time', 'Long-term placement', 'Bank pool', 'To be confirmed']
+    },
+    { id: 'location', label: 'Role location', type: 'text', required: true, placeholder: 'Town, city or UK region' },
+    { id: 'salaryRange', label: 'Salary or hourly rate range', type: 'text', placeholder: 'If known' },
+    {
+      id: 'urgency',
+      label: 'Hiring timescale',
+      type: 'select',
+      required: true,
+      options: ['Immediate', '2-4 weeks', '1-3 months', 'Planning ahead']
+    },
+    { id: 'message', label: 'Role brief, must-have checks and interview process', type: 'textarea', required: true }
+  ],
+  inspection: [
+    {
+      id: 'inspectionType',
+      label: 'Inspection or review type',
+      type: 'select',
+      required: true,
+      options: [
+        'First CQC inspection',
+        'Planned inspection',
+        'Responsive inspection',
+        'Mock inspection',
+        'Evidence preparation',
+        'Governance review'
+      ]
+    },
+    {
+      id: 'inspectionTimescale',
+      label: 'Timescale',
+      type: 'select',
+      required: true,
+      options: ['Date confirmed', 'Expected within 30 days', 'Expected within 3 months', 'Planning ahead', 'Urgent']
+    },
+    {
+      id: 'serviceType',
+      label: 'Service type',
+      type: 'text',
+      required: true,
+      placeholder: 'For example domiciliary care, supported living or complex care'
+    },
+    { id: 'message', label: 'Known gaps, inspection concerns or evidence needs', type: 'textarea', required: true }
+  ],
   candidate: [
     {
       id: 'rolePreference',
@@ -141,6 +240,10 @@ const variantFields: Record<LeadFormProps['variant'], Field[]> = {
         'Care worker',
         'Support worker',
         'Senior care worker',
+        'Bank staff',
+        'Nurse',
+        'Care coordinator',
+        'Care manager',
         'Registered manager',
         'Deputy manager',
         'Open to suitable roles'
@@ -260,11 +363,14 @@ const variantFields: Record<LeadFormProps['variant'], Field[]> = {
   ]
 }
 
-const titles: Record<LeadFormProps['variant'], string> = {
+const titles: Record<ServiceFormVariant, string> = {
   consultation: 'Request support from Care Atlas',
   housing: 'Discuss supported living housing support',
   registration: 'Book a registration consultation',
   recruitment: 'Request recruitment support',
+  agencyStaffing: 'Request temporary or bank staff',
+  permanentRecruitment: 'Request permanent recruitment support',
+  inspection: 'Request CQC inspection support',
   candidate: 'Register your interest in care jobs',
   training: 'Enquire about care training',
   technology: 'Request a technology audit',

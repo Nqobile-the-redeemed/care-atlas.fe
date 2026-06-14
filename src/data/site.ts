@@ -23,6 +23,20 @@ export type Checklist = {
   items: string[]
 }
 
+export type ServiceFormVariant =
+  | 'consultation'
+  | 'housing'
+  | 'registration'
+  | 'recruitment'
+  | 'agencyStaffing'
+  | 'permanentRecruitment'
+  | 'inspection'
+  | 'candidate'
+  | 'training'
+  | 'technology'
+  | 'tender'
+  | 'compliance'
+
 export type Service = {
   slug: string
   title: string
@@ -34,25 +48,19 @@ export type Service = {
   summary: string
   hero: string
   seo: SeoMeta
+  description?: string
   audience: string[]
   included: string[]
   problems: string[]
   benefits: string[]
+  outcomes?: string[]
   process: ProcessStep[]
   deliverables: string[]
   checklists: Checklist[]
+  commercialNote?: string
   faqs: FaqItem[]
   related: string[]
-  formVariant:
-    | 'consultation'
-    | 'housing'
-    | 'registration'
-    | 'recruitment'
-    | 'candidate'
-    | 'training'
-    | 'technology'
-    | 'tender'
-    | 'compliance'
+  formVariant: ServiceFormVariant
   primaryCta: string
   secondaryCta: string
 }
@@ -328,6 +336,7 @@ export const services: Service[] = [
       }
     ],
     related: [
+      'cqc-inspection-support',
       'care-compliance-policies-protocols',
       'cqc-ofsted-registration-support',
       'tender-bidding-operational-planning'
@@ -443,6 +452,7 @@ export const services: Service[] = [
       }
     ],
     related: [
+      'cqc-inspection-support',
       'care-compliance-policies-protocols',
       'care-training-organisations-individuals',
       'websites-technology-systems-support'
@@ -450,6 +460,140 @@ export const services: Service[] = [
     formVariant: 'registration',
     primaryCta: 'Start your registration journey',
     secondaryCta: 'Request policy support'
+  },
+  {
+    slug: 'cqc-inspection-support',
+    title: 'CQC Inspection Support for Care Providers',
+    navLabel: 'CQC Inspection Support',
+    href: '/services/cqc-inspection-support',
+    category: 'Regulatory and compliance',
+    icon: 'shield',
+    eyebrow: 'Inspection readiness',
+    summary:
+      'CQC inspection preparation, mock inspection support, evidence mapping, governance review, policy review and audit readiness for care providers.',
+    hero: 'Prepare for first, planned or responsive CQC inspections with structured evidence preparation, mock inspection support and practical readiness actions across the key question areas.',
+    description:
+      'This service supports care providers that need to organise evidence, test readiness and address gaps before CQC scrutiny. Care Atlas reviews governance, policies, care files, medication evidence, staff files, quality assurance records and well-led evidence, then maps actions against safe, effective, caring, responsive and well-led expectations where relevant.',
+    seo: {
+      title: 'CQC Inspection Support and Mock Inspection Preparation | Care Atlas',
+      description:
+        'CQC inspection support, mock inspections, evidence preparation, governance review, care file audits, medication audit readiness and well-led evidence mapping.'
+    },
+    audience: [
+      'New providers preparing for a first CQC inspection',
+      'Existing domiciliary care or supported living providers expecting planned inspection activity',
+      'Services responding to concerns, complaints, incidents or responsive inspection risk',
+      'Registered managers, nominated individuals and directors who need clearer governance evidence'
+    ],
+    included: [
+      'First, planned or responsive inspection preparation',
+      'Mock inspection or focused readiness review',
+      'Evidence preparation and gap identification',
+      'Governance, policy and procedure review',
+      'Care file, medication and staff file audit preparation',
+      'Quality assurance, PIR-style and well-led evidence mapping where relevant'
+    ],
+    problems: [
+      'Evidence exists but is spread across folders, systems, emails and paper files',
+      'Governance records do not clearly show learning, action tracking or provider oversight',
+      'Care files, medication records or staff files may not be inspection-ready',
+      'Managers are unclear how to evidence safe, effective, caring, responsive and well-led practice'
+    ],
+    benefits: [
+      'More organised evidence before inspection activity',
+      'Clearer visibility of gaps, risks and urgent actions',
+      'Better alignment between policies, audits, care records and governance',
+      'Improved confidence for registered managers, nominated individuals and provider leaders'
+    ],
+    outcomes: [
+      'A prioritised CQC readiness action plan',
+      'Evidence mapped against relevant quality statements and key question areas',
+      'Clearer governance records, audit trails and provider oversight evidence',
+      'Better preparation for manager, staff and leadership inspection conversations'
+    ],
+    process: [
+      {
+        title: 'Inspection context review',
+        body: 'We confirm inspection type, service model, regulated activities, previous ratings or concerns, timescale and immediate risk areas.'
+      },
+      {
+        title: 'Evidence request',
+        body: 'We identify the documents, audits, care records, staff files, policies and governance evidence needed for review.'
+      },
+      {
+        title: 'Mock inspection or focused audit',
+        body: 'The review tests selected evidence areas, including care file quality, medication audit preparation, staff file readiness and quality assurance records.'
+      },
+      {
+        title: 'Gap mapping',
+        body: 'Findings are mapped against safe, effective, caring, responsive and well-led expectations where relevant, with clear risk levels.'
+      },
+      {
+        title: 'Readiness action plan',
+        body: 'Care Atlas sets out immediate, short-term and governance actions so leaders can evidence improvement and ownership.'
+      }
+    ],
+    deliverables: [
+      'CQC inspection readiness report',
+      'Evidence map and document request list',
+      'Care file, medication and staff file audit findings where included',
+      'Governance and well-led evidence review notes',
+      'Prioritised inspection action plan'
+    ],
+    checklists: [
+      {
+        title: 'Inspection preparation areas',
+        items: [
+          'First, planned and responsive inspection preparation',
+          'Mock inspection and evidence preparation',
+          'Policy review and governance review',
+          'Care file audits and medication audit preparation',
+          'Staff file audits and quality assurance evidence'
+        ]
+      },
+      {
+        title: 'Evidence mapping areas',
+        items: [
+          'Safe evidence, risk management, safeguarding and medicines',
+          'Effective evidence, training, supervision and care planning',
+          'Caring and responsive evidence, feedback, dignity and complaints',
+          'Well-led evidence, audits, provider oversight and improvement plans',
+          'PIR-style preparation where relevant to the provider context'
+        ]
+      }
+    ],
+    commercialNote:
+      'Care Atlas does not guarantee any CQC inspection rating, judgement or regulatory outcome. The service helps providers prepare, organise evidence, identify gaps, prioritise actions and improve readiness. The provider remains responsible for safe care delivery, accurate records, regulatory notifications and compliance decisions.',
+    faqs: [
+      {
+        question: 'Can you guarantee a CQC rating?',
+        answer:
+          'No. Care Atlas does not guarantee inspection outcomes. The service supports preparation, evidence organisation, gap identification and readiness improvement.'
+      },
+      {
+        question: 'Can you support first inspections?',
+        answer:
+          'Yes. New providers can use the service to prepare evidence, test governance arrangements, review care and staff files, and organise well-led evidence before first inspection activity.'
+      },
+      {
+        question: 'Do you review care files and medication records?',
+        answer:
+          'Yes, where included in scope. We can review selected care files, risk assessments, medication audit evidence and related action tracking to identify readiness gaps.'
+      },
+      {
+        question: 'What does well-led evidence mapping include?',
+        answer:
+          'It can include governance meetings, audits, provider oversight, quality assurance, action plans, incidents, complaints, feedback, policies, staff supervision and evidence of learning and improvement.'
+      }
+    ],
+    related: [
+      'care-compliance-policies-protocols',
+      'pamms-preparation-care-consultancy',
+      'cqc-ofsted-registration-support'
+    ],
+    formVariant: 'inspection',
+    primaryCta: 'Request inspection support',
+    secondaryCta: 'View compliance support'
   },
   {
     slug: 'care-recruitment-registered-manager-finder',
@@ -548,13 +692,286 @@ export const services: Service[] = [
       }
     ],
     related: [
+      'permanent-part-time-care-recruitment',
+      'bank-staff-agency-staffing',
       'care-training-organisations-individuals',
-      'cqc-ofsted-registration-support',
       'care-compliance-policies-protocols'
     ],
     formVariant: 'recruitment',
     primaryCta: 'Enquire about recruitment',
     secondaryCta: 'Apply for care jobs'
+  },
+  {
+    slug: 'bank-staff-agency-staffing',
+    title: 'Bank Staff & Agency Staffing for Care Providers',
+    navLabel: 'Bank Staff & Agency Staffing',
+    href: '/services/bank-staff-agency-staffing',
+    category: 'Staffing and careers',
+    icon: 'users',
+    eyebrow: 'Flexible care staffing',
+    summary:
+      'Temporary, flexible and bank staffing support for providers managing sickness, annual leave, rota gaps, growth and emergency cover.',
+    hero: 'Access temporary and flexible staffing support for domiciliary care, supported living and other regulated care services when rota gaps, sickness, growth or emergency cover place pressure on safe delivery.',
+    description:
+      'This service helps care providers request suitable temporary workers or build a reliable bank staffing pipeline. Care Atlas supports the staffing brief, availability management, compliance evidence review and communication needed to place general carers, support workers, bank staff, senior carers, nurses, care coordinators, care managers and registered manager candidates where appropriate.',
+    seo: {
+      title: 'Bank Staff and Agency Staffing for Care Providers | Care Atlas',
+      description:
+        'Temporary care staffing, bank staff, agency carers, support workers, senior carers, nurses and care managers for UK care providers managing rota gaps.'
+    },
+    audience: [
+      'Domiciliary care providers covering sickness, annual leave or short-notice absence',
+      'Supported living services needing consistent cover across day, night or sleep-in shifts',
+      'Providers mobilising new packages while permanent recruitment continues',
+      'Registered managers and care coordinators trying to stabilise rotas without lowering compliance expectations'
+    ],
+    included: [
+      'Temporary staffing requirement intake and urgency triage',
+      'Role, shift, location and client group briefing',
+      'Bank staff and agency worker availability coordination',
+      'Right to work, DBS, reference, training and experience evidence review where applicable',
+      'Shift confirmation, communication and follow-up process',
+      'Escalation route for cancelled shifts, suitability concerns or urgent cover changes'
+    ],
+    problems: [
+      'Rota gaps caused by sickness, annual leave, vacancies or rapid service growth',
+      'Emergency cover requests that are not clearly documented or risk assessed',
+      'Managers spending too much time chasing availability manually',
+      'Temporary workers arriving without a clear brief, compliance context or shift expectation'
+    ],
+    benefits: [
+      'Clearer process for requesting temporary staff',
+      'Better visibility of worker availability and cover status',
+      'Reduced pressure on registered managers and coordinators during rota disruption',
+      'A safer distinction between flexible staffing support and long-term recruitment'
+    ],
+    outcomes: [
+      'A documented staffing request with role, location, shift and risk context',
+      'A clearer view of suitable temporary staff options and availability',
+      'Improved continuity planning during absence, annual leave and emergency cover',
+      'A practical audit trail for staffing decisions and follow-up actions'
+    ],
+    process: [
+      {
+        title: 'Request staff',
+        body: 'The provider submits the role type, shift pattern, location, start date, client group, urgency and any specialist requirements.'
+      },
+      {
+        title: 'Confirm compliance context',
+        body: 'We clarify the checks needed for the role, including right to work, DBS status, references, training, experience and any service-specific requirements.'
+      },
+      {
+        title: 'Check availability',
+        body: 'Suitable bank or temporary workers are matched against availability, shift pattern, travel area, experience and suitability for the service environment.'
+      },
+      {
+        title: 'Confirm cover',
+        body: 'Shift details, reporting instructions and escalation contacts are confirmed so the provider, worker and coordinator understand expectations.'
+      },
+      {
+        title: 'Review after shift',
+        body: 'Feedback, concerns, cancellations and repeat booking suitability are captured to strengthen future staffing decisions.'
+      }
+    ],
+    deliverables: [
+      'Temporary staffing request record',
+      'Role and shift briefing summary',
+      'Compliance evidence checklist',
+      'Availability and booking status update',
+      'Post-shift feedback and follow-up notes'
+    ],
+    checklists: [
+      {
+        title: 'Roles covered',
+        items: [
+          'General carers and domiciliary care workers',
+          'Support workers for supported living or community support',
+          'Bank staff and flexible workers',
+          'Senior carers and shift leads',
+          'Nurses, care coordinators, care managers and registered manager candidates where appropriate'
+        ]
+      },
+      {
+        title: 'Common cover reasons',
+        items: [
+          'Sickness and short-notice absence',
+          'Annual leave and planned rota pressure',
+          'Growth, mobilisation and new packages',
+          'Emergency cover and safeguarding-driven continuity needs',
+          'Temporary support while permanent recruitment is underway'
+        ]
+      }
+    ],
+    commercialNote:
+      'Temporary staffing is different from permanent recruitment. Agency or bank support is usually shift, cover or availability-led, while permanent recruitment is based on a long-term role brief and placement terms. Exact rates, cancellation terms, worker status, compliance responsibilities and payment arrangements should be confirmed in the service agreement.',
+    faqs: [
+      {
+        question: 'How do providers request temporary staff?',
+        answer:
+          'Providers submit the role, shift, location, start date, client group, urgency and compliance requirements through the staffing enquiry route. Care Atlas then confirms what information is needed before availability can be checked.'
+      },
+      {
+        question: 'How are compliance checks handled?',
+        answer:
+          'The required checks depend on the role and setting. Typical areas include right to work, DBS status, references, training, experience and service-specific onboarding evidence. Responsibilities and acceptable evidence should be confirmed before cover is agreed.'
+      },
+      {
+        question: 'How is staff availability managed?',
+        answer:
+          'Availability is matched against role, location, shift pattern, travel area, experience and suitability. Confirmed cover should include reporting instructions, escalation contacts and any important risk or care context.'
+      },
+      {
+        question: 'When should I use agency staffing instead of permanent recruitment?',
+        answer:
+          'Agency or bank staffing is usually best for sickness, annual leave, growth pressure, emergency cover and rota gaps. Permanent recruitment is better when the provider needs a long-term employee or stable part-time placement.'
+      }
+    ],
+    related: [
+      'permanent-part-time-care-recruitment',
+      'care-recruitment-registered-manager-finder',
+      'care-training-organisations-individuals'
+    ],
+    formVariant: 'agencyStaffing',
+    primaryCta: 'Request temporary staff',
+    secondaryCta: 'Discuss recruitment'
+  },
+  {
+    slug: 'permanent-part-time-care-recruitment',
+    title: 'Permanent & Part-Time Care Staff Recruitment',
+    navLabel: 'Permanent Staff Placement',
+    href: '/services/permanent-part-time-care-recruitment',
+    category: 'Staffing and careers',
+    icon: 'briefcase',
+    eyebrow: 'Care recruitment placement',
+    summary:
+      'Permanent, part-time and long-term staff placement for care providers, with screening, interview coordination and post-placement support.',
+    hero: 'Recruit competent, trained and compliant care staff for permanent, part-time and long-term roles with a placement-led recruitment service for care providers.',
+    description:
+      'This recruitment service is separate from agency and bank staffing. It supports employers that want long-term staff appointments and are prepared to pay for each successful placement. Care Atlas can help source and screen carers, support workers, senior carers, bank staff, nurses, care coordinators, care managers and registered managers where appropriate.',
+    seo: {
+      title: 'Permanent Care Recruitment and Part-Time Staff Placement | Care Atlas',
+      description:
+        'Permanent care recruitment, part-time staff placement, registered manager recruitment and compliant care staffing support for UK providers.'
+    },
+    audience: [
+      'Domiciliary care agencies hiring permanent carers, coordinators or senior staff',
+      'Supported living providers building stable teams for long-term packages',
+      'Care businesses seeking registered managers or experienced operational leaders',
+      'Providers that want compliant candidate screening before interview and placement'
+    ],
+    included: [
+      'Role briefing and candidate profile definition',
+      'Candidate sourcing and attraction across relevant care roles',
+      'Initial screening against experience, values, availability and location',
+      'Right to work checks and compliance evidence coordination',
+      'DBS, reference, training and file readiness guidance where applicable',
+      'Interview coordination, placement support and post-placement follow-up'
+    ],
+    problems: [
+      'Permanent vacancies are affecting continuity, quality or service growth',
+      'Hiring managers are interviewing candidates who do not meet core requirements',
+      'Registered manager or coordinator vacancies are delaying registration, mobilisation or improvement plans',
+      'Recruitment activity is not linked to compliance checks, onboarding or retention support'
+    ],
+    benefits: [
+      'A clearer role brief before candidate search starts',
+      'More consistent screening and interview coordination',
+      'Better link between recruitment, compliance files and onboarding',
+      'A commercially clear placement route based on successful hires'
+    ],
+    outcomes: [
+      'A defined role profile with must-have and desirable criteria',
+      'A shortlist of candidates matched against the agreed brief where available',
+      'Documented screening notes to support employer decision making',
+      'Post-placement support and replacement sourcing within agreed warranty terms'
+    ],
+    process: [
+      {
+        title: 'Role briefing',
+        body: 'We confirm the role, service type, location, salary or rate, hours, duties, must-have experience and compliance expectations.'
+      },
+      {
+        title: 'Candidate sourcing',
+        body: 'Potential candidates are identified through relevant care-sector routes, candidate interest records and targeted outreach where appropriate.'
+      },
+      {
+        title: 'Screening',
+        body: 'Candidates are screened for experience, availability, location, communication, values, role fit and practical suitability.'
+      },
+      {
+        title: 'Compliance checks',
+        body: 'Right to work status and available DBS, reference, training and file evidence are reviewed or coordinated according to the role and agreed process.'
+      },
+      {
+        title: 'Interview and placement',
+        body: 'Care Atlas supports interview coordination, feedback, offer communication and placement confirmation once the provider chooses a candidate.'
+      },
+      {
+        title: 'Post-placement support',
+        body: 'Early follow-up helps identify onboarding issues, suitability concerns and whether any replacement warranty support may be needed.'
+      }
+    ],
+    deliverables: [
+      'Role briefing document',
+      'Candidate sourcing and screening plan',
+      'Shortlist and screening notes where suitable candidates are available',
+      'Interview coordination record',
+      'Placement confirmation and post-placement support notes'
+    ],
+    checklists: [
+      {
+        title: 'Roles covered',
+        items: [
+          'Carers and domiciliary care workers',
+          'Support workers and senior carers',
+          'Bank staff for long-term pools',
+          'Nurses and clinical staff where appropriate',
+          'Care coordinators, care managers and registered managers'
+        ]
+      },
+      {
+        title: 'Recruitment stages',
+        items: [
+          'Role briefing and success criteria',
+          'Candidate sourcing and attraction',
+          'Screening and right to work checks',
+          'DBS, references and compliance evidence coordination',
+          'Interview, placement and post-placement support'
+        ]
+      }
+    ],
+    commercialNote:
+      'A 6-month replacement warranty can be included for eligible placements. If a placed candidate leaves or is unsuitable within the warranty period, Care Atlas will support sourcing a replacement according to the agreed terms. The warranty is not unlimited and may depend on factors such as role changes, dismissal reason, payment status, employer onboarding, candidate conduct and notification timescales. Final terms should be confirmed in the service agreement.',
+    faqs: [
+      {
+        question: 'How is this different from agency staffing?',
+        answer:
+          'Permanent recruitment is designed for long-term roles and successful placements. Agency or bank staffing is usually used for temporary shifts, rota gaps and emergency cover.'
+      },
+      {
+        question: 'When does the provider pay?',
+        answer:
+          'The provider pays for each successful placement according to the agreed recruitment terms. Payment triggers, timing and any deposit or retained search arrangements should be confirmed before sourcing begins.'
+      },
+      {
+        question: 'What checks are included before placement?',
+        answer:
+          'The process can include role screening, right to work checks, available DBS and reference evidence, training evidence and compliance file coordination. The exact checks depend on the role and agreement.'
+      },
+      {
+        question: 'How does the 6-month replacement warranty work?',
+        answer:
+          'If an eligible candidate leaves or is unsuitable within the warranty period, Care Atlas will support sourcing a replacement according to the service terms. It does not create unlimited liability and final wording should be confirmed in the service agreement.'
+      }
+    ],
+    related: [
+      'bank-staff-agency-staffing',
+      'care-recruitment-registered-manager-finder',
+      'care-training-organisations-individuals'
+    ],
+    formVariant: 'permanentRecruitment',
+    primaryCta: 'Start a placement search',
+    secondaryCta: 'View agency staffing'
   },
   {
     slug: 'care-compliance-policies-protocols',
@@ -663,6 +1080,7 @@ export const services: Service[] = [
       }
     ],
     related: [
+      'cqc-inspection-support',
       'pamms-preparation-care-consultancy',
       'cqc-ofsted-registration-support',
       'websites-technology-systems-support'
@@ -769,7 +1187,8 @@ export const services: Service[] = [
     ],
     related: [
       'pamms-preparation-care-consultancy',
-      'care-recruitment-registered-manager-finder',
+      'permanent-part-time-care-recruitment',
+      'bank-staff-agency-staffing',
       'websites-technology-systems-support'
     ],
     formVariant: 'tender',
@@ -780,7 +1199,7 @@ export const services: Service[] = [
     slug: 'care-training-organisations-individuals',
     title: 'Care Training for Organisations & Individuals',
     navLabel: 'Care Training',
-    href: '/training',
+    href: '/services/care-training-organisations-individuals',
     category: 'Training and capability building',
     icon: 'graduation',
     eyebrow: 'Capability building',
@@ -873,6 +1292,7 @@ export const services: Service[] = [
       }
     ],
     related: [
+      'permanent-part-time-care-recruitment',
       'care-recruitment-registered-manager-finder',
       'care-compliance-policies-protocols',
       'cqc-ofsted-registration-support'
@@ -1206,6 +1626,38 @@ export const jobListings: JobListing[] = [
     summary:
       'Register for registered manager opportunities with providers seeking strong operational and compliance leadership.',
     tags: ['Leadership', 'CQC', 'Service development']
+  },
+  {
+    title: 'Senior Carer',
+    location: 'Local provider matching',
+    type: 'Permanent / Part-time',
+    summary:
+      'Register interest in senior care roles supporting shift leadership, mentoring, medication practice and quality standards.',
+    tags: ['Senior care', 'Medication', 'Team support']
+  },
+  {
+    title: 'Care Coordinator',
+    location: 'Office and hybrid opportunities',
+    type: 'Permanent',
+    summary:
+      'Share your coordination experience for rota, care planning, client communication and provider operations roles.',
+    tags: ['Rostering', 'Care planning', 'Operations']
+  },
+  {
+    title: 'Nurse',
+    location: 'Role-dependent opportunities',
+    type: 'Permanent / Bank',
+    summary:
+      'Register clinical interest for appropriate nursing, complex care or provider support opportunities where available.',
+    tags: ['Clinical', 'Complex care', 'Bank work']
+  },
+  {
+    title: 'Care Manager',
+    location: 'UK-wide search support',
+    type: 'Permanent',
+    summary:
+      'Register for operational management roles with providers seeking stronger governance, supervision and service delivery.',
+    tags: ['Management', 'Governance', 'Quality']
   }
 ]
 

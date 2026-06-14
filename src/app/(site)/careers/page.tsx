@@ -10,7 +10,18 @@ export const metadata: Metadata = {
     'Register interest for care worker, support worker and registered manager roles through Care Atlas candidate signup and job matching placeholders.'
 }
 
-const filters = ['All roles', 'Care worker', 'Support worker', 'Registered manager', 'Part-time', 'Full-time', 'Bank']
+const filters = [
+  'All roles',
+  'Care worker',
+  'Support worker',
+  'Senior carer',
+  'Care coordinator',
+  'Nurse',
+  'Registered manager',
+  'Part-time',
+  'Full-time',
+  'Bank'
+]
 
 export default function CareersPage() {
   return (
@@ -29,12 +40,15 @@ export default function CareersPage() {
               for opportunities with care providers. Share your preferences now and the platform can later connect to
               active jobs, candidate screening and employer matching.
             </p>
-            <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
+            <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap'>
               <ButtonLink href='#candidate-signup' variant='primary'>
                 Apply for Care Jobs
               </ButtonLink>
-              <ButtonLink href='/services/care-recruitment-registered-manager-finder' variant='secondary'>
-                Employers Hiring Staff
+              <ButtonLink href='/services/permanent-part-time-care-recruitment' variant='secondary'>
+                Employers Hiring Permanently
+              </ButtonLink>
+              <ButtonLink href='/services/bank-staff-agency-staffing' variant='secondary'>
+                Request Bank Staff
               </ButtonLink>
             </div>
           </div>
@@ -120,9 +134,9 @@ export default function CareersPage() {
           <SectionHeading
             eyebrow='Employers'
             title='Hiring care staff or searching for a registered manager?'
-            body='Employers can submit role details, urgency and location requirements through the recruitment enquiry flow.'
+            body='Employers can submit role details, contract type, urgency, location and compliance requirements through the permanent placement enquiry flow.'
           />
-          <LeadForm variant='recruitment' title='Employer recruitment enquiry' />
+          <LeadForm variant='permanentRecruitment' title='Employer permanent recruitment enquiry' />
         </Container>
       </section>
 
@@ -130,7 +144,7 @@ export default function CareersPage() {
         title='Care candidates and employers can start from the same platform.'
         body='Candidates register interest. Employers submit vacancies. Care Atlas can later connect both sides through a recruitment workflow.'
         primary={{ label: 'Register for Care Jobs', href: '#candidate-signup' }}
-        secondary={{ label: 'Enquire About Recruitment', href: '/services/care-recruitment-registered-manager-finder' }}
+        secondary={{ label: 'Enquire About Recruitment', href: '/services/permanent-part-time-care-recruitment' }}
       />
     </>
   )

@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import { getRelatedServices, Service } from '@/data/site'
+import { getConsultationProductByServiceSlug } from '@/data/products'
+import { getRelatedServices } from '@/data/site'
+import type { Service } from '@/data/site'
 import { LeadForm } from './LeadForm'
+import { ProductPurchaseSection } from './ProductPurchaseSection'
 import {
   ButtonLink,
   ChecklistGrid,
@@ -16,6 +19,9 @@ import { SiteIcon } from './SiteIcon'
 
 export function ServiceDetailPage({ service }: { service: Service }) {
   const related = getRelatedServices(service)
+  const outcomes = service.outcomes ?? service.benefits
+  const consultationProduct = getConsultationProductByServiceSlug(service.slug)
+  const consultationHref = consultationProduct ? `/checkout?product=${consultationProduct.slug}` : '/contact#booking'
 
   return (
     <>
@@ -27,12 +33,18 @@ export function ServiceDetailPage({ service }: { service: Service }) {
             </p>
             <h1 className='max-w-4xl text-4xl font-semibold text-gray-950 sm:text-5xl'>{service.title}</h1>
             <p className='mt-5 max-w-3xl text-lg leading-8 text-gray-600'>{service.hero}</p>
-            <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
-              <ButtonLink href='#service-enquiry' variant='primary'>
-                {service.primaryCta}
+            <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap'>
+              <ButtonLink href={consultationHref} variant='primary'>
+                Book a Consultation
               </ButtonLink>
-              <ButtonLink href='/services' variant='secondary'>
-                Explore all services
+              <ButtonLink href='#pricing' variant='secondary'>
+                Purchase Service
+              </ButtonLink>
+              <ButtonLink href='#service-enquiry' variant='secondary'>
+                Request a Quote
+              </ButtonLink>
+              <ButtonLink href='/contact' variant='ghost'>
+                Speak to Care Atlas
               </ButtonLink>
             </div>
           </div>
@@ -61,11 +73,16 @@ export function ServiceDetailPage({ service }: { service: Service }) {
       <section className='bg-gray-50 py-16'>
         <Container className='grid gap-8 lg:grid-cols-[0.8fr_1.2fr]'>
           <SectionHeading
-            eyebrow='Who it helps'
-            title='Support for the providers, founders and teams facing practical operational questions.'
-            body='Each engagement starts by understanding the service model, stage, risk areas and the people who need to use the final process.'
+            eyebrow='Service description'
+            title='Practical support scoped around your care service.'
+            body={service.description ?? service.hero}
           />
-          <FeatureGrid items={service.audience} />
+          <div>
+            <h2 className='text-xl font-semibold text-gray-950'>Who this service is for</h2>
+            <div className='mt-5'>
+              <FeatureGrid items={service.audience} />
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -112,7 +129,7 @@ export function ServiceDetailPage({ service }: { service: Service }) {
             <SectionHeading
               eyebrow='Deliverables'
               title='Useful outputs that can move into daily operations.'
-              body='Deliverables are designed to be reusable later in admin dashboards, document libraries, booking systems or compliance workflows.'
+              body='The output is designed to support real provider decisions, not sit unused in a folder.'
             />
             <ul className='mt-8 space-y-3'>
               {service.deliverables.map(deliverable => (
@@ -126,9 +143,35 @@ export function ServiceDetailPage({ service }: { service: Service }) {
               ))}
             </ul>
           </div>
-          <ChecklistGrid checklists={service.checklists} />
+          <div>
+            <SectionHeading
+              eyebrow='Expected outcomes'
+              title='What the provider should be clearer on after the work.'
+              body='Outcomes depend on the agreed scope, but each service is built to improve decision making, evidence quality and operational control.'
+            />
+            <div className='mt-8'>
+              <FeatureGrid items={outcomes} />
+            </div>
+          </div>
         </Container>
+        {service.checklists.length > 0 && (
+          <Container className='mt-10'>
+            <ChecklistGrid checklists={service.checklists} />
+          </Container>
+        )}
       </section>
+
+      <ProductPurchaseSection service={service} />
+
+      {service.commercialNote && (
+        <section className='bg-white py-16'>
+          <Container>
+            <div className='border-warning-200 bg-warning-25 rounded-lg border p-5'>
+              <p className='text-sm leading-6 text-gray-700'>{service.commercialNote}</p>
+            </div>
+          </Container>
+        </section>
+      )}
 
       <section className='bg-gray-50 py-16'>
         <Container className='grid gap-10 lg:grid-cols-[0.9fr_1.1fr]'>

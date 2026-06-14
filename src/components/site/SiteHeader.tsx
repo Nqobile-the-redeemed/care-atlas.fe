@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { mainNav, serviceCategories, services, site } from '@/data/site'
+import { CareAtlasLogo } from './CareAtlasLogo'
 import { ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
@@ -51,13 +52,7 @@ export function SiteHeader() {
 
       <Container className='flex min-h-18 items-center justify-between gap-4'>
         <Link href='/' className='focus:ring-brand-500/10 flex items-center gap-3 focus:ring-4 focus:outline-hidden'>
-          <span className='bg-brand-600 shadow-theme-sm flex h-11 w-11 items-center justify-center rounded-lg text-sm font-bold text-white'>
-            CA
-          </span>
-          <span className='leading-tight'>
-            <span className='block text-lg font-semibold text-gray-950'>CARE ATLAS</span>
-            <span className='text-brand-700 block text-xs font-medium'>Care consultancy and enablement</span>
-          </span>
+          <CareAtlasLogo />
         </Link>
 
         <nav aria-label='Main navigation' className='hidden items-center gap-1 lg:flex'>

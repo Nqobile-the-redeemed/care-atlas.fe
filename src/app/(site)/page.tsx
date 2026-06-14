@@ -17,7 +17,7 @@ import { blogPosts, jobListings, services, testimonials } from '@/data/site'
 export const metadata: Metadata = {
   title: 'Care Atlas | UK Care Consultancy, Compliance, Staffing and Technology Support',
   description:
-    'Care Atlas helps UK care providers launch, grow, stay compliant, recruit staff, prepare for registration and improve care operations with technology support from Cosmonaut Labs.'
+    'Care Atlas helps UK care providers build care infrastructure, launch with confidence, stay compliant, recruit staff and improve operations with technology support from Cosmonaut Labs.'
 }
 
 const whoWeHelp = [
@@ -64,7 +64,9 @@ export default function HomePage() {
     [
       'supported-living-housing-benefit',
       'cqc-ofsted-registration-support',
-      'care-recruitment-registered-manager-finder',
+      'cqc-inspection-support',
+      'bank-staff-agency-staffing',
+      'permanent-part-time-care-recruitment',
       'care-compliance-policies-protocols',
       'websites-technology-systems-support'
     ].includes(service.slug)
@@ -79,11 +81,12 @@ export default function HomePage() {
               CARE ATLAS | UK care sector consultancy
             </p>
             <h1 className='max-w-4xl text-4xl leading-tight font-semibold text-gray-950 sm:text-5xl lg:text-6xl'>
-              Expert support for care providers, care founders, and care professionals.
+              Build, launch and support your care service with confidence.
             </h1>
             <p className='mt-6 max-w-2xl text-lg leading-8 text-gray-600'>
-              From housing support and regulatory registration to compliance systems, staffing, training, websites and
-              operational consulting, Care Atlas helps care organisations build stronger services.
+              Care Atlas helps providers and founders create the policies, systems and workflows behind stronger care
+              services, prepare CQC-ready launches, and access ongoing support for compliance, tenders, staffing, growth
+              and digital operations.
             </p>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
               <ButtonLink href='/contact#booking' variant='primary'>
@@ -95,9 +98,9 @@ export default function HomePage() {
             </div>
             <div className='mt-8 grid gap-3 sm:grid-cols-3'>
               {[
-                ['Consultancy', 'Care operations and setup'],
-                ['Compliance', 'CQC, PAMMS and policies'],
-                ['Technology', 'Websites, forms and systems']
+                ['Build', 'Policies, systems and workflows'],
+                ['Launch', 'CQC-ready provider setup'],
+                ['Support', 'Compliance, tenders and growth']
               ].map(([label, body]) => (
                 <div key={label} className='border-brand-100 bg-brand-25 rounded-lg border p-4'>
                   <p className='text-brand-700 text-sm font-semibold'>{label}</p>

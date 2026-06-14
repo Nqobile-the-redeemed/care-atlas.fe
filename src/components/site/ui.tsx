@@ -1,7 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
 import { BlogPost, Checklist, FaqItem, ProcessStep, Service } from '@/data/site'
+import { HeroGuide } from './HeroGuide'
 import { SiteIcon } from './SiteIcon'
 
 type WithClassName = {
@@ -71,55 +71,7 @@ export function SectionHeading({
 }
 
 export function HeroVisual() {
-  return (
-    <div className='border-brand-100 shadow-theme-lg relative min-h-[440px] overflow-hidden rounded-lg border bg-white'>
-      <Image
-        src='/images/grid-image/image-02.png'
-        alt='Modern blue meeting space representing professional care consultancy and technology planning'
-        fill
-        priority
-        sizes='(min-width: 1024px) 560px, 100vw'
-        className='object-cover'
-      />
-      <div className='absolute inset-0 bg-white/72' />
-      <div className='shadow-theme-sm absolute inset-x-5 top-5 rounded-lg border border-white/80 bg-white/90 p-4 backdrop-blur'>
-        <div className='flex items-center justify-between gap-4'>
-          <div>
-            <p className='text-brand-700 text-xs font-semibold tracking-[0.08em] uppercase'>
-              Care Atlas operating view
-            </p>
-            <p className='mt-1 text-sm font-semibold text-gray-950'>Launch, comply, staff, digitise</p>
-          </div>
-          <div className='bg-success-50 text-success-700 rounded-lg px-3 py-1.5 text-xs font-semibold'>Ready</div>
-        </div>
-        <div className='mt-4 grid grid-cols-2 gap-3'>
-          {['Registration', 'Housing', 'Policies', 'Recruitment'].map((item, index) => (
-            <div key={item} className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
-              <div className='bg-brand-100 mb-2 h-1.5 rounded-full'>
-                <div className='bg-brand-600 h-1.5 rounded-full' style={{ width: `${64 + index * 8}%` }} />
-              </div>
-              <p className='text-xs font-semibold text-gray-800'>{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className='shadow-theme-xl absolute right-5 bottom-5 left-5 rounded-lg bg-gray-950 p-5 text-white'>
-        <p className='text-blue-light-100 text-sm font-semibold'>Consultancy plus technology delivery</p>
-        <div className='mt-4 grid grid-cols-3 gap-3 text-center'>
-          {[
-            ['12', 'service paths'],
-            ['5', 'stage process'],
-            ['UK', 'care focus']
-          ].map(([value, label]) => (
-            <div key={label} className='rounded-lg bg-white/10 p-3'>
-              <p className='text-2xl font-semibold'>{value}</p>
-              <p className='text-blue-light-100 mt-1 text-xs'>{label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+  return <HeroGuide />
 }
 
 export function ServiceCard({ service, compact = false }: { service: Service; compact?: boolean }) {

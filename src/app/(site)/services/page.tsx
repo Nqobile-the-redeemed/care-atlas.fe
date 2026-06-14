@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 const benefits = [
   'Clear service pathways for providers at different stages',
-  'Specific enquiry forms that route leads by need and urgency',
-  'Content depth for search visibility and trust building',
-  'Related service links for connected care operations journeys'
+  'Specific enquiry routes for compliance, staffing, training, housing and technology needs',
+  'Commercially clear service pages with pricing routes and next-step options',
+  'Related consultations and services for connected care operations decisions'
 ]
 
 const process = [
@@ -74,7 +74,7 @@ export default function ServicesPage() {
           <SectionHeading
             eyebrow='Categories'
             title='Services grouped around real care business needs.'
-            body='Visitors can scan by category, compare related services and choose the most relevant conversion path.'
+            body='Compare practical support routes for registration, inspection readiness, recruitment, staffing, housing, training, compliance and digital systems.'
           />
           <div className='mt-10 space-y-12'>
             {serviceCategories.map(category => {
@@ -116,7 +116,7 @@ export default function ServicesPage() {
           <SectionHeading
             eyebrow='How to use the directory'
             title='A simple route from service interest to practical support.'
-            body='Each service page explains who it is for, what is included, problems solved, deliverables, FAQs and the form fields needed to route the enquiry.'
+            body='Each service page explains who it is for, problems solved, what is included, delivery steps, outcomes, pricing routes, related products and FAQs.'
           />
           <div className='mt-10'>
             <ProcessTimeline steps={process} />

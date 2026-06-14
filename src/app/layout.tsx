@@ -15,7 +15,15 @@ export const metadata: Metadata = {
     template: '%s'
   },
   description:
-    'Care Atlas supports UK care providers with consultancy, compliance, registration, recruitment, training, websites and technology systems.'
+    'Care Atlas supports UK care providers with consultancy, compliance, registration, recruitment, training, websites and technology systems.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/images/logo/care-atlas-logo.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/images/logo/care-atlas-logo.svg'
+  }
 }
 
 export default function RootLayout({

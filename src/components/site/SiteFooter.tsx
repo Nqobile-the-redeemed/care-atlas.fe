@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { mainNav, services, site } from '@/data/site'
+import { CareAtlasLogo } from './CareAtlasLogo'
 import { ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
@@ -19,13 +20,7 @@ export function SiteFooter() {
               href='/'
               className='inline-flex items-center gap-3 focus:ring-4 focus:ring-white/20 focus:outline-hidden'
             >
-              <span className='text-brand-700 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-sm font-bold'>
-                CA
-              </span>
-              <span>
-                <span className='block text-lg font-semibold'>CARE ATLAS</span>
-                <span className='text-blue-light-200 block text-xs font-medium'>Care consultancy and enablement</span>
-              </span>
+              <CareAtlasLogo variant='dark' />
             </Link>
             <p className='text-blue-light-100 mt-5 max-w-sm text-sm leading-6'>{site.summary}</p>
             <div className='mt-6 flex flex-wrap gap-3'>
@@ -67,7 +62,7 @@ export function SiteFooter() {
           <div>
             <h2 className='text-blue-light-200 text-sm font-semibold tracking-[0.12em] uppercase'>Services</h2>
             <ul className='mt-5 space-y-3'>
-              {services.slice(0, 7).map(service => (
+              {services.map(service => (
                 <li key={service.slug}>
                   <Link
                     href={service.href}
