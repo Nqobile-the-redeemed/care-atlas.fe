@@ -6,8 +6,8 @@ import { getBillingLabel } from '@/data/products'
 import type { Product } from '@/data/products'
 import type { Service } from '@/data/site'
 import { createCheckoutSession, getCheckoutUrls } from '@/lib/commerce'
+import { CheckoutSummary } from './CommerceBlocks'
 import { ButtonLink } from './ui'
-import { SiteIcon } from './SiteIcon'
 
 type CheckoutClientProps = {
   product?: Product
@@ -27,61 +27,6 @@ const initialCustomerState: CustomerState = {
   email: '',
   phone: '',
   organisation: ''
-}
-
-function ProductSummary({ product, service }: { product: Product; service?: Service }) {
-  return (
-    <div className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
-      <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Selected service summary</p>
-      <h2 className='mt-3 text-2xl font-semibold text-gray-950'>{product.name}</h2>
-      {service && <p className='text-brand-700 mt-2 text-sm font-semibold'>{service.title}</p>}
-      <p className='mt-4 text-sm leading-6 text-gray-600'>{product.longDescription}</p>
-
-      <div className='mt-6 grid gap-3 sm:grid-cols-3'>
-        {[
-          ['Price', product.price],
-          ['Billing', getBillingLabel(product)],
-          ['Timeline', product.timeline]
-        ].map(([label, value]) => (
-          <div key={label} className='rounded-lg border border-gray-200 bg-gray-50 p-4'>
-            <p className='text-xs font-semibold tracking-[0.08em] text-gray-500 uppercase'>{label}</p>
-            <p className='mt-1 text-sm font-semibold text-gray-900'>{value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className='mt-6 grid gap-5 md:grid-cols-2'>
-        <div>
-          <h3 className='text-sm font-semibold text-gray-950'>Features</h3>
-          <ul className='mt-3 space-y-2'>
-            {product.features.map(feature => (
-              <li key={feature} className='flex gap-2 text-sm leading-6 text-gray-700'>
-                <SiteIcon name='check' className='text-success-600 mt-1 h-4 w-4 shrink-0' />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className='text-sm font-semibold text-gray-950'>Deliverables</h3>
-          <ul className='mt-3 space-y-2'>
-            {product.deliverables.map(deliverable => (
-              <li key={deliverable} className='flex gap-2 text-sm leading-6 text-gray-700'>
-                <SiteIcon name='file' className='text-brand-700 mt-1 h-4 w-4 shrink-0' />
-                {deliverable}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {product.warrantyText && (
-        <div className='border-warning-200 bg-warning-25 mt-6 rounded-lg border p-4'>
-          <p className='text-sm leading-6 text-gray-700'>{product.warrantyText}</p>
-        </div>
-      )}
-    </div>
-  )
 }
 
 function ProductPicker({ products }: { products: Product[] }) {
@@ -180,7 +125,7 @@ export function CheckoutClient({ product, service, popularProducts }: CheckoutCl
       </div>
 
       <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr]'>
-        <ProductSummary product={product} service={service} />
+        <CheckoutSummary product={product} serviceTitle={service?.title} />
 
         <div className='shadow-theme-lg rounded-lg border border-gray-200 bg-white p-6'>
           <div className='border-b border-gray-200 pb-5'>

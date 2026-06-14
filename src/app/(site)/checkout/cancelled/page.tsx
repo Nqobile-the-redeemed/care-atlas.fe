@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CheckoutSummary, PaymentStatusMessage } from '@/components/site/CommerceBlocks'
 import { ButtonLink, Container, CtaBand } from '@/components/site/ui'
 import { getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
@@ -24,18 +25,23 @@ export default async function PaymentCancelledPage({ searchParams }: PaymentCanc
     <>
       <section className='bg-white py-16 sm:py-20'>
         <Container className='max-w-4xl'>
-          <p className='border-warning-200 bg-warning-25 text-warning-700 mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold'>
-            Payment cancelled
-          </p>
-          <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>Checkout was cancelled.</h1>
-          <p className='mt-5 text-lg leading-8 text-gray-600'>
-            No payment has been confirmed. You can return to checkout, request a quote, or speak to Care Atlas before
-            purchasing.
-          </p>
+          <PaymentStatusMessage
+            tone='warning'
+            eyebrow='Payment cancelled'
+            title='Checkout was cancelled.'
+            body='No payment has been confirmed. You can return to checkout, request a quote, or speak to Care Atlas before purchasing.'
+          />
 
-          <div className='border-brand-100 bg-brand-25 mt-8 rounded-lg border p-6'>
-            <h2 className='text-2xl font-semibold text-gray-950'>{product?.name ?? 'Selected Care Atlas product'}</h2>
-            {product && <p className='mt-3 text-sm leading-6 text-gray-600'>{product.shortDescription}</p>}
+          <div className='mt-8 space-y-4'>
+            {product ? (
+              <CheckoutSummary product={product} serviceTitle={service?.title} />
+            ) : (
+              <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
+                <p className='text-sm leading-6 text-gray-600'>
+                  No payment has been taken and the order is not confirmed.
+                </p>
+              </div>
+            )}
             <div className='mt-6 flex flex-col gap-3 sm:flex-row'>
               <ButtonLink href={retryHref} variant='primary'>
                 Return to Checkout

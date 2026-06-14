@@ -41,7 +41,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export async function createCheckoutSession(payload: CheckoutSessionRequest): Promise<CheckoutSessionResponse> {
-  const response = await fetch(buildApiUrl('/api/commerce/checkout-sessions'), {
+  const response = await fetch(buildApiUrl('/api/checkout/create-session'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ export async function createCheckoutSession(payload: CheckoutSessionRequest): Pr
 
 export async function submitQuoteRequest(payload: QuoteRequestPayload) {
   try {
-    const response = await fetch(buildApiUrl('/api/commerce/quote-requests'), {
+    const response = await fetch(buildApiUrl('/api/quotes'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

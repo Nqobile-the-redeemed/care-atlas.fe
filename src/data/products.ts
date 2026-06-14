@@ -227,11 +227,11 @@ export const products: Product[] = [
       'A package for founders and providers who need structured help preparing registration documentation, policy readiness, manager preparation and mobilisation actions.',
     category: 'package',
     serviceSlug: 'cqc-ofsted-registration-support',
-    price: 'From £2,300 + VAT',
+    price: '£2,250 + VAT',
     currency: 'GBP',
     billingType: 'one-off',
-    stripePriceId: 'price_cqc_registration_package_placeholder',
-    stripeProductId: 'prod_cqc_registration_package_placeholder',
+    stripePriceId: 'price_1TiMQuQUNGqCD6aRw9aqVPFy',
+    stripeProductId: 'prod_Uhlyvv3MgpBOq1',
     isPurchasable: true,
     requiresConsultation: true,
     features: ['Document support', 'Governance planning', 'Registered manager preparation'],
@@ -962,6 +962,14 @@ export function getPurchasableProductsByServiceSlug(serviceSlug: string) {
 
 export function getConsultationProductByServiceSlug(serviceSlug: string) {
   return getProductsByServiceSlug(serviceSlug).find(product => product.category === 'consultation')
+}
+
+export function getConsultationProductsByServiceSlug(serviceSlug: string) {
+  return getProductsByServiceSlug(serviceSlug).filter(product => product.category === 'consultation')
+}
+
+export function getNonConsultationProductsByServiceSlug(serviceSlug: string) {
+  return getProductsByServiceSlug(serviceSlug).filter(product => product.category !== 'consultation')
 }
 
 export function getPopularProducts(limit = 6) {

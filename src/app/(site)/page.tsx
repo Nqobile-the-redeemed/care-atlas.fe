@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { JobRoleCard } from '@/components/site/JobRoleCard'
 import {
   BlogCard,
   ButtonLink,
@@ -12,7 +13,8 @@ import {
   TrustStrip
 } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
-import { blogPosts, jobListings, services, testimonials } from '@/data/site'
+import { getFeaturedJobRoles } from '@/data/careers'
+import { blogPosts, services, testimonials } from '@/data/site'
 
 export const metadata: Metadata = {
   title: 'Care Atlas | UK Care Consultancy, Compliance, Staffing and Technology Support',
@@ -60,6 +62,7 @@ const process = [
 ]
 
 export default function HomePage() {
+  const featuredJobRoles = getFeaturedJobRoles(6)
   const featuredServices = services.filter(service =>
     [
       'supported-living-housing-benefit',
@@ -272,22 +275,12 @@ export default function HomePage() {
         <Container className='grid gap-10 lg:grid-cols-[0.85fr_1.15fr]'>
           <SectionHeading
             eyebrow='Careers'
-            title='Care workers and registered managers can register interest in future roles.'
-            body='The careers area is prepared for candidate signup, role preferences, CV upload placeholders and future job filtering.'
+            title='Dedicated role pages now support candidate interest by job type.'
+            body='Candidates can browse separate role pages for care, leadership and consultant opportunities before using the placeholder register-interest route.'
           />
-          <div className='grid gap-4 md:grid-cols-3'>
-            {jobListings.map(job => (
-              <div key={job.title} className='rounded-lg border border-gray-200 bg-gray-50 p-5'>
-                <h3 className='text-lg font-semibold text-gray-950'>{job.title}</h3>
-                <p className='text-brand-700 mt-2 text-sm'>{job.location}</p>
-                <p className='mt-3 text-sm leading-6 text-gray-600'>{job.summary}</p>
-                <Link
-                  href='/careers#candidate-signup'
-                  className='text-brand-700 mt-5 inline-flex text-sm font-semibold'
-                >
-                  Register interest
-                </Link>
-              </div>
+          <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
+            {featuredJobRoles.map(role => (
+              <JobRoleCard key={role.slug} role={role} />
             ))}
           </div>
         </Container>

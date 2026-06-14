@@ -1,26 +1,22 @@
 import type { Metadata } from 'next'
 import { LeadForm } from '@/components/site/LeadForm'
+import { JobRoleCard } from '@/components/site/JobRoleCard'
 import { ButtonLink, Container, CtaBand, SectionHeading } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
-import { jobListings } from '@/data/site'
+import { jobRoles } from '@/data/careers'
 
 export const metadata: Metadata = {
   title: 'Careers | Find a Job as a Carer | Care Atlas',
   description:
-    'Register interest for care worker, support worker and registered manager roles through Care Atlas candidate signup and job matching placeholders.'
+    'Explore individual care and consultant role pages, then register interest through the Care Atlas careers and candidate signup flow.'
 }
 
-const filters = [
-  'All roles',
-  'Care worker',
-  'Support worker',
-  'Senior carer',
-  'Care coordinator',
-  'Nurse',
-  'Registered manager',
-  'Part-time',
-  'Full-time',
-  'Bank'
+const roleGroups = [
+  'Domiciliary care',
+  'Supported living',
+  'Bank and agency staffing',
+  'Operational leadership',
+  'Compliance and registration consulting'
 ]
 
 export default function CareersPage() {
@@ -33,16 +29,16 @@ export default function CareersPage() {
               Careers in care
             </p>
             <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>
-              Find care work that fits your experience and goals.
+              Find care and consulting opportunities that fit your experience and goals.
             </h1>
             <p className='mt-5 text-lg leading-8 text-gray-600'>
-              Care Atlas helps care workers, support workers, senior carers and registered managers register interest
-              for opportunities with care providers. Share your preferences now and the platform can later connect to
-              active jobs, candidate screening and employer matching.
+              Care Atlas now separates each role type into its own page so candidates can understand the role, checks,
+              responsibilities and next-step route before registering interest. The current flow stays placeholder-ready
+              for future backend matching, screening and employer application workflows.
             </p>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap'>
               <ButtonLink href='#candidate-signup' variant='primary'>
-                Apply for Care Jobs
+                Register for Roles
               </ButtonLink>
               <ButtonLink href='/services/permanent-part-time-care-recruitment' variant='secondary'>
                 Employers Hiring Permanently
@@ -53,17 +49,17 @@ export default function CareersPage() {
             </div>
           </div>
           <div className='border-brand-100 bg-brand-25 rounded-lg border p-6'>
-            <h2 className='text-2xl font-semibold text-gray-950'>Candidate profile fields ready for production</h2>
+            <h2 className='text-2xl font-semibold text-gray-950'>Dedicated role pages now available</h2>
             <div className='mt-5 grid gap-3 sm:grid-cols-2'>
               {[
-                'Role preference',
-                'Location preference',
-                'Work type',
-                'Experience level',
-                'Right to work',
-                'Certifications',
-                'CV upload',
-                'Availability'
+                'Role overview',
+                'Who the role suits',
+                'Responsibilities',
+                'Required documents',
+                'Training expectations',
+                'Application process',
+                'Register interest CTA',
+                'Back-to-careers linking'
               ].map(item => (
                 <div key={item} className='shadow-theme-xs flex gap-3 rounded-lg bg-white p-4'>
                   <SiteIcon name='check' className='text-brand-700 mt-1 h-4 w-4 shrink-0' />
@@ -79,41 +75,63 @@ export default function CareersPage() {
         <Container>
           <div className='flex flex-col justify-between gap-5 lg:flex-row lg:items-end'>
             <SectionHeading
-              eyebrow='Job listings'
-              title='Featured care opportunities structure.'
-              body='These placeholder job cards show how a later admin dashboard or CMS can publish roles, locations, tags and application flows.'
+              eyebrow='Job role pages'
+              title='Explore dedicated pages for each care and consultant role.'
+              body='Each role page explains who the role is suitable for, typical responsibilities, required documents, training expectations and the current placeholder application route.'
             />
             <div className='flex flex-wrap gap-2'>
-              {filters.map(filter => (
-                <button
-                  key={filter}
-                  type='button'
-                  className='shadow-theme-xs hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition'
+              {roleGroups.map(group => (
+                <span
+                  key={group}
+                  className='shadow-theme-xs rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700'
                 >
-                  {filter}
-                </button>
+                  {group}
+                </span>
               ))}
             </div>
           </div>
-          <div className='mt-10 grid gap-5 md:grid-cols-3'>
-            {jobListings.map(job => (
-              <article key={job.title} className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
-                <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>{job.type}</p>
-                <h2 className='mt-3 text-xl font-semibold text-gray-950'>{job.title}</h2>
-                <p className='text-brand-700 mt-2 text-sm font-medium'>{job.location}</p>
-                <p className='mt-4 text-sm leading-6 text-gray-600'>{job.summary}</p>
-                <div className='mt-5 flex flex-wrap gap-2'>
-                  {job.tags.map(tag => (
-                    <span key={tag} className='bg-brand-50 text-brand-700 rounded-full px-3 py-1 text-xs font-semibold'>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <ButtonLink href='#candidate-signup' variant='secondary' className='mt-6 w-full'>
-                  Register your interest
-                </ButtonLink>
-              </article>
+          <div className='mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3'>
+            {jobRoles.map(role => (
+              <JobRoleCard key={role.slug} role={role} />
             ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className='bg-white py-16'>
+        <Container className='grid gap-8 lg:grid-cols-3'>
+          <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
+            <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Permanent recruitment</p>
+            <h2 className='mt-3 text-2xl font-semibold text-gray-950'>Long-term hiring for providers</h2>
+            <p className='mt-3 text-sm leading-6 text-gray-600'>
+              Permanent and part-time recruitment stays separate from flexible cover. Employers can use the recruitment
+              route when they want a longer-term placement, manager search or structured shortlisting support.
+            </p>
+            <ButtonLink href='/services/permanent-part-time-care-recruitment' variant='secondary' className='mt-6'>
+              View permanent recruitment
+            </ButtonLink>
+          </div>
+          <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
+            <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Bank and agency</p>
+            <h2 className='mt-3 text-2xl font-semibold text-gray-950'>Flexible staffing and urgent cover</h2>
+            <p className='mt-3 text-sm leading-6 text-gray-600'>
+              Bank and agency staffing is positioned as a separate service for rota gaps, sickness, annual leave, growth
+              cover and emergency support. This keeps the staffing route commercially and operationally clear.
+            </p>
+            <ButtonLink href='/services/bank-staff-agency-staffing' variant='secondary' className='mt-6'>
+              View bank staffing
+            </ButtonLink>
+          </div>
+          <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
+            <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Application flow</p>
+            <h2 className='mt-3 text-2xl font-semibold text-gray-950'>Placeholder-ready for backend handoff</h2>
+            <p className='mt-3 text-sm leading-6 text-gray-600'>
+              Role pages currently route candidates into a clean register-interest form. That flow can later connect to
+              a recruitment backend, CRM or vacancy service without reworking the page structure.
+            </p>
+            <ButtonLink href='#candidate-signup' variant='secondary' className='mt-6'>
+              View candidate form
+            </ButtonLink>
           </div>
         </Container>
       </section>
@@ -122,8 +140,8 @@ export default function CareersPage() {
         <Container className='grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start'>
           <SectionHeading
             eyebrow='Candidate signup'
-            title='Create a care job interest profile.'
-            body='The form includes role preferences, location, work type, experience level and CV upload placeholder fields so it can later feed recruitment workflows.'
+            title='Create a care or consultant role interest profile.'
+            body='The form remains a clean placeholder route for role preferences, location, work type, experience level and CV upload so it can later feed safer recruitment workflows.'
           />
           <LeadForm variant='candidate' />
         </Container>
@@ -141,9 +159,9 @@ export default function CareersPage() {
       </section>
 
       <CtaBand
-        title='Care candidates and employers can start from the same platform.'
-        body='Candidates register interest. Employers submit vacancies. Care Atlas can later connect both sides through a recruitment workflow.'
-        primary={{ label: 'Register for Care Jobs', href: '#candidate-signup' }}
+        title='Candidates and employers now have clearer routes.'
+        body='Role pages handle candidate intent, while recruitment and bank staffing stay clearly separated for provider enquiries and future backend workflows.'
+        primary={{ label: 'Register for Roles', href: '#candidate-signup' }}
         secondary={{ label: 'Enquire About Recruitment', href: '/services/permanent-part-time-care-recruitment' }}
       />
     </>

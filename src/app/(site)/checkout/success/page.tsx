@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
+import { CheckoutSummary, PaymentStatusMessage } from '@/components/site/CommerceBlocks'
 import { ButtonLink, Container, CtaBand } from '@/components/site/ui'
 import { getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
-import { SiteIcon } from '@/components/site/SiteIcon'
 
 export const metadata: Metadata = {
   title: 'Payment Successful | Care Atlas',
@@ -26,14 +26,12 @@ export default async function PaymentSuccessPage({ searchParams }: PaymentSucces
       <section className='bg-white py-16 sm:py-20'>
         <Container className='grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center'>
           <div>
-            <p className='border-success-200 bg-success-50 text-success-700 mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold'>
-              Payment successful
-            </p>
-            <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>Your Care Atlas payment is complete.</h1>
-            <p className='mt-5 text-lg leading-8 text-gray-600'>
-              Thank you. Care Atlas can now confirm the order internally, match it to your service request and follow up
-              with next steps.
-            </p>
+            <PaymentStatusMessage
+              tone='success'
+              eyebrow='Payment successful'
+              title='Your Care Atlas payment is complete.'
+              body='Thank you. Care Atlas can now confirm the order internally, match it to your service request and follow up with next steps.'
+            />
             <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
               <ButtonLink href='/contact#booking' variant='primary'>
                 Book Follow-up Call
@@ -43,29 +41,24 @@ export default async function PaymentSuccessPage({ searchParams }: PaymentSucces
               </ButtonLink>
             </div>
           </div>
-          <div className='border-brand-100 bg-brand-25 rounded-lg border p-6'>
-            <div className='flex items-center gap-4'>
-              <span className='bg-success-600 flex h-11 w-11 items-center justify-center rounded-lg text-white'>
-                <SiteIcon name='check' className='h-5 w-5' />
-              </span>
-              <div>
-                <p className='text-sm font-semibold text-gray-500'>Order summary</p>
-                <h2 className='text-2xl font-semibold text-gray-950'>{product?.name ?? 'Care Atlas product'}</h2>
+          {product ? (
+            <div className='space-y-4'>
+              <CheckoutSummary product={product} serviceTitle={service?.title} />
+              <div className='rounded-lg border border-gray-200 bg-gray-50 p-5'>
+                <p className='text-xs font-semibold tracking-[0.08em] text-gray-500 uppercase'>Stripe session</p>
+                <p className='mt-2 text-sm font-semibold break-all text-gray-900'>
+                  {params?.session_id ?? 'Returned by Stripe Checkout'}
+                </p>
               </div>
             </div>
-            <dl className='mt-6 grid gap-3'>
-              <div className='rounded-lg bg-white p-4'>
-                <dt className='text-xs font-semibold tracking-[0.08em] text-gray-500 uppercase'>Service</dt>
-                <dd className='mt-1 text-sm font-semibold text-gray-900'>{service?.title ?? 'Care Atlas service'}</dd>
-              </div>
-              <div className='rounded-lg bg-white p-4'>
-                <dt className='text-xs font-semibold tracking-[0.08em] text-gray-500 uppercase'>Stripe session</dt>
-                <dd className='mt-1 text-sm font-semibold break-all text-gray-900'>
-                  {params?.session_id ?? 'Returned by Stripe Checkout'}
-                </dd>
-              </div>
-            </dl>
-          </div>
+          ) : (
+            <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
+              <p className='text-sm leading-6 text-gray-600'>
+                Stripe Checkout returned successfully. The backend webhook should remain the source of truth for order
+                status, fulfillment and confirmation.
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 

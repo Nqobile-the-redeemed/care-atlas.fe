@@ -35,6 +35,10 @@ const process = [
 ]
 
 export default function ServicesPage() {
+  const cqcInspectionSupport = services.find(service => service.slug === 'cqc-inspection-support')
+  const recruitmentSupport = services.find(service => service.slug === 'permanent-part-time-care-recruitment')
+  const bankStaffingSupport = services.find(service => service.slug === 'bank-staff-agency-staffing')
+
   return (
     <>
       <section className='bg-white py-16 sm:py-20'>
@@ -71,6 +75,47 @@ export default function ServicesPage() {
 
       <section className='bg-gray-50 py-16'>
         <Container>
+          <div className='mb-10 grid gap-5 lg:grid-cols-3'>
+            {cqcInspectionSupport && (
+              <div className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
+                <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Inspection support</p>
+                <h2 className='mt-3 text-2xl font-semibold text-gray-950'>{cqcInspectionSupport.navLabel}</h2>
+                <p className='mt-3 text-sm leading-6 text-gray-600'>{cqcInspectionSupport.summary}</p>
+                <ButtonLink href={cqcInspectionSupport.href} variant='secondary' className='mt-6'>
+                  Explore inspection support
+                </ButtonLink>
+              </div>
+            )}
+            {recruitmentSupport && (
+              <div className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
+                <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>
+                  Permanent recruitment
+                </p>
+                <h2 className='mt-3 text-2xl font-semibold text-gray-950'>{recruitmentSupport.navLabel}</h2>
+                <p className='mt-3 text-sm leading-6 text-gray-600'>
+                  Use this route for long-term placements, role briefs, candidate screening and registered manager
+                  search support.
+                </p>
+                <ButtonLink href={recruitmentSupport.href} variant='secondary' className='mt-6'>
+                  View recruitment service
+                </ButtonLink>
+              </div>
+            )}
+            {bankStaffingSupport && (
+              <div className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
+                <p className='text-brand-600 text-xs font-semibold tracking-[0.08em] uppercase'>Bank and agency</p>
+                <h2 className='mt-3 text-2xl font-semibold text-gray-950'>{bankStaffingSupport.navLabel}</h2>
+                <p className='mt-3 text-sm leading-6 text-gray-600'>
+                  Use this route for rota gaps, sickness cover, annual leave pressure and urgent temporary staffing
+                  needs.
+                </p>
+                <ButtonLink href={bankStaffingSupport.href} variant='secondary' className='mt-6'>
+                  View staffing service
+                </ButtonLink>
+              </div>
+            )}
+          </div>
+
           <SectionHeading
             eyebrow='Categories'
             title='Services grouped around real care business needs.'
