@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { JobRoleCard } from '@/components/site/JobRoleCard'
+import { CareersRoleGrid } from '@/components/site/CareersRoleGrid'
+import {
+  AvatarStack,
+  RoleChip,
+  SpecialistSupportGrid,
+  TestimonialCard,
+  type AvatarMember
+} from '@/components/site/PeopleUI'
 import {
   BlogCard,
   ButtonLink,
@@ -13,7 +20,6 @@ import {
   TrustStrip
 } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
-import { getFeaturedJobRoles } from '@/data/careers'
 import { blogPosts, services, testimonials } from '@/data/site'
 
 export const metadata: Metadata = {
@@ -61,8 +67,77 @@ const process = [
   }
 ]
 
+const supportRoles: Array<{
+  title: string
+  body: string
+  roles: string[]
+  members: AvatarMember[]
+}> = [
+  {
+    title: 'CQC Registration',
+    body: 'Support with registration preparation, statement of purpose development, governance planning and launch readiness for new providers.',
+    roles: ['Compliance Lead', 'Registered Manager Advisor'],
+    members: [
+      { name: 'Priya Singh', initials: 'PS', role: 'Compliance Lead', tone: 'brand' },
+      { name: 'Maya Thomas', initials: 'MT', role: 'Registered Manager Advisor', tone: 'blue' }
+    ]
+  },
+  {
+    title: 'Recruitment',
+    body: 'Support with safer recruitment structure, role briefs, candidate screening and provider hiring workflows across permanent and flexible staffing needs.',
+    roles: ['Recruitment Consultant', 'Operations Advisor'],
+    members: [
+      { name: 'Aisha Rahman', initials: 'AR', role: 'Recruitment Consultant', tone: 'green' },
+      { name: 'Owen Clarke', initials: 'OC', role: 'Operations Advisor', tone: 'slate' }
+    ]
+  },
+  {
+    title: 'Website Build',
+    body: 'Support with provider websites, enquiry journeys, credibility content and digital workflows that help care services look organised and trustworthy.',
+    roles: ['Web Designer', 'Content Systems'],
+    members: [
+      { name: 'Nina Patel', initials: 'NP', role: 'Web Designer', tone: 'blue' },
+      { name: 'Leo Hart', initials: 'LH', role: 'Systems Builder', tone: 'slate' }
+    ]
+  },
+  {
+    title: 'CQC Inspection Support',
+    body: 'Support with mock inspection preparation, evidence mapping, action tracking and quality assurance follow-up ahead of external scrutiny.',
+    roles: ['QA Lead', 'Governance Lead'],
+    members: [
+      { name: 'Daniel Cole', initials: 'DC', role: 'QA Lead', tone: 'gold' },
+      { name: 'Priya Singh', initials: 'PS', role: 'Governance Lead', tone: 'brand' }
+    ]
+  },
+  {
+    title: 'CosmoSuite',
+    body: 'Support with care-sector systems thinking, enquiry routing, dashboards, forms and operational visibility through the digital capability behind Care Atlas.',
+    roles: ['Web Team', 'Systems Builder'],
+    members: [
+      { name: 'Nina Patel', initials: 'NP', role: 'Web Designer', tone: 'blue' },
+      { name: 'Leo Hart', initials: 'LH', role: 'Systems Builder', tone: 'slate' }
+    ]
+  },
+  {
+    title: 'Tender Readiness',
+    body: 'Support with tender preparation, evidence organisation, quality narratives and submission planning for providers pursuing growth opportunities.',
+    roles: ['Bid Support', 'Governance Review'],
+    members: [
+      { name: 'Daniel Cole', initials: 'DC', role: 'QA Lead', tone: 'gold' },
+      { name: 'Owen Clarke', initials: 'OC', role: 'Operations Advisor', tone: 'slate' }
+    ]
+  }
+]
+
+const launchTeam = [
+  { label: 'Compliance', detail: 'Registration preparation, policies and governance ownership' },
+  { label: 'Recruitment', detail: 'Safer recruitment setup, screening workflows and provider hiring support' },
+  { label: 'Web', detail: 'Website delivery, enquiry capture and trust-building digital journeys' },
+  { label: 'Operations', detail: 'Workflow design, readiness tracking and calmer launch coordination' },
+  { label: 'QA', detail: 'Inspection readiness, evidence review and quality assurance follow-up' }
+]
+
 export default function HomePage() {
-  const featuredJobRoles = getFeaturedJobRoles(6)
   const featuredServices = services.filter(service =>
     [
       'supported-living-housing-benefit',
@@ -77,42 +152,61 @@ export default function HomePage() {
 
   return (
     <>
-      <section className='bg-white py-16 sm:py-20 lg:py-24'>
-        <Container className='grid gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center'>
-          <div>
+      <section className='bg-white py-14 sm:py-18 lg:py-20'>
+        <Container className='grid gap-10 lg:grid-cols-[minmax(0,0.88fr)_minmax(600px,1.12fr)] lg:items-stretch lg:gap-12'>
+          <div className='flex h-full max-w-2xl flex-col justify-start pt-2 lg:min-h-[560px] lg:justify-start lg:self-stretch lg:pt-8'>
             <p className='border-brand-200 bg-brand-50 text-brand-700 mb-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold'>
               CARE ATLAS | UK care sector consultancy
             </p>
             <h1 className='max-w-4xl text-4xl leading-tight font-semibold text-gray-950 sm:text-5xl lg:text-6xl'>
-              Build, launch and support your care service with confidence.
+              Launch, register, recruit and run your care service with confidence.
             </h1>
             <p className='mt-6 max-w-2xl text-lg leading-8 text-gray-600'>
-              Care Atlas helps providers and founders create the policies, systems and workflows behind stronger care
-              services, prepare CQC-ready launches, and access ongoing support for compliance, tenders, staffing, growth
-              and digital operations.
+              Care Atlas helps new and growing care providers with CQC registration, policies, recruitment, websites,
+              inspection readiness, digital systems and operational support.
             </p>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
               <ButtonLink href='/contact#booking' variant='primary'>
-                Book Consultation
+                Book a consultation
               </ButtonLink>
               <ButtonLink href='/services' variant='secondary'>
-                Explore Services
+                View services
               </ButtonLink>
             </div>
-            <div className='mt-8 grid gap-3 sm:grid-cols-3'>
-              {[
-                ['Build', 'Policies, systems and workflows'],
-                ['Launch', 'CQC-ready provider setup'],
-                ['Support', 'Compliance, tenders and growth']
-              ].map(([label, body]) => (
-                <div key={label} className='border-brand-100 bg-brand-25 rounded-lg border p-4'>
-                  <p className='text-brand-700 text-sm font-semibold'>{label}</p>
-                  <p className='mt-1 text-xs leading-5 text-gray-600'>{body}</p>
+            <div className='mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2'>
+              <div className='border-brand-100 bg-brand-25 rounded-xl border p-4'>
+                <p className='text-brand-700 text-xs font-semibold tracking-[0.08em] uppercase'>Your launch team</p>
+                <div className='mt-3 flex items-center gap-3'>
+                  <AvatarStack
+                    members={[
+                      { name: 'Priya Singh', initials: 'PS', role: 'Compliance Lead', tone: 'brand' },
+                      { name: 'Maya Thomas', initials: 'MT', role: 'Nominated Individual', tone: 'blue' },
+                      { name: 'Aisha Rahman', initials: 'AR', role: 'Recruitment Consultant', tone: 'green' },
+                      { name: 'Nina Patel', initials: 'NP', role: 'Web Designer', tone: 'blue' }
+                    ]}
+                    size='sm'
+                  />
+                  <p className='text-sm leading-6 text-gray-700'>
+                    Compliance, recruitment, web and operations support around one provider journey.
+                  </p>
                 </div>
-              ))}
+              </div>
+              <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-1'>
+                {[
+                  ['CQC registration support', 'Launch readiness, policies and governance'],
+                  ['Recruitment and systems', 'Hiring support, websites and enquiry workflows']
+                ].map(([label, body]) => (
+                  <div key={label} className='rounded-xl border border-gray-200 bg-gray-50 p-4'>
+                    <p className='text-sm font-semibold text-gray-950'>{label}</p>
+                    <p className='mt-1 text-xs leading-5 text-gray-600'>{body}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <HeroVisual />
+          <div className='flex w-full self-stretch lg:h-[560px] lg:justify-self-end'>
+            <HeroVisual />
+          </div>
         </Container>
       </section>
 
@@ -124,7 +218,7 @@ export default function HomePage() {
             <SectionHeading
               eyebrow='Services'
               title='One platform for the operational questions care businesses face.'
-              body='Each service page has a clear conversion path, specific enquiry form, FAQ content and related services for users who need connected support.'
+              body='Each service card now shows the kind of specialist support team that may sit behind the work, helping providers connect services to people, ownership and delivery.'
             />
             <ButtonLink href='/services' variant='secondary'>
               View Services Directory
@@ -175,11 +269,60 @@ export default function HomePage() {
           <SectionHeading
             eyebrow='Featured services'
             title='The most common entry points for care organisations.'
-            body='Start with one priority or combine support across registration, housing, recruitment, compliance and digital systems.'
+            body='Start with one priority or combine support across registration, housing, recruitment, compliance and digital systems with visible specialist ownership.'
           />
           <div className='mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3'>
             {featuredServices.map(service => (
               <ServiceCard key={service.slug} service={service} />
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className='bg-white py-16'>
+        <Container>
+          <SectionHeading
+            eyebrow='Who supports you?'
+            title='A support model that feels like a calm care operations platform.'
+            body='Care Atlas brings together compliance, recruitment, website, systems and operational support so providers can see the people and workstreams behind progress.'
+          />
+          <div className='mt-10'>
+            <SpecialistSupportGrid items={supportRoles} />
+          </div>
+        </Container>
+      </section>
+
+      <section className='bg-gray-50 py-16'>
+        <Container className='grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center'>
+          <div>
+            <SectionHeading
+              eyebrow='Your launch team'
+              title='Clients may receive support across compliance, recruitment, websites, systems and operations.'
+              body='The team depends on scope, but the operating model stays clear: one coordinated view of work, owners and next steps across launch and improvement activity.'
+            />
+            <div className='mt-6 flex items-center gap-4'>
+              <AvatarStack
+                members={[
+                  { name: 'Priya Singh', initials: 'PS', role: 'Compliance Lead', tone: 'brand' },
+                  { name: 'Aisha Rahman', initials: 'AR', role: 'Recruitment Consultant', tone: 'green' },
+                  { name: 'Nina Patel', initials: 'NP', role: 'Web Designer', tone: 'blue' },
+                  { name: 'Owen Clarke', initials: 'OC', role: 'Care Operations Advisor', tone: 'slate' },
+                  { name: 'Daniel Cole', initials: 'DC', role: 'QA Lead', tone: 'gold' }
+                ]}
+                size='md'
+              />
+              <p className='text-sm leading-6 text-gray-600'>
+                A visible team structure helps founders and providers understand who is supporting registration,
+                recruitment, evidence, policies, care planning systems and launch tasks.
+              </p>
+            </div>
+          </div>
+          <div className='grid gap-4 sm:grid-cols-2'>
+            {launchTeam.map(item => (
+              <div key={item.label} className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-5'>
+                <RoleChip label={item.label} tone='blue' />
+                <p className='mt-4 text-sm leading-6 text-gray-600'>{item.detail}</p>
+              </div>
             ))}
           </div>
         </Container>
@@ -203,17 +346,11 @@ export default function HomePage() {
           <SectionHeading
             eyebrow='Trust'
             title='A credible platform for care leaders who need clarity.'
-            body='Placeholder testimonials are structured so real case studies and client quotes can be dropped in later without changing the layout.'
+            body='Testimonials use initials avatars, provider type and location so the interface feels human and trustworthy without relying on generic face photography.'
           />
           <div className='mt-10 grid gap-5 md:grid-cols-3'>
             {testimonials.map(testimonial => (
-              <figure key={testimonial.name} className='shadow-theme-xs rounded-lg border border-gray-200 bg-white p-6'>
-                <blockquote className='text-sm leading-7 text-gray-700'>{testimonial.quote}</blockquote>
-                <figcaption className='mt-5 border-t border-gray-200 pt-4'>
-                  <p className='text-sm font-semibold text-gray-950'>{testimonial.name}</p>
-                  <p className='text-xs text-gray-500'>{testimonial.role}</p>
-                </figcaption>
-              </figure>
+              <TestimonialCard key={`${testimonial.name}-${testimonial.location}`} testimonial={testimonial} />
             ))}
           </div>
         </Container>
@@ -227,6 +364,11 @@ export default function HomePage() {
               title='Cosmonaut Labs supports the digital capability behind Care Atlas.'
               body='Care Atlas shapes the care-sector requirements. Cosmonaut Labs helps translate those requirements into websites, systems, software, forms, dashboards and supportable technology.'
             />
+            <div className='mt-5 flex flex-wrap gap-2'>
+              {['Web Designer', 'Systems Builder', 'CosmoSuite', 'Enquiry workflows'].map(label => (
+                <RoleChip key={label} label={label} tone='blue' />
+              ))}
+            </div>
             <div className='mt-8 flex flex-col gap-3 sm:flex-row'>
               <ButtonLink href='/technology-partner/cosmonaut-labs' variant='primary'>
                 Meet Cosmonaut Labs
@@ -272,16 +414,14 @@ export default function HomePage() {
       </section>
 
       <section className='bg-white py-16'>
-        <Container className='grid gap-10 lg:grid-cols-[0.85fr_1.15fr]'>
+        <Container>
           <SectionHeading
             eyebrow='Careers'
-            title='Dedicated role pages now support candidate interest by job type.'
-            body='Candidates can browse separate role pages for care, leadership and consultant opportunities before using the placeholder register-interest route.'
+            title='Job types are organised into clearer, wider role pathways.'
+            body='Browse care and support, clinical and specialist, and leadership or office roles in a calmer grid that is easier to scan on desktop and mobile.'
           />
-          <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
-            {featuredJobRoles.map(role => (
-              <JobRoleCard key={role.slug} role={role} />
-            ))}
+          <div className='mt-10'>
+            <CareersRoleGrid />
           </div>
         </Container>
       </section>

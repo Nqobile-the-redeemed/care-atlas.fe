@@ -86,6 +86,15 @@ export type JobListing = {
   tags: string[]
 }
 
+export type Testimonial = {
+  quote: string
+  name: string
+  initials: string
+  role: string
+  providerType: string
+  location: string
+}
+
 export const site = {
   name: 'Care Atlas',
   legalName: 'CARE ATLAS',
@@ -1417,24 +1426,33 @@ export const services: Service[] = [
   }
 ]
 
-export const testimonials = [
+export const testimonials: Testimonial[] = [
   {
     quote:
       'Care Atlas helped us turn a vague launch plan into a practical route with documents, responsibilities and next steps we could actually follow.',
     name: 'Founder',
-    role: 'Supported living provider'
+    initials: 'FO',
+    role: 'Launch-stage leadership team',
+    providerType: 'Supported living provider',
+    location: 'West Midlands'
   },
   {
     quote:
       'The work felt grounded in care operations, not generic consultancy. The recommendations were clear, realistic and easy to prioritise.',
     name: 'Operations Lead',
-    role: 'Care agency'
+    initials: 'OL',
+    role: 'Operational improvement project',
+    providerType: 'Domiciliary care agency',
+    location: 'Greater Manchester'
   },
   {
     quote:
       'We needed technology support that understood compliance, recruitment and service delivery. The Care Atlas and Cosmonaut Labs partnership made that easier.',
     name: 'Director',
-    role: 'Growing care provider'
+    initials: 'DI',
+    role: 'Digital systems and growth support',
+    providerType: 'Growing care provider',
+    location: 'London'
   }
 ]
 

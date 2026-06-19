@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
 import { BlogPost, Checklist, FaqItem, ProcessStep, Service } from '@/data/site'
 import { HeroGuide } from './HeroGuide'
+import { ServiceSupportMeta } from './PeopleUI'
 import { SiteIcon } from './SiteIcon'
 
 type WithClassName = {
@@ -92,6 +93,7 @@ export function ServiceCard({ service, compact = false }: { service: Service; co
       <p className='mt-4 flex-1 text-sm leading-6 text-gray-600'>
         {compact ? service.summary.slice(0, 120) : service.summary}
       </p>
+      <ServiceSupportMeta service={service} />
       <span className='text-brand-700 mt-5 inline-flex items-center gap-2 text-sm font-semibold'>
         Learn more
         <SiteIcon name='arrow' className='h-4 w-4 transition group-hover:translate-x-1' />
