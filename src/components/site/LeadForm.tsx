@@ -1,8 +1,10 @@
 'use client'
 
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useMemo, useRef, useState } from 'react'
 import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
 
 type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date'
 
@@ -390,8 +392,11 @@ function getFieldClass(hasError: boolean) {
 }
 
 export function LeadForm({ variant, title, intro }: LeadFormProps) {
+  const dispatch = useAppDispatch()
+  const submission = useAppSelector(state => state.enquiries.submissions[variant])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
+  const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const fields = useMemo(() => [...baseFields, ...variantFields[variant]], [variant])
 
   function validate(formData: FormData) {
@@ -416,7 +421,7 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
     return nextErrors
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
     const formData = new FormData(form)
@@ -425,8 +430,46 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length === 0) {
-      setSubmitted(true)
-      form.reset()
+      const details = Object.fromEntries(
+        fields
+          .filter(field => field.type !== 'file')
+          .map(field => [field.label, String(formData.get(field.id) ?? '').trim()])
+          .filter(([, value]) => value)
+      )
+      const comment = Object.entries(details)
+        .map(([label, value]) => `${label}: ${value}`)
+        .join('\n')
+      const attachments = fields
+        .filter(field => field.type === 'file')
+        .flatMap(field => {
+          const value = formData.get(field.id)
+          return value instanceof File && value.size > 0 ? [value] : []
+        })
+
+      try {
+        await dispatch(
+          submitEnquiry({
+            name: String(formData.get('name') ?? '').trim(),
+            email: String(formData.get('email') ?? '').trim(),
+            phone: String(formData.get('phone') ?? '').trim(),
+            subject: title ?? titles[variant],
+            enquiryType: variant,
+            comment,
+            details,
+            consent: true,
+            formStartedAt: formStartedAt.current,
+            sourceUrl: window.location.href,
+            website: String(formData.get('website') ?? ''),
+            attachments
+          })
+        ).unwrap()
+
+        setSubmitted(true)
+        form.reset()
+        formStartedAt.current = Math.floor(Date.now() / 1000)
+      } catch {
+        setSubmitted(false)
+      }
     }
   }
 
@@ -442,12 +485,12 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
 
       {submitted && (
         <div className='border-success-200 bg-success-50 text-success-800 mt-5 rounded-lg border p-4 text-sm leading-6'>
-          Thanks. Your enquiry has been captured in the frontend flow. A production build can connect this to CRM, email
-          routing or booking automation.
+          Thanks. Your enquiry has been sent to Care Atlas. A confirmation email should arrive shortly.
         </div>
       )}
 
       <form className='mt-6 grid gap-5' noValidate onSubmit={handleSubmit}>
+        <input type='text' name='website' tabIndex={-1} autoComplete='off' aria-hidden='true' className='hidden' />
         <div className='grid gap-5 md:grid-cols-2'>
           {fields.map(field => {
             const hasError = Boolean(errors[field.id])
@@ -540,10 +583,16 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
 
         <button
           type='submit'
+          disabled={submission?.status === 'submitting'}
           className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
         >
-          Send enquiry
+          {submission?.status === 'submitting' ? 'Sending…' : 'Send enquiry'}
         </button>
+        {submission?.status === 'failed' && (
+          <p className='text-error-600 text-sm font-medium' role='alert'>
+            {submission.error}
+          </p>
+        )}
       </form>
     </div>
   )

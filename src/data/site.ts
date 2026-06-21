@@ -98,7 +98,7 @@ export type Testimonial = {
 export const site = {
   name: 'Care Atlas',
   legalName: 'CARE ATLAS',
-  email: 'hello@careatlas.co.uk',
+  email: 'admin@careatlas.co.uk',
   phone: '020 0000 0000',
   address: 'UK-wide remote and on-site consultancy support',
   summary:
