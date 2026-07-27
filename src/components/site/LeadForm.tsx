@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useRef, useState } from 'react'
 import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
+import { getRecaptchaToken } from '@/lib/recaptcha'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
 
@@ -396,6 +397,7 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
   const submission = useAppSelector(state => state.enquiries.submissions[variant])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
+  const [securityError, setSecurityError] = useState('')
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const fields = useMemo(() => [...baseFields, ...variantFields[variant]], [variant])
 
@@ -447,6 +449,10 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
         })
 
       try {
+        setSecurityError('')
+        const recaptchaAction = `care_atlas_${variant}_enquiry`.replace(/[^a-zA-Z0-9_]/g, '_')
+        const recaptchaToken = await getRecaptchaToken(recaptchaAction)
+
         await dispatch(
           submitEnquiry({
             name: String(formData.get('name') ?? '').trim(),
@@ -460,14 +466,19 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
             formStartedAt: formStartedAt.current,
             sourceUrl: window.location.href,
             website: String(formData.get('website') ?? ''),
-            attachments
+            attachments,
+            recaptchaToken,
+            recaptchaAction
           })
         ).unwrap()
 
         setSubmitted(true)
         form.reset()
         formStartedAt.current = Math.floor(Date.now() / 1000)
-      } catch {
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('reCAPTCHA')) {
+          setSecurityError(error.message)
+        }
         setSubmitted(false)
       }
     }
@@ -586,8 +597,13 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
           disabled={submission?.status === 'submitting'}
           className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
         >
-          {submission?.status === 'submitting' ? 'Sending…' : 'Send enquiry'}
+          {submission?.status === 'submitting' ? 'Sending...' : 'Send enquiry'}
         </button>
+        {securityError && (
+          <p className='text-error-600 text-sm font-medium' role='alert'>
+            {securityError}
+          </p>
+        )}
         {submission?.status === 'failed' && (
           <p className='text-error-600 text-sm font-medium' role='alert'>
             {submission.error}

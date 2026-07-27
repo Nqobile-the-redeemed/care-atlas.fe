@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { BookingPanel } from '@/components/site/BookingPanel'
-import { LeadForm } from '@/components/site/LeadForm'
+import { CareAtlasContactForm } from '@/components/site/CareAtlasContactForm'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { Container, CtaBand, FaqList, SectionHeading } from '@/components/site/ui'
 import { globalFaqs, site } from '@/data/site'
@@ -57,7 +57,7 @@ export default function ContactPage() {
               ))}
             </div>
           </div>
-          <LeadForm variant='consultation' title='General enquiry form' />
+          <CareAtlasContactForm />
         </Container>
       </section>
 

@@ -13,6 +13,8 @@ export type EnquirySubmission = {
   sourceUrl: string
   website?: string
   attachments: File[]
+  recaptchaToken?: string | null
+  recaptchaAction?: string
 }
 
 export type EnquiryReceipt = {
@@ -31,14 +33,19 @@ export async function sendEnquiry(payload: EnquirySubmission) {
   formData.set('email', payload.email)
   formData.set('phone', payload.phone ?? '')
   formData.set('subject', payload.subject)
-  formData.set('enquiryType', payload.enquiryType)
+  formData.set('enquiry_type', payload.enquiryType)
   formData.set('comment', payload.comment)
   formData.set('details', JSON.stringify(payload.details))
   formData.set('consent', payload.consent ? '1' : '0')
-  formData.set('formStartedAt', String(payload.formStartedAt))
-  formData.set('sourceUrl', payload.sourceUrl)
-  formData.set('webSource', WEB_SOURCE)
+  formData.set('form_started_at', String(payload.formStartedAt))
+  formData.set('source_url', payload.sourceUrl)
+  formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
+
+  if (payload.recaptchaToken) {
+    formData.set('recaptcha_token', payload.recaptchaToken)
+    formData.set('recaptcha_action', payload.recaptchaAction ?? 'care_atlas_enquiry')
+  }
 
   payload.attachments.forEach(file => formData.append('attachments[]', file))
 
