@@ -1,7 +1,7 @@
 'use client'
 
-import { FormEvent, useRef, useState } from 'react'
-import { getRecaptchaToken } from '@/lib/recaptcha'
+import { FormEvent, useEffect, useRef, useState } from 'react'
+import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 
@@ -51,6 +51,10 @@ export function CareAtlasContactForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues | 'consent', string>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [securityError, setSecurityError] = useState('')
+
+  useEffect(() => {
+    preloadRecaptcha()
+  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

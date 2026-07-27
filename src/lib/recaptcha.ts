@@ -45,6 +45,16 @@ function loadRecaptchaScript() {
   return recaptchaScriptPromise
 }
 
+export function preloadRecaptcha() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  void loadRecaptchaScript().catch(() => {
+    recaptchaScriptPromise = null
+  })
+}
+
 export async function getRecaptchaToken(action: string) {
   if (!RECAPTCHA_SITE_KEY) {
     return null

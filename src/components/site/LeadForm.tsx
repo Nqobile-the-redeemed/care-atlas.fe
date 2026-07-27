@@ -1,9 +1,9 @@
 'use client'
 
-import { FormEvent, useMemo, useRef, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
-import { getRecaptchaToken } from '@/lib/recaptcha'
+import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
 
@@ -400,6 +400,10 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
   const [securityError, setSecurityError] = useState('')
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const fields = useMemo(() => [...baseFields, ...variantFields[variant]], [variant])
+
+  useEffect(() => {
+    preloadRecaptcha()
+  }, [])
 
   function validate(formData: FormData) {
     const nextErrors: Record<string, string> = {}
