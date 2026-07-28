@@ -1,5 +1,6 @@
 import { SiteFooter } from '@/components/site/SiteFooter'
 import { SiteHeader } from '@/components/site/SiteHeader'
+import { WhatsappChatBox } from '@/components/site/WhatsappChatBox'
 import type { ReactNode } from 'react'
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
@@ -8,6 +9,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter />
+      <WhatsappChatBox />
     </div>
   )
 }
