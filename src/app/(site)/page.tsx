@@ -212,6 +212,26 @@ export default function HomePage() {
 
       <TrustStrip />
 
+      <section className='border-brand-100 border-b bg-white py-8'>
+        <Container className='flex flex-col justify-between gap-5 lg:flex-row lg:items-center'>
+          <div className='flex items-start gap-4'>
+            <span className='bg-brand-50 text-brand-700 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg'>
+              <SiteIcon name='search' className='h-5 w-5' />
+            </span>
+            <div>
+              <h2 className='text-xl font-semibold text-gray-950'>Care Atlas Tender Navigator</h2>
+              <p className='mt-1 max-w-3xl text-sm leading-6 text-gray-600'>
+                Browse current UK care, housing and cleaning opportunities, then unlock the full catalogue and bid
+                support workflow.
+              </p>
+            </div>
+          </div>
+          <ButtonLink href='/tenders' variant='primary' className='shrink-0'>
+            Browse tender previews
+          </ButtonLink>
+        </Container>
+      </section>
+
       <section className='bg-gray-50 py-16'>
         <Container>
           <div className='flex flex-col justify-between gap-6 lg:flex-row lg:items-end'>
