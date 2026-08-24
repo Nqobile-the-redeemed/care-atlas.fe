@@ -113,6 +113,7 @@ export const mainNav: SiteLink[] = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
   { label: 'Services', href: '/services' },
+  { label: 'Tenders', href: '/tenders' },
   { label: 'Training', href: '/training' },
   { label: 'Careers', href: '/careers' },
   { label: 'Blog', href: '/blog' },
