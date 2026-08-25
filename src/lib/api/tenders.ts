@@ -27,6 +27,39 @@ export type PublicTender = {
   lastSeenAt: string | null
 }
 
+export type PublicTenderLot = {
+  id: string
+  sourceLotId: string | null
+  title: string
+  description: string | null
+  valueMinor: number | null
+  currency: string
+  regions: string[]
+  categories: string[]
+  submissionDeadline: string | null
+  isRelevant: boolean
+}
+
+export type PublicTenderDetail = PublicTender & {
+  description: string | null
+  buyerType: string | null
+  stage: string | null
+  procedureType: string | null
+  procurementType: string | null
+  clarificationDeadline: string | null
+  deliveryLocations: string[]
+  cpvCodes: string[]
+  isFramework: boolean
+  isDynamicMarket: boolean
+  smeSuitable: boolean | null
+  vcseSuitable: boolean | null
+  sourceNoticeUrl: string | null
+  responsePortalUrl: string | null
+  sourceUpdatedAt: string | null
+  lots?: PublicTenderLot[]
+  pricingCaveat?: string
+}
+
 export type TenderLeadKind = 'enquiry' | 'booking'
 
 export type TenderLeadPayload = {
@@ -68,6 +101,12 @@ export async function getPublicTenders(filters: { keyword?: string; category?: s
   const suffix = params.toString()
 
   return apiRequest<PublicTender[]>(`/v1/public/tenders${suffix ? `?${suffix}` : ''}`, {
+    cache: 'no-store'
+  })
+}
+
+export async function getPublicTender(tenderId: string) {
+  return apiRequest<PublicTenderDetail>(`/v1/public/tenders/${tenderId}`, {
     cache: 'no-store'
   })
 }
