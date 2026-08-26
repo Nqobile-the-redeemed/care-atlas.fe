@@ -46,6 +46,11 @@ export function ServiceDetailPage({ service }: { service: Service }) {
               <ButtonLink href='/contact' variant='ghost'>
                 Speak to Care Atlas
               </ButtonLink>
+              {service.slug === 'tender-bidding-operational-planning' && (
+                <ButtonLink href='/tenders' variant='secondary'>
+                  Browse live tenders
+                </ButtonLink>
+              )}
             </div>
           </div>
           <div className='border-brand-100 bg-brand-25 rounded-lg border p-6'>
