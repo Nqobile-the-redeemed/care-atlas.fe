@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
+import { TenderBoardClient } from '@/components/site/TenderBoardClient'
 import { Container, CtaBand } from '@/components/site/ui'
-import { PublicTenderBoard } from '@/features/tenders/PublicTenderBoard'
 
 export const metadata: Metadata = {
   title: 'Tender Navigator | Care Atlas',
   description:
-    'Browse UK care, supported living, housing and cleaning tender previews. Unlock the full catalogue and bid support workflow with Care Atlas.'
+    'Browse current UK care, supported living, housing and cleaning tenders for free, then book a Care Atlas bid-support meeting.'
 }
 
 export default function TendersPage() {
@@ -19,8 +19,8 @@ export default function TendersPage() {
             </p>
             <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>Care sector tender opportunities.</h1>
             <p className='mt-5 text-lg leading-8 text-gray-600'>
-              Browse current UK care, housing, cleaning and supported-living tender previews. Unlock the full catalogue
-              and connect with Care Atlas bid-support when you need help submitting.
+              Browse the full public board for current UK care, housing, cleaning and supported-living tenders. Open an
+              opportunity to review the detail, then book a bid-support meeting when you want help submitting.
             </p>
           </div>
         </Container>
@@ -28,14 +28,14 @@ export default function TendersPage() {
 
       <section className='bg-gray-50 py-12'>
         <Container>
-          <PublicTenderBoard />
+          <TenderBoardClient />
         </Container>
       </section>
 
       <CtaBand
         title='Need help with a specific tender?'
         body='Use the tender board filters above to find relevant opportunities, or send Care Atlas a general bid-support enquiry if you already have a target notice in mind.'
-        primary={{ label: 'Book Bid Support', href: '/contact#booking' }}
+        primary={{ label: 'Book a Tender Meeting', href: '/contact#booking' }}
         secondary={{ label: 'Send a Tender Enquiry', href: '/contact' }}
       />
     </>

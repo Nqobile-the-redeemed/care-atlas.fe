@@ -56,6 +56,10 @@ const emptyForm = {
   name: '',
   email: '',
   phone: '',
+  whatsapp: '',
+  preferredContactMethod: 'email' as const,
+  preferredSlot: '',
+  tenderPreferenceNotes: '',
   company: '',
   line1: '',
   line2: '',
@@ -151,6 +155,15 @@ export function TenderBoardClient() {
         name: form.name,
         email: form.email,
         phone: form.phone,
+        whatsapp: form.whatsapp,
+        preferredContactMethod: form.preferredContactMethod,
+        preferredSlot: form.preferredSlot,
+        tenderPreferences: {
+          categories: selectedTender.categories,
+          regions: selectedTender.regions,
+          channels: ['email', 'whatsapp'],
+          notes: form.tenderPreferenceNotes
+        },
         company: form.company,
         address: {
           line1: form.line1,
@@ -166,7 +179,9 @@ export function TenderBoardClient() {
         sourceUrl: window.location.href,
         website: form.website
       })
-      setNotice(leadKind === 'booking' ? 'Booking request sent. We will reply by email.' : 'Tender enquiry sent.')
+      setNotice(
+        leadKind === 'booking' ? 'Booking request sent. We will reply with meeting details.' : 'Tender enquiry sent.'
+      )
       setForm(emptyForm)
       setFormStartedAt(Math.floor(Date.now() / 1000))
     } catch (err) {
@@ -284,7 +299,7 @@ export function TenderBoardClient() {
                     className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
                   >
                     <SiteIcon name='calendar' className='h-4 w-4' />
-                    Book support
+                    Book meeting
                   </button>
                   <button
                     type='button'
@@ -344,7 +359,7 @@ export function TenderBoardClient() {
                 className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
               >
                 <SiteIcon name='calendar' className='h-4 w-4' />
-                Book support
+                Book meeting
               </button>
               <button
                 type='button'
@@ -505,6 +520,36 @@ export function TenderBoardClient() {
               className={inputClass}
             />
             <input
+              value={form.whatsapp}
+              onChange={event => setForm(current => ({ ...current, whatsapp: event.target.value }))}
+              placeholder='WhatsApp number'
+              className={inputClass}
+            />
+            <select
+              value={form.preferredContactMethod}
+              onChange={event =>
+                setForm(current => ({
+                  ...current,
+                  preferredContactMethod: event.target.value as typeof emptyForm.preferredContactMethod
+                }))
+              }
+              aria-label='Preferred contact method'
+              className={inputClass}
+            >
+              <option value='email'>Prefer email</option>
+              <option value='phone'>Prefer phone</option>
+              <option value='whatsapp'>Prefer WhatsApp</option>
+            </select>
+            {leadKind === 'booking' && (
+              <input
+                type='datetime-local'
+                value={form.preferredSlot}
+                onChange={event => setForm(current => ({ ...current, preferredSlot: event.target.value }))}
+                aria-label='Preferred meeting slot'
+                className={inputClass}
+              />
+            )}
+            <input
               value={form.company}
               onChange={event => setForm(current => ({ ...current, company: event.target.value }))}
               placeholder='Company'
@@ -553,6 +598,13 @@ export function TenderBoardClient() {
             rows={5}
             className={`${inputClass} w-full py-3`}
           />
+          <textarea
+            value={form.tenderPreferenceNotes}
+            onChange={event => setForm(current => ({ ...current, tenderPreferenceNotes: event.target.value }))}
+            placeholder='Tender alerts or regions you want to hear about'
+            rows={3}
+            className={`${inputClass} w-full py-3`}
+          />
           <label className='flex gap-3 text-sm leading-6 text-gray-600'>
             <input
               required
@@ -561,7 +613,7 @@ export function TenderBoardClient() {
               onChange={event => setForm(current => ({ ...current, consent: event.target.checked }))}
               className='mt-1 h-4 w-4 rounded border-gray-300'
             />
-            I agree for Care Atlas to contact me about this tender.
+            I agree for Care Atlas to contact me about this tender and related opportunities.
           </label>
           {notice && <p className='bg-success-50 text-success-700 rounded-lg p-3 text-sm font-medium'>{notice}</p>}
           {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
@@ -571,7 +623,7 @@ export function TenderBoardClient() {
             className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden disabled:opacity-50'
           >
             <SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />
-            {submitting ? 'Sending...' : leadKind === 'booking' ? 'Request booking' : 'Send enquiry'}
+            {submitting ? 'Sending...' : leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
           </button>
         </form>
       </aside>
