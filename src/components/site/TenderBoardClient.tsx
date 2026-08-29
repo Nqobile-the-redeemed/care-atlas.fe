@@ -9,6 +9,7 @@ import {
   sendTenderLead,
   TenderLeadKind
 } from '@/lib/api/tenders'
+import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { SiteIcon } from './SiteIcon'
 
 const inputClass =
@@ -112,6 +113,10 @@ export function TenderBoardClient() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    preloadRecaptcha()
+  }, [])
+
   function openForm(tender: PublicTender, kind: TenderLeadKind) {
     setSelectedTender(tender)
     setLeadKind(kind)
@@ -151,6 +156,9 @@ export function TenderBoardClient() {
     setNotice('')
 
     try {
+      const recaptchaAction = `care_atlas_tender_${leadKind}`
+      const recaptchaToken = await getRecaptchaToken(recaptchaAction)
+
       await sendTenderLead(selectedTender.id, leadKind, {
         name: form.name,
         email: form.email,
@@ -177,7 +185,9 @@ export function TenderBoardClient() {
         consent: form.consent,
         formStartedAt,
         sourceUrl: window.location.href,
-        website: form.website
+        website: form.website,
+        recaptchaToken,
+        recaptchaAction
       })
       setNotice(
         leadKind === 'booking' ? 'Booking request sent. We will reply with meeting details.' : 'Tender enquiry sent.'

@@ -91,6 +91,8 @@ export type TenderLeadPayload = {
   formStartedAt: number
   sourceUrl: string
   website?: string
+  recaptchaToken?: string | null
+  recaptchaAction?: string
 }
 
 export type TenderLeadReceipt = {
@@ -143,6 +145,11 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
   formData.set('details', JSON.stringify({ page: 'public tender board', lead_kind: kind }))
+
+  if (payload.recaptchaToken) {
+    formData.set('recaptcha_token', payload.recaptchaToken)
+    formData.set('recaptcha_action', payload.recaptchaAction ?? `care_atlas_tender_${kind}`)
+  }
 
   return apiRequest<TenderLeadReceipt>(endpoint, {
     method: 'POST',
