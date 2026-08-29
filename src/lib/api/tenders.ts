@@ -5,6 +5,8 @@ export type PublicTender = {
   title: string
   buyer: string | null
   sourceReference: string | null
+  sourceKey?: string | null
+  sourceName?: string | null
   category: string
   categories: string[]
   region: string

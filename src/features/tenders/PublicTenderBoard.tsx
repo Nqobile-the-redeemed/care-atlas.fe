@@ -42,6 +42,13 @@ function formatTerm(tender: TenderPreview) {
   return `${formatDate(tender.contractStartDate)} - ${formatDate(tender.contractEndDate)}`
 }
 
+function sourceLabel(tender: TenderPreview) {
+  if (tender.sourceKey === 'proactis_due_north') return 'Proactis'
+  if (tender.sourceKey === 'find_a_tender') return 'GOV.UK'
+
+  return tender.sourceName ?? 'Source'
+}
+
 function signupHref() {
   const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://portal.orbitmirai.com/sign-up'
   const target = new URL(configured, window.location.origin)
@@ -111,6 +118,11 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
               {tender.title}
             </h2>
             <p className='mt-1 text-sm text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
+            <p className='mt-2'>
+              <span className='border-brand-100 bg-brand-25 text-brand-800 rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
+                {sourceLabel(tender)}
+              </span>
+            </p>
           </div>
           <button
             type='button'
@@ -395,7 +407,12 @@ export function PublicTenderBoard() {
                         <p className='font-semibold text-gray-950'>{tender.title}</p>
                         <p className='mt-1 text-xs text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
                         <div className='mt-2'>
-                          <StateBadges states={tender.states} />
+                          <div className='flex flex-wrap gap-1.5'>
+                            <span className='border-brand-100 bg-brand-25 text-brand-800 rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
+                              {sourceLabel(tender)}
+                            </span>
+                            <StateBadges states={tender.states} />
+                          </div>
                         </div>
                       </td>
                       <td className='w-44 px-4 py-4 text-gray-700'>{tender.category}</td>
@@ -446,6 +463,9 @@ export function PublicTenderBoard() {
                     className='focus:ring-brand-500/20 w-full text-left focus:ring-4 focus:outline-hidden'
                   >
                     <StateBadges states={tender.states} />
+                    <span className='border-brand-100 bg-brand-25 text-brand-800 mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
+                      {sourceLabel(tender)}
+                    </span>
                     <h3 className='mt-3 text-base font-semibold text-gray-950'>{tender.title}</h3>
                     <p className='mt-1 text-xs text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
                     <dl className='mt-4 grid grid-cols-2 gap-3 text-sm'>
