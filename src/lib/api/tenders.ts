@@ -68,7 +68,16 @@ export type TenderLeadPayload = {
   name: string
   email: string
   phone: string
+  whatsapp?: string
   company?: string
+  preferredContactMethod?: 'email' | 'phone' | 'whatsapp'
+  preferredSlot?: string
+  tenderPreferences?: {
+    regions?: string[]
+    categories?: string[]
+    channels?: string[]
+    notes?: string
+  }
   address: {
     line1: string
     line2?: string
@@ -121,7 +130,11 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   formData.set('name', payload.name)
   formData.set('email', payload.email)
   formData.set('phone', payload.phone)
+  formData.set('whatsapp', payload.whatsapp ?? '')
   formData.set('company', payload.company ?? '')
+  formData.set('preferred_contact_method', payload.preferredContactMethod ?? '')
+  formData.set('preferred_slot_at', payload.preferredSlot ?? '')
+  formData.set('tender_preferences', JSON.stringify(payload.tenderPreferences ?? {}))
   formData.set('address', JSON.stringify(payload.address))
   formData.set('message', payload.message)
   formData.set('consent', payload.consent ? '1' : '0')
