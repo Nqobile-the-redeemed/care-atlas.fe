@@ -9,6 +9,13 @@ import {
   sendTenderLead,
   TenderLeadKind
 } from '@/lib/api/tenders'
+import {
+  BookingEventType,
+  BookingSlot,
+  createPublicBooking,
+  getBookingAvailability,
+  getBookingEventTypes
+} from '@/lib/api/bookings'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { SiteIcon } from './SiteIcon'
 
@@ -53,6 +60,37 @@ function plainText(value: string | null | undefined) {
     .trim()
 }
 
+function formatSlotDate(date: string) {
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short'
+  }).format(new Date(`${date}T12:00:00`))
+}
+
+function groupSlots(slots: BookingSlot[]) {
+  return slots.reduce<Record<string, BookingSlot[]>>((groups, slot) => {
+    groups[slot.date] = [...(groups[slot.date] ?? []), slot]
+    return groups
+  }, {})
+}
+
+function tenderBookingMessage(tender: PublicTender | PublicTenderDetail, message: string) {
+  const sourceNoticeUrl = 'sourceNoticeUrl' in tender ? tender.sourceNoticeUrl : null
+
+  return [
+    message.trim(),
+    '',
+    `Tender: ${tender.title}`,
+    tender.buyer ? `Buyer: ${tender.buyer}` : '',
+    tender.sourceReference ? `Reference: ${tender.sourceReference}` : '',
+    tender.submissionDeadline ? `Deadline: ${dateLabel(tender.submissionDeadline)}` : '',
+    sourceNoticeUrl ? `Notice: ${sourceNoticeUrl}` : ''
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
 const emptyForm = {
   name: '',
   email: '',
@@ -88,9 +126,16 @@ export function TenderBoardClient() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [eventTypes, setEventTypes] = useState<BookingEventType[]>([])
+  const [selectedEventSlug, setSelectedEventSlug] = useState('')
+  const [slots, setSlots] = useState<BookingSlot[]>([])
+  const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null)
+  const [bookingOptionsLoading, setBookingOptionsLoading] = useState(false)
 
   const categories = useMemo(() => Array.from(new Set(tenders.flatMap(tender => tender.categories))).sort(), [tenders])
   const regions = useMemo(() => Array.from(new Set(tenders.flatMap(tender => tender.regions))).sort(), [tenders])
+  const selectedEventType = eventTypes.find(eventType => eventType.slug === selectedEventSlug)
+  const slotGroups = useMemo(() => groupSlots(slots), [slots])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -117,11 +162,75 @@ export function TenderBoardClient() {
     preloadRecaptcha()
   }, [])
 
+  useEffect(() => {
+    if (leadKind !== 'booking' || eventTypes.length > 0) return
+
+    let alive = true
+
+    async function loadEventTypes() {
+      try {
+        setBookingOptionsLoading(true)
+        const response = await getBookingEventTypes()
+        if (!alive) return
+
+        setEventTypes(response.data)
+        setSelectedEventSlug(
+          response.data.find(eventType => eventType.slug === 'general-care-atlas-consultation')?.slug ??
+            response.data[0]?.slug ??
+            ''
+        )
+      } catch (err) {
+        if (!alive) return
+        setError(err instanceof Error ? err.message : 'Booking options could not be loaded.')
+      } finally {
+        if (alive) setBookingOptionsLoading(false)
+      }
+    }
+
+    void loadEventTypes()
+
+    return () => {
+      alive = false
+    }
+  }, [eventTypes.length, leadKind])
+
+  useEffect(() => {
+    if (leadKind !== 'booking' || !selectedEventSlug) return
+
+    let alive = true
+
+    async function loadAvailability() {
+      try {
+        setBookingOptionsLoading(true)
+        setSelectedSlot(null)
+        const response = await getBookingAvailability({
+          eventTypeSlug: selectedEventSlug,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London'
+        })
+        if (!alive) return
+        setSlots(response.data.slots)
+      } catch (err) {
+        if (!alive) return
+        setSlots([])
+        setError(err instanceof Error ? err.message : 'Availability could not be loaded.')
+      } finally {
+        if (alive) setBookingOptionsLoading(false)
+      }
+    }
+
+    void loadAvailability()
+
+    return () => {
+      alive = false
+    }
+  }, [leadKind, selectedEventSlug])
+
   function openForm(tender: PublicTender, kind: TenderLeadKind) {
     setSelectedTender(tender)
     setLeadKind(kind)
     setNotice('')
     setError('')
+    setSelectedSlot(null)
     setFormStartedAt(Math.floor(Date.now() / 1000))
     setForm(current => ({
       ...current,
@@ -156,6 +265,47 @@ export function TenderBoardClient() {
     setNotice('')
 
     try {
+      if (leadKind === 'booking') {
+        if (!selectedSlot) {
+          setError('Choose an available meeting slot.')
+          return
+        }
+
+        const response = await createPublicBooking({
+          eventTypeSlug: selectedEventSlug,
+          startAt: selectedSlot.startAt,
+          endAt: selectedSlot.endAt,
+          timezone: selectedSlot.timezone,
+          customer: {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            companyName: form.company
+          },
+          intake: {
+            serviceInterest: `Tender support: ${selectedTender.title}`,
+            currentStage: selectedTender.sourceReference
+              ? `Tender reference: ${selectedTender.sourceReference}`
+              : 'Tender support booking',
+            message: tenderBookingMessage(selectedTender, form.message)
+          },
+          consent: form.consent,
+          formStartedAt,
+          sourceUrl: window.location.href,
+          website: form.website
+        })
+
+        setNotice(
+          response.data.googleMeetUrl
+            ? `Meeting booked. Your reference is ${response.data.bookingReference}. The Google Meet link has been sent by email.`
+            : `Meeting booked. Your reference is ${response.data.bookingReference}. We will confirm the Meet link shortly.`
+        )
+        setForm(emptyForm)
+        setSelectedSlot(null)
+        setFormStartedAt(Math.floor(Date.now() / 1000))
+        return
+      }
+
       const recaptchaAction = `care_atlas_tender_${leadKind}`
       const recaptchaToken = await getRecaptchaToken(recaptchaAction)
 
@@ -189,9 +339,7 @@ export function TenderBoardClient() {
         recaptchaToken,
         recaptchaAction
       })
-      setNotice(
-        leadKind === 'booking' ? 'Booking request sent. We will reply with meeting details.' : 'Tender enquiry sent.'
-      )
+      setNotice('Tender enquiry sent.')
       setForm(emptyForm)
       setFormStartedAt(Math.floor(Date.now() / 1000))
     } catch (err) {
@@ -551,13 +699,66 @@ export function TenderBoardClient() {
               <option value='whatsapp'>Prefer WhatsApp</option>
             </select>
             {leadKind === 'booking' && (
-              <input
-                type='datetime-local'
-                value={form.preferredSlot}
-                onChange={event => setForm(current => ({ ...current, preferredSlot: event.target.value }))}
-                aria-label='Preferred meeting slot'
-                className={inputClass}
-              />
+              <div className='space-y-3 sm:col-span-2 lg:col-span-1'>
+                <select
+                  value={selectedEventSlug}
+                  onChange={event => setSelectedEventSlug(event.target.value)}
+                  aria-label='Consultation type'
+                  className={`${inputClass} w-full`}
+                  disabled={bookingOptionsLoading || eventTypes.length === 0}
+                >
+                  {eventTypes.length === 0 ? (
+                    <option value=''>Loading consultation types...</option>
+                  ) : (
+                    eventTypes.map(eventType => (
+                      <option key={eventType.id} value={eventType.slug}>
+                        {eventType.name} - {eventType.durationMinutes} min
+                      </option>
+                    ))
+                  )}
+                </select>
+                {selectedEventType?.description && (
+                  <p className='text-xs leading-5 text-gray-500'>{selectedEventType.description}</p>
+                )}
+                <div className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                  <div className='mb-2 flex items-center justify-between gap-3'>
+                    <p className='text-sm font-semibold text-gray-800'>Available times</p>
+                    <span className='text-xs font-medium text-gray-500'>{slots.length} slots</span>
+                  </div>
+                  {bookingOptionsLoading ? (
+                    <p className='text-sm text-gray-600'>Loading slots...</p>
+                  ) : slots.length === 0 ? (
+                    <p className='text-sm text-gray-600'>No live slots are available right now.</p>
+                  ) : (
+                    <div className='max-h-64 space-y-4 overflow-y-auto pr-1'>
+                      {Object.entries(slotGroups).map(([date, daySlots]) => (
+                        <div key={date}>
+                          <p className='mb-2 text-xs font-semibold text-gray-500 uppercase'>{formatSlotDate(date)}</p>
+                          <div className='grid grid-cols-2 gap-2'>
+                            {daySlots.map(slot => {
+                              const active = selectedSlot?.startAt === slot.startAt
+                              return (
+                                <button
+                                  key={slot.startAt}
+                                  type='button'
+                                  onClick={() => setSelectedSlot(slot)}
+                                  className={`min-h-9 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${
+                                    active
+                                      ? 'border-brand-600 bg-brand-600 focus:ring-brand-500/20 text-white'
+                                      : 'border-brand-200 text-brand-800 hover:border-brand-400 hover:bg-brand-50 focus:ring-brand-500/10 bg-white'
+                                  }`}
+                                >
+                                  {slot.label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
             <input
               value={form.company}
