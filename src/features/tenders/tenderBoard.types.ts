@@ -34,6 +34,8 @@ export type TenderBoardForm = {
   message: string
   consent: boolean
   website: string
+  password: string
+  passwordConfirmation: string
 }
 
 export type TenderBoardWorkspaceState = {

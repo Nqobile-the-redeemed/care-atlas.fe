@@ -54,7 +54,9 @@ const emptyTenderBoardForm: TenderBoardForm = {
   country: 'United Kingdom',
   message: '',
   consent: false,
-  website: ''
+  website: '',
+  password: '',
+  passwordConfirmation: ''
 }
 
 function buildInitialTenderBoardForm(title: string): TenderBoardForm {
@@ -169,7 +171,9 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
             name: workspace.form.name,
             email: workspace.form.email,
             phone: workspace.form.phone,
-            companyName: workspace.form.company
+            companyName: workspace.form.company,
+            password: workspace.form.password,
+            passwordConfirmation: workspace.form.passwordConfirmation
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -226,6 +230,8 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
         formStartedAt: workspace.formStartedAt,
         sourceUrl: payload.sourceUrl,
         website: workspace.form.website,
+        password: workspace.form.password,
+        passwordConfirmation: workspace.form.passwordConfirmation,
         recaptchaToken: payload.recaptchaToken,
         recaptchaAction: payload.recaptchaAction
       })

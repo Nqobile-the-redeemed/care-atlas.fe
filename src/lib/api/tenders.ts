@@ -93,6 +93,8 @@ export type TenderLeadPayload = {
   website?: string
   recaptchaToken?: string | null
   recaptchaAction?: string
+  password?: string
+  passwordConfirmation?: string
 }
 
 export type TenderLeadReceipt = {
@@ -145,6 +147,13 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
   formData.set('details', JSON.stringify({ page: 'public tender board', lead_kind: kind }))
+
+  if (payload.password) {
+    formData.set('password', payload.password)
+  }
+  if (payload.passwordConfirmation) {
+    formData.set('password_confirmation', payload.passwordConfirmation)
+  }
 
   if (payload.recaptchaToken) {
     formData.set('recaptcha_token', payload.recaptchaToken)

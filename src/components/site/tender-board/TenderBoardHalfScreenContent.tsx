@@ -162,6 +162,22 @@ export function TenderBoardHalfScreenContent({ data }: TenderBoardHalfScreenCont
     setError('')
     setNotice('')
 
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      setSubmitting(false)
+      return
+    }
+    if (!form.passwordConfirmation) {
+      setError('Confirm your password.')
+      setSubmitting(false)
+      return
+    }
+    if (form.password !== form.passwordConfirmation) {
+      setError('Passwords do not match.')
+      setSubmitting(false)
+      return
+    }
+
     try {
       if (leadKind === 'booking') {
         if (!selectedSlot) {
@@ -178,7 +194,9 @@ export function TenderBoardHalfScreenContent({ data }: TenderBoardHalfScreenCont
             name: form.name,
             email: form.email,
             phone: form.phone,
-            companyName: form.company
+            companyName: form.company,
+            password: form.password,
+            passwordConfirmation: form.passwordConfirmation
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -234,6 +252,8 @@ export function TenderBoardHalfScreenContent({ data }: TenderBoardHalfScreenCont
         formStartedAt,
         sourceUrl: window.location.href,
         website: form.website,
+        password: form.password,
+        passwordConfirmation: form.passwordConfirmation,
         recaptchaToken,
         recaptchaAction
       })

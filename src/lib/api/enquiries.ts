@@ -15,6 +15,8 @@ export type EnquirySubmission = {
   attachments: File[]
   recaptchaToken?: string | null
   recaptchaAction?: string
+  password?: string
+  passwordConfirmation?: string
 }
 
 export type EnquiryReceipt = {
@@ -41,6 +43,13 @@ export async function sendEnquiry(payload: EnquirySubmission) {
   formData.set('source_url', payload.sourceUrl)
   formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
+
+  if (payload.password) {
+    formData.set('password', payload.password)
+  }
+  if (payload.passwordConfirmation) {
+    formData.set('password_confirmation', payload.passwordConfirmation)
+  }
 
   if (payload.recaptchaToken) {
     formData.set('recaptcha_token', payload.recaptchaToken)

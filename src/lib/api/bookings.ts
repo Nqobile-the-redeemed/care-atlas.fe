@@ -58,6 +58,8 @@ export type BookingPayload = {
     email: string
     phone?: string
     companyName?: string
+    password?: string
+    passwordConfirmation?: string
   }
   intake: {
     serviceInterest?: string

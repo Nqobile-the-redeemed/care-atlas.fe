@@ -20,5 +20,7 @@ export const emptyTenderBoardForm: TenderBoardForm = {
   country: 'United Kingdom',
   message: '',
   consent: false,
-  website: ''
+  website: '',
+  password: '',
+  passwordConfirmation: ''
 }

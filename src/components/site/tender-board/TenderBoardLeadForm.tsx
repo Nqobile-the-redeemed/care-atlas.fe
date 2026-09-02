@@ -172,6 +172,22 @@ export function TenderBoardLeadForm({
             placeholder='Postcode'
             className={inputClass}
           />
+          <input
+            value={form.password}
+            onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
+            placeholder='Password (min 8 chars)'
+            type='password'
+            autoComplete='new-password'
+            className={inputClass}
+          />
+          <input
+            value={form.passwordConfirmation}
+            onChange={event => setForm(current => ({ ...current, passwordConfirmation: event.target.value }))}
+            placeholder='Confirm password'
+            type='password'
+            autoComplete='new-password'
+            className={inputClass}
+          />
         </div>
         <textarea
           required

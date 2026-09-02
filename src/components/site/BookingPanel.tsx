@@ -115,6 +115,17 @@ export function BookingPanel() {
       nextErrors.email = 'Enter a valid email address.'
     }
 
+    const password = String(formData.get('password') ?? '')
+    const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
+    if (password.length < 8) {
+      nextErrors.password = 'Password must be at least 8 characters.'
+    }
+    if (!passwordConfirmation) {
+      nextErrors.passwordConfirmation = 'Confirm your password.'
+    } else if (password && password !== passwordConfirmation) {
+      nextErrors.passwordConfirmation = 'Passwords do not match.'
+    }
+
     if (!selectedSlot) {
       nextErrors.slot = 'Choose a consultation time.'
     }
@@ -148,7 +159,9 @@ export function BookingPanel() {
           name: String(formData.get('name') ?? '').trim(),
           email: String(formData.get('email') ?? '').trim(),
           phone: String(formData.get('phone') ?? '').trim(),
-          companyName: String(formData.get('companyName') ?? '').trim()
+          companyName: String(formData.get('companyName') ?? '').trim(),
+          password: String(formData.get('password') ?? ''),
+          passwordConfirmation: String(formData.get('passwordConfirmation') ?? '')
         },
         intake: {
           serviceInterest: selectedEventType?.name,
@@ -341,6 +354,36 @@ export function BookingPanel() {
               className={fieldClass()}
               placeholder='Add anything useful before the call.'
             />
+          </div>
+          <div>
+            <label htmlFor='booking-password' className='mb-1.5 block text-sm font-semibold text-gray-800'>
+              Password *
+            </label>
+            <input
+              id='booking-password'
+              name='password'
+              type='password'
+              autoComplete='new-password'
+              className={fieldClass(Boolean(errors.password))}
+              placeholder='At least 8 characters'
+            />
+            {errors.password && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.password}</p>}
+          </div>
+          <div>
+            <label htmlFor='booking-password-confirmation' className='mb-1.5 block text-sm font-semibold text-gray-800'>
+              Confirm password *
+            </label>
+            <input
+              id='booking-password-confirmation'
+              name='passwordConfirmation'
+              type='password'
+              autoComplete='new-password'
+              className={fieldClass(Boolean(errors.passwordConfirmation))}
+              placeholder='Re-enter your password'
+            />
+            {errors.passwordConfirmation && (
+              <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.passwordConfirmation}</p>
+            )}
           </div>
         </div>
 
