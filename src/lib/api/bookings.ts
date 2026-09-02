@@ -46,6 +46,8 @@ export type PublicBooking = {
   googleMeetUrl: string | null
   googleSyncError: string | null
   intake: Record<string, string>
+  verificationRequired?: boolean
+  submissionType?: 'booking'
 }
 
 export type BookingPayload = {

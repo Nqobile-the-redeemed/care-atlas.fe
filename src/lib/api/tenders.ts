@@ -102,6 +102,36 @@ export type TenderLeadReceipt = {
   status: string
   webQueryId: string
   receivedAt: string
+  verificationRequired?: boolean
+  email?: string
+  submissionType?: TenderLeadKind
+}
+
+export type TenderFilters = {
+  categories: string[]
+  regions: string[]
+}
+
+export type TenderOnboardingVerification = {
+  submission: {
+    id: string
+    type: TenderLeadKind
+    verifiedAt: string
+  }
+  auth: {
+    token: string
+    tokenExpiresAt: number
+  }
+  profileComplete: boolean
+}
+
+export type TenderNotificationPreferencePayload = {
+  optedIn: boolean
+  isActive?: boolean
+  consentSource?: string
+  regions: string[]
+  categories: string[]
+  tenderTypes: string[]
 }
 
 const WEB_SOURCE = process.env.NEXT_PUBLIC_CARE_ATLAS_WEB_SOURCE ?? 'careatlas.co.uk'
@@ -122,6 +152,12 @@ export async function getPublicTenders(filters: { keyword?: string; category?: s
 
 export async function getPublicTender(tenderId: string) {
   return apiRequest<PublicTenderDetail>(`/v1/public/tenders/${tenderId}`, {
+    cache: 'no-store'
+  })
+}
+
+export async function getPublicTenderFilters() {
+  return apiRequest<TenderFilters>('/v1/public/tender-filters', {
     cache: 'no-store'
   })
 }
@@ -163,5 +199,37 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   return apiRequest<TenderLeadReceipt>(endpoint, {
     method: 'POST',
     body: formData
+  })
+}
+
+export async function verifyTenderOnboardingOtp(payload: {
+  email: string
+  otpCode: string
+  submissionType: TenderLeadKind
+  submissionId: string
+}) {
+  return apiRequest<TenderOnboardingVerification>('/v1/public/tender-onboarding/otp/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+}
+
+export async function resendTenderOnboardingOtp(email: string) {
+  return apiRequest<null>('/v1/public/tender-onboarding/otp/resend', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+}
+
+export async function saveTenderNotificationPreferences(token: string, payload: TenderNotificationPreferencePayload) {
+  return apiRequest('/v1/user/tender-notifications', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
   })
 }
