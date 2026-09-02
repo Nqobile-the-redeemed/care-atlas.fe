@@ -5,6 +5,7 @@ import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 import type { TenderLeadKind } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
+import { RegionCountiesFormSection } from '../standalone-inputs'
 
 import { inputClass } from './constants'
 import { TenderBoardBookingFields } from './TenderBoardBookingFields'
@@ -29,6 +30,10 @@ type TenderBoardLeadFormProps = {
   error: string
   submitting: boolean
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  selectedRegions: string[]
+  setSelectedRegions: Dispatch<SetStateAction<string[]>>
+  selectedCounties: string[]
+  setSelectedCounties: Dispatch<SetStateAction<string[]>>
 }
 
 export function TenderBoardLeadForm({
@@ -49,7 +54,11 @@ export function TenderBoardLeadForm({
   notice,
   error,
   submitting,
-  onSubmit
+  onSubmit,
+  selectedRegions,
+  setSelectedRegions,
+  selectedCounties,
+  setSelectedCounties
 }: TenderBoardLeadFormProps) {
   return (
     <>
@@ -139,6 +148,17 @@ export function TenderBoardLeadForm({
             placeholder='Company'
             className={inputClass}
           />
+        </div>
+        <RegionCountiesFormSection
+          id='tender-board'
+          selectedRegions={selectedRegions}
+          selectedCounties={selectedCounties}
+          onRegionsChange={setSelectedRegions}
+          onCountiesChange={setSelectedCounties}
+          regionLabel='Preferred operating regions'
+          countyLabel='Target counties'
+        />
+        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-1'>
           <input
             required
             value={form.line1}

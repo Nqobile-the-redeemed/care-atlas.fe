@@ -67,6 +67,8 @@ export type BookingPayload = {
     serviceInterest?: string
     currentStage?: string
     message?: string
+    regions?: string[]
+    counties?: string[]
   }
   consent: boolean
   formStartedAt: number

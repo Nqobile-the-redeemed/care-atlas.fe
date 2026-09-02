@@ -7,7 +7,7 @@ export type EnquirySubmission = {
   subject: string
   enquiryType: string
   comment: string
-  details: Record<string, string>
+  details: Record<string, unknown>
   consent: boolean
   formStartedAt: number
   sourceUrl: string

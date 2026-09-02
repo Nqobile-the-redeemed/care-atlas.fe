@@ -22,6 +22,7 @@ import {
 } from '@/lib/api/tenders'
 
 import { emptyTenderBoardForm } from './constants'
+import { RegionCountiesFormSection } from '../standalone-inputs'
 import { TenderBoardLeadForm } from './TenderBoardLeadForm'
 import { TenderBoardSelectedTenderPanel } from './TenderBoardSelectedTenderPanel'
 import type { TenderBoardForm, TenderBoardPanelData, TenderBoardSelectedTender } from './types'
@@ -67,6 +68,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [profileComplete, setProfileComplete] = useState(false)
   const [availableFilters, setAvailableFilters] = useState<TenderFilters>({ categories: [], regions: [] })
   const [selectedRegions, setSelectedRegions] = useState<string[]>([])
+  const [selectedCounties, setSelectedCounties] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedTenderTypes, setSelectedTenderTypes] = useState<string[]>([])
   const [preferenceConsent, setPreferenceConsent] = useState(false)
@@ -88,6 +90,10 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     setAuthToken('')
     setProfileComplete(false)
     setPreferenceConsent(false)
+    setSelectedRegions([])
+    setSelectedCounties([])
+    setSelectedCategories([])
+    setSelectedTenderTypes([])
     setForm({
       ...emptyTenderBoardForm,
       message: `I would like to discuss support for this tender: ${data.tender.title}. Please contact me with the next steps.`
@@ -260,7 +266,9 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             currentStage: selectedTender.sourceReference
               ? `Tender reference: ${selectedTender.sourceReference}`
               : 'Tender support booking',
-            message: tenderBookingMessage(selectedTender, form.message)
+            message: tenderBookingMessage(selectedTender, form.message),
+            regions: selectedRegions,
+            counties: selectedCounties
           },
           consent: form.consent,
           formStartedAt,
@@ -297,7 +305,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         preferredSlot: form.preferredSlot,
         tenderPreferences: {
           categories: selectedTender.categories,
-          regions: selectedTender.regions,
+          regions: selectedRegions.length > 0 ? selectedRegions : selectedTender.regions,
+          counties: selectedCounties,
           channels: ['email', 'whatsapp'],
           notes: form.tenderPreferenceNotes
         },
@@ -498,21 +507,13 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           <p className='text-brand-700 text-xs font-semibold uppercase'>Tender notifications</p>
           <h2 className='mt-2 text-xl font-semibold text-gray-950'>Choose matching preferences</h2>
         </div>
-        <fieldset className='space-y-2'>
-          <legend className='text-sm font-semibold text-gray-900'>Regions</legend>
-          <div className='grid gap-2'>
-            {availableFilters.regions.map(region => (
-              <label key={region} className='flex items-center gap-2 text-sm text-gray-700'>
-                <input
-                  type='checkbox'
-                  checked={selectedRegions.includes(region)}
-                  onChange={() => setSelectedRegions(current => toggleValue(current, region))}
-                />
-                {region}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <RegionCountiesFormSection
+          id='tender-preferences'
+          selectedRegions={selectedRegions}
+          selectedCounties={selectedCounties}
+          onRegionsChange={setSelectedRegions}
+          onCountiesChange={setSelectedCounties}
+        />
         <fieldset className='space-y-2'>
           <legend className='text-sm font-semibold text-gray-900'>Categories</legend>
           <div className='grid gap-2'>
@@ -594,6 +595,10 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         error={error}
         submitting={submitting}
         onSubmit={submitLead}
+        selectedRegions={selectedRegions}
+        setSelectedRegions={setSelectedRegions}
+        selectedCounties={selectedCounties}
+        setSelectedCounties={setSelectedCounties}
       />
     </div>
   )

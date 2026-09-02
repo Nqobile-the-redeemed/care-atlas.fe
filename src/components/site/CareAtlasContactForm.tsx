@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { RegionCountiesFormSection } from './standalone-inputs'
 
 const fieldClass =
   'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-brand-500/10 focus:ring-4 focus:outline-hidden'
@@ -63,6 +64,8 @@ export function CareAtlasContactForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues | 'consent', string>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [securityError, setSecurityError] = useState('')
+  const [regions, setRegions] = useState<string[]>([])
+  const [counties, setCounties] = useState<string[]>([])
 
   useEffect(() => {
     preloadRecaptcha()
@@ -105,7 +108,9 @@ export function CareAtlasContactForm() {
           comment: values.message,
           details: {
             Subject: values.subject,
-            Message: values.message
+            Message: values.message,
+            regions,
+            counties
           },
           consent: true,
           formStartedAt: formStartedAt.current,
@@ -121,6 +126,8 @@ export function CareAtlasContactForm() {
 
       setSubmitted(true)
       form.reset()
+      setRegions([])
+      setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
       setSubmitted(false)
@@ -212,6 +219,14 @@ export function CareAtlasContactForm() {
           />
           {errors.message && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.message}</p>}
         </div>
+
+        <RegionCountiesFormSection
+          id='contact'
+          selectedRegions={regions}
+          selectedCounties={counties}
+          onRegionsChange={setRegions}
+          onCountiesChange={setCounties}
+        />
 
         <div className='grid gap-5 md:grid-cols-2'>
           <div>

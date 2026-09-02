@@ -9,6 +9,7 @@ import {
   getBookingEventTypes
 } from '@/lib/api/bookings'
 import { SiteIcon } from './SiteIcon'
+import { RegionCountiesFormSection } from './standalone-inputs'
 
 type BookingStatus = 'idle' | 'loading' | 'submitting' | 'success' | 'error'
 
@@ -43,6 +44,8 @@ export function BookingPanel() {
   const [status, setStatus] = useState<BookingStatus>('loading')
   const [message, setMessage] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [regions, setRegions] = useState<string[]>([])
+  const [counties, setCounties] = useState<string[]>([])
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const slotGroups = useMemo(() => groupSlots(slots), [slots])
   const selectedEventType = eventTypes.find(eventType => eventType.slug === selectedEventSlug)
@@ -166,7 +169,9 @@ export function BookingPanel() {
         intake: {
           serviceInterest: selectedEventType?.name,
           currentStage: String(formData.get('currentStage') ?? '').trim(),
-          message: String(formData.get('bookingMessage') ?? '').trim()
+          message: String(formData.get('bookingMessage') ?? '').trim(),
+          regions,
+          counties
         },
         consent: true,
         formStartedAt: formStartedAt.current,
@@ -182,6 +187,8 @@ export function BookingPanel() {
       )
       setSelectedSlot(null)
       form.reset()
+      setRegions([])
+      setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
       setStatus('error')
@@ -343,6 +350,17 @@ export function BookingPanel() {
               <option>Need urgent support</option>
             </select>
           </div>
+        </div>
+
+        <RegionCountiesFormSection
+          id='booking'
+          selectedRegions={regions}
+          selectedCounties={counties}
+          onRegionsChange={setRegions}
+          onCountiesChange={setCounties}
+        />
+
+        <div className='grid gap-5 md:grid-cols-2'>
           <div className='md:col-span-2'>
             <label htmlFor='bookingMessage' className='mb-1.5 block text-sm font-semibold text-gray-800'>
               Notes for the meeting

@@ -76,6 +76,7 @@ export type TenderLeadPayload = {
     regions?: string[]
     categories?: string[]
     channels?: string[]
+    counties?: string[]
     notes?: string
   }
   address: {
