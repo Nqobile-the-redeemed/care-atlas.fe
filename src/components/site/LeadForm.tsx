@@ -5,7 +5,7 @@ import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
+import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 
 type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date'
 

@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+
 import { ApiError } from '@/lib/api/client'
 import { type EnquiryReceipt, type EnquirySubmission, sendEnquiry } from '@/lib/api/enquiries'
+import type { RootState } from '@/store'
 
 type SubmissionStatus = 'idle' | 'submitting' | 'succeeded' | 'failed'
 
@@ -60,5 +62,9 @@ const enquiriesSlice = createSlice({
       })
   }
 })
+
+export const selectEnquiriesState = (state: RootState) => state.enquiries
+export const selectEnquirySubmission = (enquiryType: string) => (state: RootState) =>
+  state.enquiries.submissions[enquiryType]
 
 export default enquiriesSlice.reducer

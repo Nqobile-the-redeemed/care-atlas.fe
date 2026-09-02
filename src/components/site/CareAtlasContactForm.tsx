@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
-import { submitEnquiry } from '@/store/features/enquiries/enquiriesSlice'
+import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 
 const fieldClass =

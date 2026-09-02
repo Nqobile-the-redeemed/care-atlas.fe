@@ -23,13 +23,52 @@ export function buildApiUrl(path: string) {
 }
 
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<ApiEnvelope<T>> {
-  const response = await fetch(buildApiUrl(path), {
+  const url = buildApiUrl(path)
+  // #region debug-point A:request-url
+  fetch('http://127.0.0.1:7777/event', {
+    method: 'POST',
+    body: JSON.stringify({
+      sessionId: 'public-tenders-404',
+      runId: 'pre-fix',
+      hypothesisId: 'A',
+      location: 'src/lib/api/client.ts:26',
+      msg: '[DEBUG] apiRequest built URL',
+      data: {
+        apiBaseUrl: API_BASE_URL,
+        path,
+        url
+      },
+      ts: Date.now()
+    })
+  }).catch(() => {})
+  // #endregion
+  const response = await fetch(url, {
     ...init,
     headers: {
       Accept: 'application/json',
       ...init.headers
     }
   })
+  // #region debug-point B:response-shape
+  fetch('http://127.0.0.1:7777/event', {
+    method: 'POST',
+    body: JSON.stringify({
+      sessionId: 'public-tenders-404',
+      runId: 'pre-fix',
+      hypothesisId: 'B',
+      location: 'src/lib/api/client.ts:45',
+      msg: '[DEBUG] apiRequest received response',
+      data: {
+        url,
+        status: response.status,
+        ok: response.ok,
+        contentType: response.headers.get('content-type'),
+        poweredBy: response.headers.get('x-powered-by')
+      },
+      ts: Date.now()
+    })
+  }).catch(() => {})
+  // #endregion
 
   let body: Partial<ApiEnvelope<T>> = {}
 

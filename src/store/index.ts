@@ -1,12 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
-import enquiriesReducer from './features/enquiries/enquiriesSlice'
-import imagesReducer from './features/images/imagesSlice'
+import enquiriesReducer from '@/features/enquiries/enquiriesSlice'
+import imagesReducer from '@/features/images/imagesSlice'
+import notificationsReducer from '@/features/notifications/notificationsSlice'
+import tenderBoardReducer from '@/features/tenders/tenderBoardSlice'
 
 export const makeStore = () =>
   configureStore({
     reducer: {
       enquiries: enquiriesReducer,
-      images: imagesReducer
+      images: imagesReducer,
+      notifications: notificationsReducer,
+      tenderBoard: tenderBoardReducer
     },
     middleware: getDefaultMiddleware =>
       getDefaultMiddleware({

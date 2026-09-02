@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { mainNav, serviceCategories, services, site } from '@/data/site'
 import { CareAtlasLogo } from './CareAtlasLogo'
 import { ButtonLink, Container } from './ui'
@@ -20,6 +20,7 @@ export function SiteHeader() {
   const pathname = usePathname()
   const [servicesOpen, setServicesOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
 
   const groupedServices = useMemo(
     () =>
@@ -32,8 +33,38 @@ export function SiteHeader() {
     []
   )
 
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const height = headerRef.current?.offsetHeight ?? 72
+      document.documentElement.style.setProperty('--site-header-height', `${height}px`)
+    }
+
+    updateHeaderHeight()
+
+    const observer =
+      typeof ResizeObserver !== 'undefined' && headerRef.current
+        ? new ResizeObserver(() => {
+            updateHeaderHeight()
+          })
+        : null
+
+    if (observer && headerRef.current) {
+      observer.observe(headerRef.current)
+    }
+
+    window.addEventListener('resize', updateHeaderHeight)
+
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', updateHeaderHeight)
+    }
+  }, [mobileOpen, pathname, servicesOpen])
+
   return (
-    <header className='border-brand-100 shadow-theme-xs sticky top-0 z-9999 border-b bg-white/95 backdrop-blur'>
+    <header
+      ref={headerRef}
+      className='border-brand-100 shadow-theme-xs sticky top-0 z-9999 border-b bg-white/95 backdrop-blur'
+    >
       <div className='border-brand-50 bg-brand-950 hidden border-b text-white lg:block'>
         <Container className='flex h-9 items-center justify-between text-xs'>
           <div className='flex items-center gap-5'>

@@ -41,7 +41,9 @@ const paths: Record<string, string[]> = {
   menu: ['M4 6h16M4 12h16M4 18h16'],
   close: ['M6 6l12 12M18 6 6 18'],
   chevron: ['m6 9 6 6 6-6'],
-  lock: ['M7 11V7a5 5 0 0 1 10 0v4', 'M5 11h14v10H5z']
+  lock: ['M7 11V7a5 5 0 0 1 10 0v4', 'M5 11h14v10H5z'],
+  expandOut: ['M9 3H3v6', 'M3 3l7 7', 'M15 21h6v-6', 'M21 21l-7-7'],
+  expandIn: ['M3 15v6h6', 'M3 21l7-7', 'M21 9V3h-6', 'M21 3l-7 7']
 }
 
 export function SiteIcon({ name, className = 'h-5 w-5' }: SiteIconProps) {

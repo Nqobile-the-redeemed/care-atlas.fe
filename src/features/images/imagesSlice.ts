@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+
 import { ApiError } from '@/lib/api/client'
 import { getPageImages, type ManagedWebsiteImage } from '@/lib/api/images'
+import type { RootState } from '@/store'
 
 type ImagesState = {
   pages: Record<string, Record<string, ManagedWebsiteImage>>
@@ -47,5 +49,10 @@ const imagesSlice = createSlice({
       })
   }
 })
+
+export const selectImagesState = (state: RootState) => state.images
+export const selectPageImages = (pageSlug: string) => (state: RootState) => state.images.pages[pageSlug] ?? {}
+export const selectPageImagesLoading = (pageSlug: string) => (state: RootState) => state.images.loadingPages[pageSlug]
+export const selectPageImagesError = (pageSlug: string) => (state: RootState) => state.images.errors[pageSlug]
 
 export default imagesSlice.reducer
