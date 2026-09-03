@@ -16,6 +16,7 @@ import {
 
 import { PREFERRED_CONTACT_OPTIONS } from './tenderLeadFormSchema'
 import { TenderBoardBookingFields } from './TenderBoardBookingFields'
+import { TenderBoardLeadKindSelector } from './TenderBoardLeadKindSelector'
 import type { TenderBoardForm, TenderBoardSelectedTender } from './types'
 
 type TenderBoardLeadFormProps = {
@@ -85,20 +86,7 @@ export function TenderBoardLeadForm({
 
   return (
     <>
-      <div className='mt-5 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1'>
-        {(['enquiry', 'booking'] as TenderLeadKind[]).map(kind => (
-          <button
-            key={kind}
-            type='button'
-            onClick={() => setLeadKind(kind)}
-            className={`min-h-11 rounded-md px-3 text-sm font-semibold capitalize ${
-              leadKind === kind ? 'shadow-theme-xs bg-white text-gray-950' : 'text-gray-600 hover:text-gray-950'
-            }`}
-          >
-            {kind}
-          </button>
-        ))}
-      </div>
+      <TenderBoardLeadKindSelector value={leadKind} onChange={setLeadKind} />
 
       <form className='mt-5 space-y-5' onSubmit={handleSubmit}>
         <input

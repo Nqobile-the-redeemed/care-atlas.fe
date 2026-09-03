@@ -41,9 +41,11 @@ const paths: Record<string, string[]> = {
   menu: ['M4 6h16M4 12h16M4 18h16'],
   close: ['M6 6l12 12M18 6 6 18'],
   chevron: ['m6 9 6 6 6-6'],
+  chevronUp: ['m6 15 6-6 6 6'],
   lock: ['M7 11V7a5 5 0 0 1 10 0v4', 'M5 11h14v10H5z'],
   expandOut: ['M9 3H3v6', 'M3 3l7 7', 'M15 21h6v-6', 'M21 21l-7-7'],
   expandIn: ['M3 15v6h6', 'M3 21l7-7', 'M21 9V3h-6', 'M21 3l-7 7'],
+  contract: ['M9 3v6H3', 'M3 9l6-6', 'M15 21v-6h6', 'M21 15l-6 6'],
   plus: ['M12 5v14', 'M5 12h14'],
   minus: ['M5 12h14'],
   alertCircle: ['M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z', 'M12 8v4', 'M12 16h.01']

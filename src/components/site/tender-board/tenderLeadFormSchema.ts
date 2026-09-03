@@ -29,7 +29,7 @@ export const TenderBoardFormYup: Yup.ObjectSchema<TenderBoardForm> = Yup.object(
   password: Yup.string()
     .ensure()
     .when({
-      is: (value: string) => (value ?? '').length > 0,
+      is: (value: string | null | undefined) => (value ?? '').length > 0,
       then: schema => schema.min(8, 'Password must be at least 8 characters')
     })
     .default(''),

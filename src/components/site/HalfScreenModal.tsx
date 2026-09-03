@@ -161,7 +161,7 @@ export function HalfScreenModal() {
                   aria-label={isExpanded ? 'Minimize drawer' : 'Expand drawer'}
                 >
                   {isExpanded ? (
-                    <SiteIcon name='expandIn' className='h-5 w-5' />
+                    <SiteIcon name='contract' className='h-5 w-5' />
                   ) : (
                     <SiteIcon name='expandOut' className='h-5 w-5' />
                   )}
@@ -245,7 +245,7 @@ export function HalfScreenModal() {
                   {sheetSnap === 'minimized' ? (
                     <SiteIcon name='expandOut' className='h-4 w-4' />
                   ) : (
-                    <SiteIcon name='expandIn' className='h-4 w-4' />
+                    <SiteIcon name='contract' className='h-4 w-4' />
                   )}
                   <span>{sheetSnap === 'minimized' ? 'Expand' : 'Minimize'}</span>
                 </button>

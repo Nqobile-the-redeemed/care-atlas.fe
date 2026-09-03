@@ -251,11 +251,12 @@ export function StandaloneDropDown({
         <button
           type='button'
           onClick={disabled ? () => undefined : toggleDropDown}
-          aria-label='Toggle Dropdown'
+          aria-label={listExpanded ? 'Collapse dropdown' : 'Expand dropdown'}
           disabled={disabled}
+          className='ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 focus:ring-2 focus:ring-blue-duskBlue/20 focus:outline-none disabled:pointer-events-none'
         >
           <SiteIcon
-            name={listExpanded ? 'expandIn' : 'expandOut'}
+            name={listExpanded ? 'chevronUp' : 'chevron'}
             className='text-gray-mediumGray h-5 w-5 dark:text-slate-300'
           />
         </button>
