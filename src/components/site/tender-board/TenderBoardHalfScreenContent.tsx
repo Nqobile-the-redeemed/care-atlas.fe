@@ -1,6 +1,7 @@
 'use client'
 
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useFormik, type FormikProps } from 'formik'
 
 import {
   createPublicBooking,
@@ -21,7 +22,7 @@ import {
   type TenderLeadKind
 } from '@/lib/api/tenders'
 
-import { emptyTenderBoardForm } from './constants'
+import { TenderBoardFormYup, emptyTenderBoardFormValues } from './tenderLeadFormSchema'
 import { RegionCountiesFormSection } from '../standalone-inputs'
 import { TenderBoardLeadForm } from './TenderBoardLeadForm'
 import { TenderBoardSelectedTenderPanel } from './TenderBoardSelectedTenderPanel'
@@ -46,10 +47,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [selectedTender, setSelectedTender] = useState<TenderBoardSelectedTender>(data.tender)
   const [leadKind, setLeadKind] = useState<TenderLeadKind>(data.initialLeadKind ?? 'enquiry')
   const [formStartedAt, setFormStartedAt] = useState(() => Math.floor(Date.now() / 1000))
-  const [form, setForm] = useState<TenderBoardForm>(() => ({
-    ...emptyTenderBoardForm,
-    message: `I would like to discuss support for this tender: ${data.tender.title}. Please contact me with the next steps.`
-  }))
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -73,6 +70,18 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [selectedTenderTypes, setSelectedTenderTypes] = useState<string[]>([])
   const [preferenceConsent, setPreferenceConsent] = useState(false)
 
+  const formik: FormikProps<TenderBoardForm> = useFormik<TenderBoardForm>({
+    initialValues: {
+      ...structuredClone(emptyTenderBoardFormValues),
+      message: `I would like to discuss support for this tender: ${data.tender.title}. Please contact me with the next steps.`
+    },
+    validationSchema: TenderBoardFormYup,
+    initialTouched: {},
+    initialErrors: {},
+    enableReinitialize: false,
+    onSubmit: async () => {}
+  })
+
   const selectedEventType = eventTypes.find(eventType => eventType.slug === selectedEventSlug)
   const slotGroups = useMemo(() => groupSlots(slots), [slots])
 
@@ -94,10 +103,13 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     setSelectedCounties([])
     setSelectedCategories([])
     setSelectedTenderTypes([])
-    setForm({
-      ...emptyTenderBoardForm,
-      message: `I would like to discuss support for this tender: ${data.tender.title}. Please contact me with the next steps.`
+    formik.resetForm({
+      values: {
+        ...structuredClone(emptyTenderBoardFormValues),
+        message: `I would like to discuss support for this tender: ${data.tender.title}. Please contact me with the next steps.`
+      }
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   useEffect(() => {
@@ -223,20 +235,17 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     }
   }, [leadKind, selectedEventSlug])
 
-  async function submitLead(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
+  async function submitLead(values: TenderBoardForm) {
     setSubmitting(true)
     setError('')
     setNotice('')
 
-    if (form.password && form.password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      setSubmitting(false)
-      return
-    }
-    if (form.password !== form.passwordConfirmation) {
-      setError('Passwords do not match.')
+    try {
+      await TenderBoardFormYup.validate(values, { abortEarly: false, stripUnknown: false })
+    } catch (validateErr) {
+      const firstMessage =
+        validateErr instanceof Error ? validateErr.message : 'Please review the form and fix the highlighted fields.'
+      setError(firstMessage)
       setSubmitting(false)
       return
     }
@@ -254,26 +263,26 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           endAt: selectedSlot.endAt,
           timezone: selectedSlot.timezone,
           customer: {
-            name: form.name,
-            email: form.email,
-            phone: form.phone,
-            companyName: form.company,
-            password: form.password,
-            passwordConfirmation: form.passwordConfirmation
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+            companyName: values.company,
+            password: values.password,
+            passwordConfirmation: values.passwordConfirmation
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
             currentStage: selectedTender.sourceReference
               ? `Tender reference: ${selectedTender.sourceReference}`
               : 'Tender support booking',
-            message: tenderBookingMessage(selectedTender, form.message),
+            message: tenderBookingMessage(selectedTender, values.message),
             regions: selectedRegions,
             counties: selectedCounties
           },
-          consent: form.consent,
+          consent: values.consent,
           formStartedAt,
           sourceUrl: window.location.href,
-          website: form.website
+          website: values.website
         })
 
         setNotice(
@@ -282,7 +291,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         setPendingSubmission({
           id: response.data.id,
           type: 'booking',
-          email: form.email,
+          email: values.email,
           reference: response.data.bookingReference
         })
         setSelectedRegions(selectedTender.regions ?? [])
@@ -297,35 +306,35 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
       const recaptchaToken = await getRecaptchaToken(recaptchaAction)
 
       const response = await sendTenderLead(selectedTender.id, leadKind, {
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        whatsapp: form.whatsapp,
-        preferredContactMethod: form.preferredContactMethod,
-        preferredSlot: form.preferredSlot,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        whatsapp: values.whatsapp,
+        preferredContactMethod: values.preferredContactMethod,
+        preferredSlot: values.preferredSlot,
         tenderPreferences: {
           categories: selectedTender.categories,
           regions: selectedRegions.length > 0 ? selectedRegions : selectedTender.regions,
           counties: selectedCounties,
           channels: ['email', 'whatsapp'],
-          notes: form.tenderPreferenceNotes
+          notes: values.tenderPreferenceNotes
         },
-        company: form.company,
+        company: values.company,
         address: {
-          line1: form.line1,
-          line2: form.line2,
-          city: form.city,
-          county: form.county,
-          postcode: form.postcode,
-          country: form.country
+          line1: values.line1,
+          line2: values.line2,
+          city: values.city,
+          county: values.county,
+          postcode: values.postcode,
+          country: values.country
         },
-        message: form.message,
-        consent: form.consent,
+        message: values.message,
+        consent: values.consent,
         formStartedAt,
         sourceUrl: window.location.href,
-        website: form.website,
-        password: form.password,
-        passwordConfirmation: form.passwordConfirmation,
+        website: values.website,
+        password: values.password,
+        passwordConfirmation: values.passwordConfirmation,
         recaptchaToken,
         recaptchaAction
       })
@@ -334,7 +343,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
       setPendingSubmission({
         id: response.data.id,
         type: 'enquiry',
-        email: form.email
+        email: values.email
       })
       setSelectedRegions(selectedTender.regions ?? [])
       setSelectedCategories(selectedTender.categories ?? [])
@@ -410,7 +419,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         window.location.href = '/profile-complete'
         return
       }
-      setForm(emptyTenderBoardForm)
+      formik.resetForm({ values: structuredClone(emptyTenderBoardFormValues) })
       setFormStartedAt(Math.floor(Date.now() / 1000))
       onClose()
     } catch (err) {
@@ -487,7 +496,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
               window.location.href = '/profile-complete'
               return
             }
-            setForm(emptyTenderBoardForm)
+            formik.resetForm({ values: structuredClone(emptyTenderBoardFormValues) })
             onClose()
           }}
           className='inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-5 text-sm font-semibold text-gray-700 hover:bg-gray-50'
@@ -580,8 +589,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         selectedTender={selectedTender}
         leadKind={leadKind}
         setLeadKind={setLeadKind}
-        form={form}
-        setForm={setForm}
+        formik={formik}
         selectedEventSlug={selectedEventSlug}
         setSelectedEventSlug={setSelectedEventSlug}
         eventTypes={eventTypes}

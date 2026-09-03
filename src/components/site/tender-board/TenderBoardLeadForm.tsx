@@ -1,13 +1,20 @@
 'use client'
 
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import type { FormikProps } from 'formik'
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 import type { TenderLeadKind } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
-import { RegionCountiesFormSection } from '../standalone-inputs'
+import {
+  RegionCountiesFormSection,
+  StandaloneTextInput,
+  StandaloneEmailInput,
+  StandaloneTextArea,
+  StandaloneDropDown
+} from '../standalone-inputs'
 
-import { inputClass } from './constants'
+import { PREFERRED_CONTACT_OPTIONS } from './tenderLeadFormSchema'
 import { TenderBoardBookingFields } from './TenderBoardBookingFields'
 import type { TenderBoardForm, TenderBoardSelectedTender } from './types'
 
@@ -15,8 +22,7 @@ type TenderBoardLeadFormProps = {
   selectedTender: TenderBoardSelectedTender | null
   leadKind: TenderLeadKind
   setLeadKind: Dispatch<SetStateAction<TenderLeadKind>>
-  form: TenderBoardForm
-  setForm: Dispatch<SetStateAction<TenderBoardForm>>
+  formik: FormikProps<TenderBoardForm>
   selectedEventSlug: string
   setSelectedEventSlug: Dispatch<SetStateAction<string>>
   eventTypes: BookingEventType[]
@@ -29,19 +35,25 @@ type TenderBoardLeadFormProps = {
   notice: string
   error: string
   submitting: boolean
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onSubmit: (values: TenderBoardForm) => void
   selectedRegions: string[]
   setSelectedRegions: Dispatch<SetStateAction<string[]>>
   selectedCounties: string[]
   setSelectedCounties: Dispatch<SetStateAction<string[]>>
 }
 
+function fieldError<T extends keyof TenderBoardForm>(
+  formik: FormikProps<TenderBoardForm>,
+  field: T
+): string | undefined {
+  return formik.touched[field] ? (formik.errors[field] as string | undefined) : undefined
+}
+
 export function TenderBoardLeadForm({
   selectedTender,
   leadKind,
   setLeadKind,
-  form,
-  setForm,
+  formik,
   selectedEventSlug,
   setSelectedEventSlug,
   eventTypes,
@@ -57,9 +69,20 @@ export function TenderBoardLeadForm({
   onSubmit,
   selectedRegions,
   setSelectedRegions,
-  selectedCounties,
-  setSelectedCounties
+  setSelectedCounties,
+  selectedCounties
 }: TenderBoardLeadFormProps) {
+  const handleSubmit = async (_event: FormEvent<HTMLFormElement>) => {
+    _event.preventDefault()
+    const touched: Partial<Record<keyof TenderBoardForm, boolean>> = {}
+    ;(Object.keys(formik.values) as Array<keyof TenderBoardForm>).forEach(key => {
+      touched[key] = true
+    })
+    formik.setTouched(touched)
+    await formik.validateForm()
+    await onSubmit(formik.values)
+  }
+
   return (
     <>
       <div className='mt-5 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1'>
@@ -77,58 +100,62 @@ export function TenderBoardLeadForm({
         ))}
       </div>
 
-      <form className='mt-5 space-y-3' onSubmit={onSubmit}>
+      <form className='mt-5 space-y-5' onSubmit={handleSubmit}>
         <input
           className='hidden'
           tabIndex={-1}
           autoComplete='off'
-          value={form.website}
-          onChange={event => setForm(current => ({ ...current, website: event.target.value }))}
+          name='website'
+          value={formik.values.website}
+          onChange={event => formik.setFieldValue('website', event.target.value)}
         />
-        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-1'>
-          <input
+        <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-1'>
+          <StandaloneTextInput
+            name='name'
+            label='Full name'
             required
-            value={form.name}
-            onChange={event => setForm(current => ({ ...current, name: event.target.value }))}
             placeholder='Full name'
-            className={inputClass}
+            value={formik.values.name}
+            onChange={value => formik.setFieldValue('name', value)}
+            error={fieldError(formik, 'name')}
           />
-          <input
+          <StandaloneEmailInput
+            name='email'
+            label='Email'
             required
-            type='email'
-            value={form.email}
-            onChange={event => setForm(current => ({ ...current, email: event.target.value }))}
             placeholder='Email'
-            className={inputClass}
+            value={formik.values.email}
+            onChange={value => formik.setFieldValue('email', value)}
+            error={fieldError(formik, 'email')}
           />
-          <input
+          <StandaloneTextInput
+            name='phone'
+            label='Phone'
             required
-            value={form.phone}
-            onChange={event => setForm(current => ({ ...current, phone: event.target.value }))}
             placeholder='Phone'
-            className={inputClass}
+            value={formik.values.phone}
+            onChange={value => formik.setFieldValue('phone', value)}
+            error={fieldError(formik, 'phone')}
+            autoComplete='tel'
           />
-          <input
-            value={form.whatsapp}
-            onChange={event => setForm(current => ({ ...current, whatsapp: event.target.value }))}
+          <StandaloneTextInput
+            name='whatsapp'
+            label='WhatsApp'
             placeholder='WhatsApp number'
-            className={inputClass}
+            value={formik.values.whatsapp}
+            onChange={value => formik.setFieldValue('whatsapp', value)}
+            error={fieldError(formik, 'whatsapp')}
+            autoComplete='tel'
           />
-          <select
-            value={form.preferredContactMethod}
-            onChange={event =>
-              setForm(current => ({
-                ...current,
-                preferredContactMethod: event.target.value as TenderBoardForm['preferredContactMethod']
-              }))
-            }
-            aria-label='Preferred contact method'
-            className={inputClass}
-          >
-            <option value='email'>Prefer email</option>
-            <option value='phone'>Prefer phone</option>
-            <option value='whatsapp'>Prefer WhatsApp</option>
-          </select>
+          <StandaloneDropDown
+            name='preferredContactMethod'
+            label='Preferred contact method'
+            value={formik.values.preferredContactMethod}
+            onChange={value => formik.setFieldValue('preferredContactMethod', value)}
+            options={PREFERRED_CONTACT_OPTIONS}
+            placeholder='Choose contact method'
+            error={fieldError(formik, 'preferredContactMethod')}
+          />
           {leadKind === 'booking' && (
             <TenderBoardBookingFields
               bookingOptionsLoading={bookingOptionsLoading}
@@ -142,11 +169,14 @@ export function TenderBoardLeadForm({
               onSelectSlot={setSelectedSlot}
             />
           )}
-          <input
-            value={form.company}
-            onChange={event => setForm(current => ({ ...current, company: event.target.value }))}
+          <StandaloneTextInput
+            name='company'
+            label='Company'
             placeholder='Company'
-            className={inputClass}
+            value={formik.values.company}
+            onChange={value => formik.setFieldValue('company', value)}
+            error={fieldError(formik, 'company')}
+            autoComplete='organization'
           />
         </div>
         <RegionCountiesFormSection
@@ -158,79 +188,104 @@ export function TenderBoardLeadForm({
           regionLabel='Preferred operating regions'
           countyLabel='Target counties'
         />
-        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-1'>
-          <input
+        <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-1'>
+          <StandaloneTextInput
+            name='line1'
+            label='Address line 1'
             required
-            value={form.line1}
-            onChange={event => setForm(current => ({ ...current, line1: event.target.value }))}
             placeholder='Address line 1'
-            className={inputClass}
+            value={formik.values.line1}
+            onChange={value => formik.setFieldValue('line1', value)}
+            error={fieldError(formik, 'line1')}
+            autoComplete='address-line1'
           />
-          <input
-            value={form.line2}
-            onChange={event => setForm(current => ({ ...current, line2: event.target.value }))}
+          <StandaloneTextInput
+            name='line2'
+            label='Address line 2'
             placeholder='Address line 2'
-            className={inputClass}
+            value={formik.values.line2}
+            onChange={value => formik.setFieldValue('line2', value)}
+            error={fieldError(formik, 'line2')}
+            autoComplete='address-line2'
           />
-          <input
+          <StandaloneTextInput
+            name='city'
+            label='Town or city'
             required
-            value={form.city}
-            onChange={event => setForm(current => ({ ...current, city: event.target.value }))}
             placeholder='Town or city'
-            className={inputClass}
+            value={formik.values.city}
+            onChange={value => formik.setFieldValue('city', value)}
+            error={fieldError(formik, 'city')}
+            autoComplete='address-level2'
           />
-          <input
-            value={form.county}
-            onChange={event => setForm(current => ({ ...current, county: event.target.value }))}
+          <StandaloneTextInput
+            name='county'
+            label='County'
             placeholder='County'
-            className={inputClass}
+            value={formik.values.county}
+            onChange={value => formik.setFieldValue('county', value)}
+            error={fieldError(formik, 'county')}
+            autoComplete='address-level1'
           />
-          <input
+          <StandaloneTextInput
+            name='postcode'
+            label='Postcode'
             required
-            value={form.postcode}
-            onChange={event => setForm(current => ({ ...current, postcode: event.target.value }))}
             placeholder='Postcode'
-            className={inputClass}
+            value={formik.values.postcode}
+            onChange={value => formik.setFieldValue('postcode', value)}
+            error={fieldError(formik, 'postcode')}
+            autoComplete='postal-code'
           />
-          <input
-            value={form.password}
-            onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
+          <StandaloneTextInput
+            name='password'
+            label='Password'
             placeholder='Password (min 8 chars)'
             type='password'
+            value={formik.values.password}
+            onChange={value => formik.setFieldValue('password', value)}
+            error={fieldError(formik, 'password')}
             autoComplete='new-password'
-            className={inputClass}
           />
-          <input
-            value={form.passwordConfirmation}
-            onChange={event => setForm(current => ({ ...current, passwordConfirmation: event.target.value }))}
+          <StandaloneTextInput
+            name='passwordConfirmation'
+            label='Confirm password'
             placeholder='Confirm password'
             type='password'
+            value={formik.values.passwordConfirmation}
+            onChange={value => formik.setFieldValue('passwordConfirmation', value)}
+            error={fieldError(formik, 'passwordConfirmation')}
             autoComplete='new-password'
-            className={inputClass}
           />
         </div>
-        <textarea
+        <StandaloneTextArea
+          name='message'
+          label='Your message'
           required
           minLength={10}
-          value={form.message}
-          onChange={event => setForm(current => ({ ...current, message: event.target.value }))}
           placeholder='Tell us what you need help with'
           rows={5}
-          className={`${inputClass} w-full py-3`}
+          value={formik.values.message}
+          onChange={value => formik.setFieldValue('message', value)}
+          error={fieldError(formik, 'message')}
         />
-        <textarea
-          value={form.tenderPreferenceNotes}
-          onChange={event => setForm(current => ({ ...current, tenderPreferenceNotes: event.target.value }))}
+        <StandaloneTextArea
+          name='tenderPreferenceNotes'
+          label='Tender alert preferences'
           placeholder='Tender alerts or regions you want to hear about'
           rows={3}
-          className={`${inputClass} w-full py-3`}
+          value={formik.values.tenderPreferenceNotes}
+          onChange={value => formik.setFieldValue('tenderPreferenceNotes', value)}
+          error={fieldError(formik, 'tenderPreferenceNotes')}
         />
         <label className='flex gap-3 text-sm leading-6 text-gray-600'>
           <input
             required
             type='checkbox'
-            checked={form.consent}
-            onChange={event => setForm(current => ({ ...current, consent: event.target.checked }))}
+            checked={formik.values.consent}
+            onChange={event => {
+              void formik.setFieldValue('consent', event.target.checked)
+            }}
             className='mt-1.5 h-5 w-5 rounded border-gray-300'
           />
           I agree for Care Atlas to contact me about this tender and related opportunities.

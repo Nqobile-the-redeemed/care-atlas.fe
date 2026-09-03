@@ -90,6 +90,20 @@ export function RegionCountiesFormSection({
     }
   }
 
+  const allCountiesSelected =
+    countyOptions.length > 0 &&
+    selectedCounties.length > 0 &&
+    countyOptions.every(c => selectedCounties.includes(String(c.code ?? c.value ?? '')))
+
+  function toggleAllCounties() {
+    if (countyOptions.length === 0) return
+    if (allCountiesSelected) {
+      onCountiesChange([])
+    } else {
+      onCountiesChange(countyOptions.map(c => String(c.code ?? c.value ?? '')))
+    }
+  }
+
   const selectedRegionOptions = useMemo(
     () => codeArraysToOptionList(selectedRegions, code => findRegionByCode(code as UkRegionCode)),
     [selectedRegions]
@@ -162,6 +176,22 @@ export function RegionCountiesFormSection({
             value={selectedCountyOptions}
             onChange={next => onCountiesChange(optionListToCodes(next))}
             error={countyError}
+            headerAction={
+              countyOptions.length === 0 ? null : (
+                <button
+                  type='button'
+                  onClick={toggleAllCounties}
+                  className='text-brand-700 hover:bg-brand-50 inline-flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium dark:text-blue-300 dark:hover:bg-blue-500/10'
+                >
+                  <span>
+                    {allCountiesSelected ? 'Unselect all counties' : 'Select all counties in selected regions'}
+                  </span>
+                  <span className='text-xs opacity-80'>
+                    {selectedCounties.length}/{countyOptions.length}
+                  </span>
+                </button>
+              )
+            }
           />
         )}
       </div>

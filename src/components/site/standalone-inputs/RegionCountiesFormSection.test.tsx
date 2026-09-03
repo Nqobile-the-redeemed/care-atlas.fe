@@ -177,4 +177,163 @@ describe('RegionCountiesFormSection', () => {
 
     expect(getByText('Please pick at least one county.')).toBeTruthy()
   })
+
+  it('TR-3.7: counties select-all action absent when no regions selected', () => {
+    const { container } = render(
+      <RegionCountiesFormSection
+        id='p7'
+        selectedRegions={[]}
+        selectedCounties={[]}
+        onRegionsChange={() => {}}
+        onCountiesChange={() => {}}
+      />
+    )
+
+    const countyInput = container.querySelector(`input[id="p7-counties"][role="combobox"]`)
+    expect(countyInput).toBeNull()
+  })
+
+  it('TR-3.8: counties select-all toggle selects every NW-filtered county, then unselects', () => {
+    const nwCounties = getCountiesByRegion(['NW'])
+    expect(nwCounties.length).toBeGreaterThan(0)
+
+    let selectedCounties: string[] = []
+    const onCountiesChange = (next: string[]) => {
+      selectedCounties = next
+    }
+
+    const { container, rerender } = render(
+      <RegionCountiesFormSection
+        id='p8'
+        selectedRegions={['NW']}
+        selectedCounties={[]}
+        onRegionsChange={() => {}}
+        onCountiesChange={onCountiesChange}
+      />
+    )
+
+    const countyInput = container.querySelector(`input[id="p8-counties"][role="combobox"]`) as HTMLInputElement | null
+    expect(countyInput).toBeTruthy()
+    fireEvent.focus(countyInput!)
+    fireEvent.click(countyInput!)
+
+    const countyListbox = container.querySelector(`[id="p8-counties-listbox"]`) as HTMLElement | null
+    expect(countyListbox).toBeTruthy()
+    const q = getQueriesForElement(countyListbox!)
+    const buttons = q.queryAllByRole('button')
+    const selectAllBtn = buttons.find(b =>
+      /select all counties|counties in selected regions/i.test(b.textContent || '')
+    ) as HTMLButtonElement | undefined
+    expect(selectAllBtn).toBeTruthy()
+    const counter = /\d+\/\d+/.exec(selectAllBtn!.textContent || '')
+    expect(counter).toBeTruthy()
+    expect(counter![0]).toBe(`0/${nwCounties.length}`)
+
+    fireEvent.click(selectAllBtn!)
+    expect(selectedCounties.length).toBe(nwCounties.length)
+    for (const c of nwCounties) {
+      expect(selectedCounties).toContain(c.code)
+    }
+
+    rerender(
+      <RegionCountiesFormSection
+        id='p8'
+        selectedRegions={['NW']}
+        selectedCounties={selectedCounties}
+        onRegionsChange={() => {}}
+        onCountiesChange={onCountiesChange}
+      />
+    )
+
+    fireEvent.click(countyInput!)
+    const countyListbox2 = container.querySelector(`[id="p8-counties-listbox"]`) as HTMLElement | null
+    expect(countyListbox2).toBeTruthy()
+    const q2 = getQueriesForElement(countyListbox2!)
+    const buttons2 = q2.queryAllByRole('button')
+    const unselectBtn = buttons2.find(b => /unselect all counties|clear all counties/i.test(b.textContent || '')) as
+      | HTMLButtonElement
+      | undefined
+    expect(unselectBtn).toBeTruthy()
+
+    fireEvent.click(unselectBtn!)
+    expect(selectedCounties.length).toBe(0)
+  })
+
+  it('TR-3.9: individual county selection still works after select-all partial state', () => {
+    const nwCounties = getCountiesByRegion(['NW'])
+    expect(nwCounties.length).toBeGreaterThanOrEqual(2)
+
+    let selectedCounties: string[] = [nwCounties[0].code]
+    const onCountiesChange = (next: string[]) => {
+      selectedCounties = next
+    }
+
+    const { container, rerender } = render(
+      <RegionCountiesFormSection
+        id='p9'
+        selectedRegions={['NW']}
+        selectedCounties={selectedCounties}
+        onRegionsChange={() => {}}
+        onCountiesChange={onCountiesChange}
+      />
+    )
+
+    const countyInput = container.querySelector(`input[id="p9-counties"][role="combobox"]`) as HTMLInputElement | null
+    fireEvent.focus(countyInput!)
+    fireEvent.click(countyInput!)
+
+    const countyListbox = container.querySelector(`[id="p9-counties-listbox"]`) as HTMLElement | null
+    const q = getQueriesForElement(countyListbox!)
+    const optionButtons = q.queryAllByRole('option') as HTMLButtonElement[]
+    expect(optionButtons.length).toBeGreaterThanOrEqual(2)
+
+    fireEvent.click(optionButtons[1])
+    expect(selectedCounties.length).toBe(2)
+    expect(selectedCounties).toContain(nwCounties[0].code)
+    const secondCode =
+      nwCounties.find(c => c.name === (optionButtons[1].textContent || '').trim())?.code || nwCounties[1].code
+    expect(selectedCounties).toContain(secondCode)
+    void rerender
+  })
+
+  it('TR-3.10: counties select-all never leaks outside filtered regions (NW+WM only, no Scotland)', () => {
+    let selectedCounties: string[] = []
+    const onCountiesChange = (next: string[]) => {
+      selectedCounties = next
+    }
+
+    const { container } = render(
+      <RegionCountiesFormSection
+        id='p10'
+        selectedRegions={['NW', 'WM']}
+        selectedCounties={[]}
+        onRegionsChange={() => {}}
+        onCountiesChange={onCountiesChange}
+      />
+    )
+
+    const countyInput = container.querySelector(`input[id="p10-counties"][role="combobox"]`) as HTMLInputElement | null
+    fireEvent.focus(countyInput!)
+    fireEvent.click(countyInput!)
+
+    const countyListbox = container.querySelector(`[id="p10-counties-listbox"]`) as HTMLElement | null
+    const q = getQueriesForElement(countyListbox!)
+    const buttons = q.queryAllByRole('button')
+    const selectAllBtn = buttons.find(b =>
+      /select all counties|counties in selected regions/i.test(b.textContent || '')
+    ) as HTMLButtonElement | undefined
+    expect(selectAllBtn).toBeTruthy()
+
+    fireEvent.click(selectAllBtn!)
+
+    const scotlandCounties = getCountiesByRegion(['SCT'])
+    for (const c of scotlandCounties) {
+      expect(selectedCounties).not.toContain(c.code)
+    }
+    const nwPlusWm = [...getCountiesByRegion(['NW']), ...getCountiesByRegion(['WM'])]
+    for (const c of nwPlusWm) {
+      expect(selectedCounties).toContain(c.code)
+    }
+    expect(selectedCounties.length).toBe(nwPlusWm.length)
+  })
 })
