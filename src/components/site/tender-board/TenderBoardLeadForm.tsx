@@ -68,7 +68,7 @@ export function TenderBoardLeadForm({
             key={kind}
             type='button'
             onClick={() => setLeadKind(kind)}
-            className={`min-h-10 rounded-md text-sm font-semibold capitalize ${
+            className={`min-h-11 rounded-md px-3 text-sm font-semibold capitalize ${
               leadKind === kind ? 'shadow-theme-xs bg-white text-gray-950' : 'text-gray-600 hover:text-gray-950'
             }`}
           >
@@ -231,7 +231,7 @@ export function TenderBoardLeadForm({
             type='checkbox'
             checked={form.consent}
             onChange={event => setForm(current => ({ ...current, consent: event.target.checked }))}
-            className='mt-1 h-4 w-4 rounded border-gray-300'
+            className='mt-1.5 h-5 w-5 rounded border-gray-300'
           />
           I agree for Care Atlas to contact me about this tender and related opportunities.
         </label>

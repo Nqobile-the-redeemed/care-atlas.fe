@@ -48,7 +48,7 @@ export function TenderBoardListItem({ tender, isSelected, onOpenDetails, onOpenF
         <button
           type='button'
           onClick={() => onOpenForm(tender, 'booking')}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
+          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden sm:w-auto'
         >
           <SiteIcon name='calendar' className='h-4 w-4' />
           Book meeting
@@ -56,7 +56,7 @@ export function TenderBoardListItem({ tender, isSelected, onOpenDetails, onOpenF
         <button
           type='button'
           onClick={() => onOpenForm(tender, 'enquiry')}
-          className='border-brand-200 text-brand-800 hover:bg-brand-50 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border bg-white px-4 text-sm font-semibold focus:ring-4 focus:outline-hidden'
+          className='border-brand-200 text-brand-800 hover:bg-brand-50 focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg border bg-white px-4 text-sm font-semibold focus:ring-4 focus:outline-hidden sm:w-auto'
         >
           <SiteIcon name='mail' className='h-4 w-4' />
           Send enquiry
@@ -64,7 +64,7 @@ export function TenderBoardListItem({ tender, isSelected, onOpenDetails, onOpenF
         <button
           type='button'
           onClick={() => onOpenDetails(tender)}
-          className='focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:ring-4 focus:outline-hidden'
+          className='focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:ring-4 focus:outline-hidden sm:w-auto'
         >
           <SiteIcon name='file' className='h-4 w-4' />
           Open details
