@@ -64,13 +64,12 @@ export default function BlogPage() {
             <p className='mt-5 text-sm font-semibold text-gray-800'>Categories</p>
             <div className='mt-3 flex flex-wrap gap-2'>
               {blogCategories.map(category => (
-                <button
+                <span
                   key={category}
-                  type='button'
-                  className='hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700 transition'
+                  className='rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700'
                 >
                   {category}
-                </button>
+                </span>
               ))}
             </div>
           </div>

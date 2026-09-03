@@ -185,7 +185,7 @@ describe('TenderBoardClient', () => {
     expect(await screen.findByText('Tender details')).toBeInTheDocument()
     expect(await screen.findByText('Full detailed description')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'booking' }))
+    await user.click(screen.getByRole('button', { name: /booking/i }))
 
     expect(await screen.findByText('Available times')).toBeInTheDocument()
     expect(await screen.findByText('Review scope and next steps.')).toBeInTheDocument()

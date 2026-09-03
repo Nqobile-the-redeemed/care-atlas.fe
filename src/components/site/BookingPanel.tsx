@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/bookings'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
+import { Button } from './ui'
 
 type BookingStatus = 'idle' | 'loading' | 'submitting' | 'success' | 'error'
 
@@ -418,14 +419,15 @@ export function BookingPanel() {
           {errors.consent && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.consent}</p>}
         </div>
 
-        <button
+        <Button
           type='submit'
           disabled={status === 'submitting' || !selectedEventSlug}
-          className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-60'
+          loading={status === 'submitting'}
+          fullWidth
+          leftIcon={<SiteIcon name='check' className='h-4 w-4' />}
         >
-          <SiteIcon name='check' className='h-4 w-4' />
-          {status === 'submitting' ? 'Booking...' : 'Confirm booking'}
-        </button>
+          Confirm booking
+        </Button>
       </form>
     </div>
   )

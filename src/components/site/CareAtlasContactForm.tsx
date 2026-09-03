@@ -5,6 +5,7 @@ import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { RegionCountiesFormSection } from './standalone-inputs'
+import { Button } from './ui'
 
 const fieldClass =
   'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-brand-500/10 focus:ring-4 focus:outline-hidden'
@@ -282,13 +283,14 @@ export function CareAtlasContactForm() {
           Protected by Google reCAPTCHA. Backend verification is required before accepting submissions.
         </p>
 
-        <button
+        <Button
           type='submit'
           disabled={submission?.status === 'submitting'}
-          className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 disabled:bg-brand-300 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
+          loading={submission?.status === 'submitting'}
+          fullWidth
         >
-          {submission?.status === 'submitting' ? 'Sending...' : 'Send message'}
-        </button>
+          Send message
+        </Button>
 
         {securityError && (
           <p className='text-error-600 text-sm font-medium' role='alert'>

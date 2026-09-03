@@ -6,6 +6,7 @@ import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 import { SiteIcon } from './SiteIcon'
+import { Button } from './ui'
 
 const EXPANDED_WIDTH = 'min(100vw, 1120px)'
 
@@ -154,27 +155,31 @@ export function HalfScreenModal() {
                 )}
               </div>
               <div className='flex items-center gap-2'>
-                <button
+                <Button
                   type='button'
                   onClick={() => setIsExpanded(current => !current)}
-                  className='focus:ring-brand-500/10 rounded-lg p-2 text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 focus:ring-4 focus:outline-hidden'
+                  variant='tertiary'
+                  size='sm'
+                  className='h-10 w-10 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900'
                   aria-label={isExpanded ? 'Minimize drawer' : 'Expand drawer'}
-                >
-                  {isExpanded ? (
-                    <SiteIcon name='contract' className='h-5 w-5' />
-                  ) : (
-                    <SiteIcon name='expandOut' className='h-5 w-5' />
-                  )}
-                </button>
-                <button
+                  leftIcon={
+                    isExpanded ? (
+                      <SiteIcon name='contract' className='h-5 w-5' />
+                    ) : (
+                      <SiteIcon name='expandOut' className='h-5 w-5' />
+                    )
+                  }
+                />
+                <Button
                   ref={closeButtonRef}
                   type='button'
                   onClick={closeModal}
-                  className='focus:ring-brand-500/10 rounded-lg p-2 text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 focus:ring-4 focus:outline-hidden'
+                  variant='tertiary'
+                  size='sm'
+                  className='h-10 w-10 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900'
                   aria-label='Close tender details'
-                >
-                  <SiteIcon name='close' className='h-5 w-5' />
-                </button>
+                  leftIcon={<SiteIcon name='close' className='h-5 w-5' />}
+                />
               </div>
             </header>
 
@@ -235,29 +240,35 @@ export function HalfScreenModal() {
                 )}
               </div>
               <div className='flex shrink-0 items-center gap-2'>
-                <button
+                <Button
                   ref={mobileMinimizeButtonRef}
                   type='button'
                   onClick={toggleMobileSnap}
-                  className='focus:ring-brand-500/10 inline-flex min-h-11 min-w-[92px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-100 focus:ring-4 focus:outline-hidden'
+                  variant='secondary'
+                  size='sm'
+                  className='min-w-[92px] border-gray-200 text-gray-800 hover:border-gray-200 hover:bg-gray-100'
                   aria-label={sheetSnap === 'minimized' ? 'Expand sheet' : 'Minimize sheet'}
+                  leftIcon={
+                    sheetSnap === 'minimized' ? (
+                      <SiteIcon name='expandOut' className='h-4 w-4' />
+                    ) : (
+                      <SiteIcon name='contract' className='h-4 w-4' />
+                    )
+                  }
                 >
-                  {sheetSnap === 'minimized' ? (
-                    <SiteIcon name='expandOut' className='h-4 w-4' />
-                  ) : (
-                    <SiteIcon name='contract' className='h-4 w-4' />
-                  )}
-                  <span>{sheetSnap === 'minimized' ? 'Expand' : 'Minimize'}</span>
-                </button>
-                <button
+                  {sheetSnap === 'minimized' ? 'Expand' : 'Minimize'}
+                </Button>
+                <Button
                   type='button'
                   onClick={closeModal}
-                  className='focus:ring-brand-500/10 inline-flex min-h-11 min-w-[76px] items-center justify-center gap-1.5 rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-200 focus:ring-4 focus:outline-hidden'
+                  variant='tertiary'
+                  size='sm'
+                  className='min-w-[76px] bg-gray-100 text-gray-900 hover:bg-gray-200'
                   aria-label='Exit and close tender details'
+                  leftIcon={<SiteIcon name='close' className='h-4 w-4' />}
                 >
-                  <SiteIcon name='close' className='h-4 w-4' />
-                  <span>Exit</span>
-                </button>
+                  Exit
+                </Button>
               </div>
             </header>
 

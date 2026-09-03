@@ -3,6 +3,7 @@
 import type { PublicTender, TenderLeadKind } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
+import { Button } from '../ui'
 
 import { dateLabel, valueLabel } from './utils'
 
@@ -45,30 +46,32 @@ export function TenderBoardListItem({ tender, isSelected, onOpenDetails, onOpenF
         </dl>
       </button>
       <div className='mt-4 flex flex-col gap-2 sm:flex-row'>
-        <button
-          type='button'
+        <Button
           onClick={() => onOpenForm(tender, 'booking')}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden sm:w-auto'
+          fullWidth
+          className='sm:w-fit'
+          leftIcon={<SiteIcon name='calendar' className='h-4 w-4' />}
         >
-          <SiteIcon name='calendar' className='h-4 w-4' />
           Book meeting
-        </button>
-        <button
-          type='button'
+        </Button>
+        <Button
+          variant='secondary'
           onClick={() => onOpenForm(tender, 'enquiry')}
-          className='border-brand-200 text-brand-800 hover:bg-brand-50 focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg border bg-white px-4 text-sm font-semibold focus:ring-4 focus:outline-hidden sm:w-auto'
+          fullWidth
+          className='sm:w-fit'
+          leftIcon={<SiteIcon name='mail' className='h-4 w-4' />}
         >
-          <SiteIcon name='mail' className='h-4 w-4' />
           Send enquiry
-        </button>
-        <button
-          type='button'
+        </Button>
+        <Button
+          variant='secondary'
           onClick={() => onOpenDetails(tender)}
-          className='focus:ring-brand-500/20 inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:ring-4 focus:outline-hidden sm:w-auto'
+          fullWidth
+          className='border-gray-300 text-gray-800 hover:border-gray-300 hover:bg-gray-50 sm:w-fit'
+          leftIcon={<SiteIcon name='file' className='h-4 w-4' />}
         >
-          <SiteIcon name='file' className='h-4 w-4' />
           Open details
-        </button>
+        </Button>
       </div>
     </article>
   )

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
+import { Button } from './ui'
 
 const whatsappNumber = process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_NUMBER ?? ''
 const defaultMessage =
@@ -109,35 +110,37 @@ export function WhatsappChatBox() {
           </div>
           <div className='space-y-2 p-3'>
             {options.map(option => (
-              <button
+              <Button
                 key={option.intent}
-                type='button'
                 disabled={loadingIntent !== null}
+                loading={loadingIntent === option.intent}
                 onClick={() => startChat(option.intent, option.message)}
-                className='hover:border-brand-600 hover:bg-brand-25 flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-left text-sm font-semibold text-gray-800 transition disabled:cursor-not-allowed disabled:opacity-60'
+                variant='secondary'
+                size='sm'
+                fullWidth
+                className='hover:border-brand-600 hover:bg-brand-25 justify-between border-gray-200 px-3 text-left text-gray-800'
+                rightIcon={<span className='text-brand-700 text-xs'>Open</span>}
               >
                 <span>{option.label}</span>
-                <span className='text-brand-700 text-xs'>
-                  {loadingIntent === option.intent ? 'Checking...' : 'Open'}
-                </span>
-              </button>
+              </Button>
             ))}
             {error && <p className='rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700'>{error}</p>}
             <p className='text-xs leading-5 text-gray-500'>Protected by Google reCAPTCHA before WhatsApp opens.</p>
           </div>
         </div>
       )}
-      <button
-        type='button'
+      <Button
         aria-expanded={open}
         onClick={() => setOpen(value => !value)}
-        className='flex min-h-14 items-center gap-3 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-xl transition hover:bg-[#1EAE56] focus:ring-4 focus:ring-[#25D366]/25 focus:outline-none'
+        className='min-h-14 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-xl hover:bg-[#1EAE56] focus:ring-[#25D366]/25'
+        leftIcon={
+          <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-[#128C4A]'>
+            WA
+          </span>
+        }
       >
-        <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-[#128C4A]'>
-          WA
-        </span>
-        <span>{open ? 'Close chat' : 'WhatsApp chat'}</span>
-      </button>
+        {open ? 'Close chat' : 'WhatsApp chat'}
+      </Button>
     </div>
   )
 }

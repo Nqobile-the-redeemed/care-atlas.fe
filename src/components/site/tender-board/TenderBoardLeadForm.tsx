@@ -17,6 +17,7 @@ import {
 import { PREFERRED_CONTACT_OPTIONS } from './tenderLeadFormSchema'
 import { TenderBoardBookingFields } from './TenderBoardBookingFields'
 import { TenderBoardLeadKindSelector } from './TenderBoardLeadKindSelector'
+import { Button } from '../ui'
 import type { TenderBoardForm, TenderBoardSelectedTender } from './types'
 
 type TenderBoardLeadFormProps = {
@@ -280,14 +281,15 @@ export function TenderBoardLeadForm({
         </label>
         {notice && <p className='bg-success-50 text-success-700 rounded-lg p-3 text-sm font-medium'>{notice}</p>}
         {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
-        <button
+        <Button
           type='submit'
           disabled={submitting || !selectedTender}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden disabled:opacity-50'
+          loading={submitting}
+          fullWidth
+          leftIcon={<SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />}
         >
-          <SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />
-          {submitting ? 'Sending...' : leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
-        </button>
+          {leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
+        </Button>
       </form>
     </>
   )

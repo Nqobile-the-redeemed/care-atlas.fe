@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TenderLeadKind } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
+import { Button } from '../ui'
 
 type TenderBoardLeadKindSelectorProps = {
   value: TenderLeadKind
@@ -26,18 +27,17 @@ export function TenderBoardLeadKindSelector({ value, onChange }: TenderBoardLead
           const active = value === option.value
 
           return (
-            <button
+            <Button
               key={option.value}
-              type='button'
               onClick={() => onChange(option.value)}
               aria-pressed={active}
-              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold transition focus:ring-4 focus:ring-brand-500/10 focus:outline-hidden ${
-                active ? 'bg-brand-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
-              }`}
+              variant={active ? 'primary' : 'tertiary'}
+              fullWidth
+              className={active ? 'rounded-md shadow-sm' : 'rounded-md text-gray-700 hover:bg-gray-100'}
+              leftIcon={<SiteIcon name={option.icon} className='h-4 w-4' />}
             >
-              <SiteIcon name={option.icon} className='h-4 w-4' />
               {option.label}
-            </button>
+            </Button>
           )
         })}
       </div>

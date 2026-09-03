@@ -24,6 +24,7 @@ import {
 
 import { TenderBoardFormYup, emptyTenderBoardFormValues } from './tenderLeadFormSchema'
 import { RegionCountiesFormSection } from '../standalone-inputs'
+import { Button } from '../ui'
 import { TenderBoardLeadForm } from './TenderBoardLeadForm'
 import { TenderBoardSelectedTenderPanel } from './TenderBoardSelectedTenderPanel'
 import type { TenderBoardForm, TenderBoardPanelData, TenderBoardSelectedTender } from './types'
@@ -450,22 +451,12 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           aria-label='Verification code'
           className='focus:border-brand-500 focus:ring-brand-500/10 h-14 w-full rounded-lg border border-gray-300 bg-white px-4 text-center text-xl tracking-[0.35em] text-gray-950 outline-hidden transition focus:ring-4'
         />
-        <button
-          type='button'
-          disabled={submitting || otpCode.length !== 6}
-          onClick={verifyOtp}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden disabled:opacity-50'
-        >
-          {submitting ? 'Checking...' : 'Verify email'}
-        </button>
-        <button
-          type='button'
-          disabled={submitting || otpResendSeconds > 0}
-          onClick={resendOtp}
-          className='text-brand-700 hover:text-brand-800 w-full text-sm font-semibold disabled:text-gray-400'
-        >
+        <Button disabled={submitting || otpCode.length !== 6} onClick={verifyOtp} loading={submitting} fullWidth>
+          Verify email
+        </Button>
+        <Button variant='tertiary' disabled={submitting || otpResendSeconds > 0} onClick={resendOtp} fullWidth>
           {otpResendSeconds > 0 ? `Send a new code in ${otpResendSeconds}s` : 'Send a new code'}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -482,15 +473,11 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             We have sent a confirmation email. You can also receive alerts when similar tenders are published.
           </p>
         </div>
-        <button
-          type='button'
-          onClick={() => setFlowStep('preferences')}
-          className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
-        >
+        <Button onClick={() => setFlowStep('preferences')} fullWidth>
           Send me tender notifications
-        </button>
-        <button
-          type='button'
+        </Button>
+        <Button
+          variant='secondary'
           onClick={() => {
             if (!profileComplete) {
               window.location.href = '/profile-complete'
@@ -499,10 +486,11 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             formik.resetForm({ values: structuredClone(emptyTenderBoardFormValues) })
             onClose()
           }}
-          className='inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-5 text-sm font-semibold text-gray-700 hover:bg-gray-50'
+          fullWidth
+          className='border-gray-300 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
         >
           Not now
-        </button>
+        </Button>
       </div>
     )
   }
@@ -564,14 +552,9 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           I agree to receive tender notification emails and understand I can unsubscribe later.
         </label>
         {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
-        <button
-          type='button'
-          disabled={submitting}
-          onClick={savePreferences}
-          className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-50'
-        >
-          {submitting ? 'Saving...' : 'Save preferences'}
-        </button>
+        <Button disabled={submitting} onClick={savePreferences} loading={submitting} fullWidth>
+          Save preferences
+        </Button>
       </div>
     )
   }
