@@ -42,6 +42,7 @@ export function BookingPanel() {
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null)
   const [status, setStatus] = useState<BookingStatus>('loading')
   const [message, setMessage] = useState('')
+  const [handoffUrl, setHandoffUrl] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const slotGroups = useMemo(() => groupSlots(slots), [slots])
@@ -115,17 +116,6 @@ export function BookingPanel() {
       nextErrors.email = 'Enter a valid email address.'
     }
 
-    const password = String(formData.get('password') ?? '')
-    const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
-    if (password.length < 8) {
-      nextErrors.password = 'Password must be at least 8 characters.'
-    }
-    if (!passwordConfirmation) {
-      nextErrors.passwordConfirmation = 'Confirm your password.'
-    } else if (password && password !== passwordConfirmation) {
-      nextErrors.passwordConfirmation = 'Passwords do not match.'
-    }
-
     if (!selectedSlot) {
       nextErrors.slot = 'Choose a consultation time.'
     }
@@ -145,6 +135,7 @@ export function BookingPanel() {
 
     setErrors(nextErrors)
     setMessage('')
+    setHandoffUrl(null)
 
     if (Object.keys(nextErrors).length > 0 || !selectedSlot) return
 
@@ -154,14 +145,13 @@ export function BookingPanel() {
         eventTypeSlug: selectedEventSlug,
         startAt: selectedSlot.startAt,
         endAt: selectedSlot.endAt,
+        consultantUserId: selectedSlot.consultantUserId ?? null,
         timezone: selectedSlot.timezone,
         customer: {
           name: String(formData.get('name') ?? '').trim(),
           email: String(formData.get('email') ?? '').trim(),
           phone: String(formData.get('phone') ?? '').trim(),
-          companyName: String(formData.get('companyName') ?? '').trim(),
-          password: String(formData.get('password') ?? ''),
-          passwordConfirmation: String(formData.get('passwordConfirmation') ?? '')
+          companyName: String(formData.get('companyName') ?? '').trim()
         },
         intake: {
           serviceInterest: selectedEventType?.name,
@@ -175,9 +165,10 @@ export function BookingPanel() {
       })
 
       setStatus('success')
+      setHandoffUrl(response.data.handoff?.url ?? null)
       setMessage(
-        response.data.googleMeetUrl
-          ? `Booking confirmed. Your reference is ${response.data.bookingReference}.`
+        response.data.handoff?.url
+          ? `Booking received. Your reference is ${response.data.bookingReference}.`
           : `Booking received. Your reference is ${response.data.bookingReference}; we will confirm the Meet link shortly.`
       )
       setSelectedSlot(null)
@@ -213,7 +204,24 @@ export function BookingPanel() {
           }`}
           role='status'
         >
-          {message}
+          <p>{message}</p>
+          {status === 'success' && handoffUrl && (
+            <div className='mt-3 grid gap-2 sm:grid-cols-2'>
+              <a
+                href={handoffUrl}
+                className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white'
+              >
+                Continue to Orbit Mirai
+              </a>
+              <button
+                type='button'
+                onClick={() => setHandoffUrl(null)}
+                className='inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-semibold text-gray-700 hover:bg-white'
+              >
+                Maybe later
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -354,36 +362,6 @@ export function BookingPanel() {
               className={fieldClass()}
               placeholder='Add anything useful before the call.'
             />
-          </div>
-          <div>
-            <label htmlFor='booking-password' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Password *
-            </label>
-            <input
-              id='booking-password'
-              name='password'
-              type='password'
-              autoComplete='new-password'
-              className={fieldClass(Boolean(errors.password))}
-              placeholder='At least 8 characters'
-            />
-            {errors.password && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.password}</p>}
-          </div>
-          <div>
-            <label htmlFor='booking-password-confirmation' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Confirm password *
-            </label>
-            <input
-              id='booking-password-confirmation'
-              name='passwordConfirmation'
-              type='password'
-              autoComplete='new-password'
-              className={fieldClass(Boolean(errors.passwordConfirmation))}
-              placeholder='Re-enter your password'
-            />
-            {errors.passwordConfirmation && (
-              <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.passwordConfirmation}</p>
-            )}
           </div>
         </div>
 

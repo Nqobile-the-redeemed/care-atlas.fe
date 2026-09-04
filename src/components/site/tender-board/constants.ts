@@ -10,17 +10,8 @@ export const emptyTenderBoardForm: TenderBoardForm = {
   whatsapp: '',
   preferredContactMethod: 'email',
   preferredSlot: '',
-  tenderPreferenceNotes: '',
   company: '',
-  line1: '',
-  line2: '',
-  city: '',
-  county: '',
-  postcode: '',
-  country: 'United Kingdom',
   message: '',
   consent: false,
-  website: '',
-  password: '',
-  passwordConfirmation: ''
+  website: ''
 }

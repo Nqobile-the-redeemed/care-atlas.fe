@@ -27,6 +27,7 @@ type TenderBoardLeadFormProps = {
   bookingOptionsLoading: boolean
   notice: string
   error: string
+  handoffUrl: string | null
   submitting: boolean
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
 }
@@ -48,6 +49,7 @@ export function TenderBoardLeadForm({
   bookingOptionsLoading,
   notice,
   error,
+  handoffUrl,
   submitting,
   onSubmit
 }: TenderBoardLeadFormProps) {
@@ -136,56 +138,7 @@ export function TenderBoardLeadForm({
           <input
             value={form.company}
             onChange={event => setForm(current => ({ ...current, company: event.target.value }))}
-            placeholder='Company'
-            className={inputClass}
-          />
-          <input
-            required
-            value={form.line1}
-            onChange={event => setForm(current => ({ ...current, line1: event.target.value }))}
-            placeholder='Address line 1'
-            className={inputClass}
-          />
-          <input
-            value={form.line2}
-            onChange={event => setForm(current => ({ ...current, line2: event.target.value }))}
-            placeholder='Address line 2'
-            className={inputClass}
-          />
-          <input
-            required
-            value={form.city}
-            onChange={event => setForm(current => ({ ...current, city: event.target.value }))}
-            placeholder='Town or city'
-            className={inputClass}
-          />
-          <input
-            value={form.county}
-            onChange={event => setForm(current => ({ ...current, county: event.target.value }))}
-            placeholder='County'
-            className={inputClass}
-          />
-          <input
-            required
-            value={form.postcode}
-            onChange={event => setForm(current => ({ ...current, postcode: event.target.value }))}
-            placeholder='Postcode'
-            className={inputClass}
-          />
-          <input
-            value={form.password}
-            onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
-            placeholder='Password (min 8 chars)'
-            type='password'
-            autoComplete='new-password'
-            className={inputClass}
-          />
-          <input
-            value={form.passwordConfirmation}
-            onChange={event => setForm(current => ({ ...current, passwordConfirmation: event.target.value }))}
-            placeholder='Confirm password'
-            type='password'
-            autoComplete='new-password'
+            placeholder='Company or provider name'
             className={inputClass}
           />
         </div>
@@ -198,13 +151,6 @@ export function TenderBoardLeadForm({
           rows={5}
           className={`${inputClass} w-full py-3`}
         />
-        <textarea
-          value={form.tenderPreferenceNotes}
-          onChange={event => setForm(current => ({ ...current, tenderPreferenceNotes: event.target.value }))}
-          placeholder='Tender alerts or regions you want to hear about'
-          rows={3}
-          className={`${inputClass} w-full py-3`}
-        />
         <label className='flex gap-3 text-sm leading-6 text-gray-600'>
           <input
             required
@@ -215,7 +161,21 @@ export function TenderBoardLeadForm({
           />
           I agree for Care Atlas to contact me about this tender and related opportunities.
         </label>
-        {notice && <p className='bg-success-50 text-success-700 rounded-lg p-3 text-sm font-medium'>{notice}</p>}
+        {notice && (
+          <div className='border-success-200 bg-success-50 text-success-800 rounded-lg border p-3 text-sm'>
+            <p className='font-semibold'>{notice}</p>
+            {handoffUrl && (
+              <div className='mt-3'>
+                <a
+                  href={handoffUrl}
+                  className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 text-sm font-semibold text-white'
+                >
+                  Continue to Orbit Mirai
+                </a>
+              </div>
+            )}
+          </div>
+        )}
         {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
         <button
           type='submit'

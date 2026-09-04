@@ -44,19 +44,10 @@ const emptyTenderBoardForm: TenderBoardForm = {
   whatsapp: '',
   preferredContactMethod: 'email',
   preferredSlot: '',
-  tenderPreferenceNotes: '',
   company: '',
-  line1: '',
-  line2: '',
-  city: '',
-  county: '',
-  postcode: '',
-  country: 'United Kingdom',
   message: '',
   consent: false,
-  website: '',
-  password: '',
-  passwordConfirmation: ''
+  website: ''
 }
 
 function buildInitialTenderBoardForm(title: string): TenderBoardForm {
@@ -89,7 +80,8 @@ const initialState: TenderBoardState = {
     slots: [],
     selectedSlot: null,
     bookingOptionsLoading: false,
-    bookingError: null
+    bookingError: null,
+    handoffUrl: null
   }
 }
 
@@ -171,9 +163,7 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
             name: workspace.form.name,
             email: workspace.form.email,
             phone: workspace.form.phone,
-            companyName: workspace.form.company,
-            password: workspace.form.password,
-            passwordConfirmation: workspace.form.passwordConfirmation
+            companyName: workspace.form.company
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -188,9 +178,9 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
           website: workspace.form.website
         })
 
-        const notice = response.data.googleMeetUrl
-          ? `Meeting booked. Your reference is ${response.data.bookingReference}. The Google Meet link has been sent by email.`
-          : `Meeting booked. Your reference is ${response.data.bookingReference}. We will confirm the Meet link shortly.`
+        const notice = response.data.handoff?.url
+          ? `Meeting booked. Your reference is ${response.data.bookingReference}. Continue to Orbit Mirai to track it.`
+          : `Meeting booked. Your reference is ${response.data.bookingReference}.`
 
         dispatch(
           showNotification({
@@ -203,7 +193,7 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
         return notice
       }
 
-      await sendTenderLead(selectedTender.id, workspace.leadKind, {
+      const response = await sendTenderLead(selectedTender.id, workspace.leadKind, {
         name: workspace.form.name,
         email: workspace.form.email,
         phone: workspace.form.phone,
@@ -214,29 +204,21 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
           categories: selectedTender.categories,
           regions: selectedTender.regions,
           channels: ['email', 'whatsapp'],
-          notes: workspace.form.tenderPreferenceNotes
+          notes: ''
         },
         company: workspace.form.company,
-        address: {
-          line1: workspace.form.line1,
-          line2: workspace.form.line2,
-          city: workspace.form.city,
-          county: workspace.form.county,
-          postcode: workspace.form.postcode,
-          country: workspace.form.country
-        },
         message: workspace.form.message,
         consent: workspace.form.consent,
         formStartedAt: workspace.formStartedAt,
         sourceUrl: payload.sourceUrl,
         website: workspace.form.website,
-        password: workspace.form.password,
-        passwordConfirmation: workspace.form.passwordConfirmation,
         recaptchaToken: payload.recaptchaToken,
         recaptchaAction: payload.recaptchaAction
       })
 
-      const notice = 'Tender enquiry sent.'
+      const notice = response.data.handoff?.url
+        ? 'Tender enquiry sent. Continue to Orbit Mirai to track it.'
+        : 'Tender enquiry sent.'
 
       dispatch(
         showNotification({
@@ -279,16 +261,19 @@ const tenderBoardSlice = createSlice({
       state.workspace.submitting = false
       state.workspace.submitError = null
       state.workspace.notice = null
+      state.workspace.handoffUrl = null
       state.workspace.selectedEventSlug = ''
       state.workspace.slots = []
       state.workspace.selectedSlot = null
       state.workspace.bookingError = null
+      state.workspace.handoffUrl = null
     },
     setTenderBoardLeadKind: (state, action: PayloadAction<TenderLeadKind>) => {
       state.workspace.leadKind = action.payload
       state.workspace.notice = null
       state.workspace.submitError = null
       state.workspace.bookingError = null
+      state.workspace.handoffUrl = null
     },
     updateTenderBoardFormValue: (
       state,
@@ -301,12 +286,14 @@ const tenderBoardSlice = createSlice({
       state.workspace.selectedSlot = null
       state.workspace.slots = []
       state.workspace.notice = null
+      state.workspace.handoffUrl = null
       state.workspace.bookingError = null
       state.workspace.submitError = null
     },
     setTenderBoardSelectedSlot: (state, action: PayloadAction<BookingSlot | null>) => {
       state.workspace.selectedSlot = action.payload
       state.workspace.notice = null
+      state.workspace.handoffUrl = null
       state.workspace.submitError = null
     },
     clearTenderBoardFeedback: state => {
@@ -384,6 +371,7 @@ const tenderBoardSlice = createSlice({
 
         state.workspace.submitting = false
         state.workspace.notice = action.payload
+        state.workspace.handoffUrl = null
         state.workspace.formStartedAt = Math.floor(Date.now() / 1000)
         state.workspace.form = buildInitialTenderBoardForm(selectedTender?.title ?? '')
         state.workspace.selectedSlot = null

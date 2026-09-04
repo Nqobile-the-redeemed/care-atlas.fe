@@ -23,19 +23,10 @@ export type TenderBoardForm = {
   whatsapp: string
   preferredContactMethod: PreferredContactMethod
   preferredSlot: string
-  tenderPreferenceNotes: string
   company: string
-  line1: string
-  line2: string
-  city: string
-  county: string
-  postcode: string
-  country: string
   message: string
   consent: boolean
   website: string
-  password: string
-  passwordConfirmation: string
 }
 
 export type TenderBoardWorkspaceState = {
@@ -54,6 +45,7 @@ export type TenderBoardWorkspaceState = {
   selectedSlot: BookingSlot | null
   bookingOptionsLoading: boolean
   bookingError: string | null
+  handoffUrl: string | null
 }
 
 export type TenderBoardState = {

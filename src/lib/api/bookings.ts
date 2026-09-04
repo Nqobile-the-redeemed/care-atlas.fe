@@ -20,6 +20,12 @@ export type BookingSlot = {
   label: string
   date: string
   timezone: string
+  consultantUserId?: number | null
+  consultant?: {
+    id: number
+    email: string
+    name: string
+  } | null
 }
 
 export type BookingAvailability = {
@@ -48,6 +54,12 @@ export type PublicBooking = {
   intake: Record<string, string>
   verificationRequired?: boolean
   submissionType?: 'booking'
+  handoff?: {
+    id: string
+    code: string
+    url: string | null
+    expiresAt: string | null
+  }
 }
 
 export type BookingPayload = {
@@ -55,13 +67,12 @@ export type BookingPayload = {
   startAt: string
   endAt: string
   timezone: string
+  consultantUserId?: number | null
   customer: {
     name: string
     email: string
     phone?: string
     companyName?: string
-    password?: string
-    passwordConfirmation?: string
   }
   intake: {
     serviceInterest?: string
@@ -109,6 +120,7 @@ export async function createPublicBooking(payload: BookingPayload) {
       eventTypeSlug: payload.eventTypeSlug,
       startAt: payload.startAt,
       endAt: payload.endAt,
+      consultantUserId: payload.consultantUserId ?? null,
       timezone: payload.timezone,
       customer: payload.customer,
       intake: payload.intake,

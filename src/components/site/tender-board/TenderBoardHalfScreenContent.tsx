@@ -53,6 +53,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [handoffUrl, setHandoffUrl] = useState<string | null>(null)
   const [eventTypes, setEventTypes] = useState<BookingEventType[]>([])
   const [selectedEventSlug, setSelectedEventSlug] = useState('')
   const [slots, setSlots] = useState<BookingSlot[]>([])
@@ -79,6 +80,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     setLeadKind(data.initialLeadKind ?? 'enquiry')
     setSelectedSlot(null)
     setNotice('')
+    setHandoffUrl(null)
     setError('')
     setFormStartedAt(Math.floor(Date.now() / 1000))
     setFlowStep('form')
@@ -224,17 +226,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     setError('')
     setNotice('')
 
-    if (form.password && form.password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      setSubmitting(false)
-      return
-    }
-    if (form.password !== form.passwordConfirmation) {
-      setError('Passwords do not match.')
-      setSubmitting(false)
-      return
-    }
-
     try {
       if (leadKind === 'booking') {
         if (!selectedSlot) {
@@ -246,14 +237,13 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           eventTypeSlug: selectedEventSlug,
           startAt: selectedSlot.startAt,
           endAt: selectedSlot.endAt,
+          consultantUserId: selectedSlot.consultantUserId ?? null,
           timezone: selectedSlot.timezone,
           customer: {
             name: form.name,
             email: form.email,
             phone: form.phone,
-            companyName: form.company,
-            password: form.password,
-            passwordConfirmation: form.passwordConfirmation
+            companyName: form.company
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -268,9 +258,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           website: form.website
         })
 
-        setNotice(
-          `Meeting received. Your reference is ${response.data.bookingReference}. Verify your email to confirm it.`
-        )
+        setHandoffUrl(response.data.handoff?.url ?? null)
+        setNotice(`Meeting received. Your reference is ${response.data.bookingReference}.`)
         setPendingSubmission({
           id: response.data.id,
           type: 'booking',
@@ -279,7 +268,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         })
         setSelectedRegions(selectedTender.regions ?? [])
         setSelectedCategories(selectedTender.categories ?? [])
-        setFlowStep('verify')
+        setFlowStep('confirmed')
         setOtpResendSeconds(45)
         setSelectedSlot(null)
         return
@@ -299,29 +288,20 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           categories: selectedTender.categories,
           regions: selectedTender.regions,
           channels: ['email', 'whatsapp'],
-          notes: form.tenderPreferenceNotes
+          notes: ''
         },
         company: form.company,
-        address: {
-          line1: form.line1,
-          line2: form.line2,
-          city: form.city,
-          county: form.county,
-          postcode: form.postcode,
-          country: form.country
-        },
         message: form.message,
         consent: form.consent,
         formStartedAt,
         sourceUrl: window.location.href,
         website: form.website,
-        password: form.password,
-        passwordConfirmation: form.passwordConfirmation,
         recaptchaToken,
         recaptchaAction
       })
 
-      setNotice('Tender enquiry received. Verify your email to confirm it.')
+      setHandoffUrl(response.data.handoff?.url ?? null)
+      setNotice('Tender enquiry received.')
       setPendingSubmission({
         id: response.data.id,
         type: 'enquiry',
@@ -329,7 +309,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
       })
       setSelectedRegions(selectedTender.regions ?? [])
       setSelectedCategories(selectedTender.categories ?? [])
-      setFlowStep('verify')
+      setFlowStep('confirmed')
       setOtpResendSeconds(45)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The tender request could not be sent.')
@@ -461,29 +441,27 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             Your {pendingSubmission?.type === 'booking' ? 'meeting request' : 'enquiry'} is confirmed
           </h2>
           <p className='mt-2 text-sm leading-6 text-gray-600'>
-            We have sent a confirmation email. You can also receive alerts when similar tenders are published.
+            Care Atlas uses Orbit Mirai to manage tender enquiries, meetings, documents and follow-up. Continue there to
+            track this opportunity, or stay here for now.
           </p>
         </div>
-        <button
-          type='button'
-          onClick={() => setFlowStep('preferences')}
-          className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
-        >
-          Send me tender notifications
-        </button>
+        {handoffUrl && (
+          <a
+            href={handoffUrl}
+            className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
+          >
+            Continue to Orbit Mirai
+          </a>
+        )}
         <button
           type='button'
           onClick={() => {
-            if (!profileComplete) {
-              window.location.href = '/profile-complete'
-              return
-            }
             setForm(emptyTenderBoardForm)
             onClose()
           }}
           className='inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-gray-300 px-5 text-sm font-semibold text-gray-700 hover:bg-gray-50'
         >
-          Not now
+          Maybe later
         </button>
       </div>
     )
@@ -592,6 +570,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         bookingOptionsLoading={bookingOptionsLoading}
         notice={notice}
         error={error}
+        handoffUrl={handoffUrl}
         submitting={submitting}
         onSubmit={submitLead}
       />

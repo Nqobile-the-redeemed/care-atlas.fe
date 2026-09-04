@@ -78,7 +78,7 @@ export type TenderLeadPayload = {
     channels?: string[]
     notes?: string
   }
-  address: {
+  address?: {
     line1: string
     line2?: string
     city: string
@@ -93,8 +93,6 @@ export type TenderLeadPayload = {
   website?: string
   recaptchaToken?: string | null
   recaptchaAction?: string
-  password?: string
-  passwordConfirmation?: string
 }
 
 export type TenderLeadReceipt = {
@@ -105,6 +103,12 @@ export type TenderLeadReceipt = {
   verificationRequired?: boolean
   email?: string
   submissionType?: TenderLeadKind
+  handoff?: {
+    id: string
+    code: string
+    url: string | null
+    expiresAt: string | null
+  }
 }
 
 export type TenderFilters = {
@@ -175,7 +179,9 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   formData.set('preferred_contact_method', payload.preferredContactMethod ?? '')
   formData.set('preferred_slot_at', payload.preferredSlot ?? '')
   formData.set('tender_preferences', JSON.stringify(payload.tenderPreferences ?? {}))
-  formData.set('address', JSON.stringify(payload.address))
+  if (payload.address) {
+    formData.set('address', JSON.stringify(payload.address))
+  }
   formData.set('message', payload.message)
   formData.set('consent', payload.consent ? '1' : '0')
   formData.set('form_started_at', String(payload.formStartedAt))
@@ -183,13 +189,6 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
   formData.set('details', JSON.stringify({ page: 'public tender board', lead_kind: kind }))
-
-  if (payload.password) {
-    formData.set('password', payload.password)
-  }
-  if (payload.passwordConfirmation) {
-    formData.set('password_confirmation', payload.passwordConfirmation)
-  }
 
   if (payload.recaptchaToken) {
     formData.set('recaptcha_token', payload.recaptchaToken)
