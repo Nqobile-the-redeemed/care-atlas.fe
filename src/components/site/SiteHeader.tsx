@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { mainNav, serviceCategories, services, site } from '@/data/site'
 import { CareAtlasLogo } from './CareAtlasLogo'
-import { ButtonLink, Container } from './ui'
+import { Button, ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
 function isActive(pathname: string, href: string) {
@@ -177,15 +177,15 @@ export function SiteHeader() {
           </ButtonLink>
         </div>
 
-        <button
+        <Button
           type='button'
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(open => !open)}
-          className='focus:ring-brand-500/10 flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 text-gray-800 transition hover:bg-gray-50 focus:ring-4 focus:outline-hidden lg:hidden'
-        >
-          <SiteIcon name={mobileOpen ? 'close' : 'menu'} className='h-5 w-5' />
-        </button>
+          variant='secondary'
+          className='h-11 w-11 border-gray-200 p-0 text-gray-800 hover:border-gray-200 hover:bg-gray-50 lg:hidden'
+          leftIcon={<SiteIcon name={mobileOpen ? 'close' : 'menu'} className='h-5 w-5' />}
+        />
       </Container>
 
       <div

@@ -1,21 +1,24 @@
 'use client'
 
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import type { FormikProps } from 'formik'
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 import type { TenderLeadKind } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
+import { StandaloneTextInput, StandaloneEmailInput, StandaloneTextArea, StandaloneDropDown } from '../standalone-inputs'
 
-import { inputClass } from './constants'
+import { PREFERRED_CONTACT_OPTIONS } from './tenderLeadFormSchema'
 import { TenderBoardBookingFields } from './TenderBoardBookingFields'
+import { TenderBoardLeadKindSelector } from './TenderBoardLeadKindSelector'
+import { Button } from '../ui'
 import type { TenderBoardForm, TenderBoardSelectedTender } from './types'
 
 type TenderBoardLeadFormProps = {
   selectedTender: TenderBoardSelectedTender | null
   leadKind: TenderLeadKind
   setLeadKind: Dispatch<SetStateAction<TenderLeadKind>>
-  form: TenderBoardForm
-  setForm: Dispatch<SetStateAction<TenderBoardForm>>
+  formik: FormikProps<TenderBoardForm>
   selectedEventSlug: string
   setSelectedEventSlug: Dispatch<SetStateAction<string>>
   eventTypes: BookingEventType[]
@@ -29,15 +32,21 @@ type TenderBoardLeadFormProps = {
   error: string
   handoffUrl: string | null
   submitting: boolean
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onSubmit: (values: TenderBoardForm) => void
+}
+
+function fieldError<T extends keyof TenderBoardForm>(
+  formik: FormikProps<TenderBoardForm>,
+  field: T
+): string | undefined {
+  return formik.touched[field] ? (formik.errors[field] as string | undefined) : undefined
 }
 
 export function TenderBoardLeadForm({
   selectedTender,
   leadKind,
   setLeadKind,
-  form,
-  setForm,
+  formik,
   selectedEventSlug,
   setSelectedEventSlug,
   eventTypes,
@@ -53,75 +62,77 @@ export function TenderBoardLeadForm({
   submitting,
   onSubmit
 }: TenderBoardLeadFormProps) {
+  const handleSubmit = async (_event: FormEvent<HTMLFormElement>) => {
+    _event.preventDefault()
+    const touched: Partial<Record<keyof TenderBoardForm, boolean>> = {}
+    ;(Object.keys(formik.values) as Array<keyof TenderBoardForm>).forEach(key => {
+      touched[key] = true
+    })
+    formik.setTouched(touched)
+    await formik.validateForm()
+    await onSubmit(formik.values)
+  }
+
   return (
     <>
-      <div className='mt-5 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1'>
-        {(['enquiry', 'booking'] as TenderLeadKind[]).map(kind => (
-          <button
-            key={kind}
-            type='button'
-            onClick={() => setLeadKind(kind)}
-            className={`min-h-10 rounded-md text-sm font-semibold capitalize ${
-              leadKind === kind ? 'shadow-theme-xs bg-white text-gray-950' : 'text-gray-600 hover:text-gray-950'
-            }`}
-          >
-            {kind}
-          </button>
-        ))}
-      </div>
+      <TenderBoardLeadKindSelector value={leadKind} onChange={setLeadKind} />
 
-      <form className='mt-5 space-y-3' onSubmit={onSubmit}>
+      <form className='mt-5 space-y-5' onSubmit={handleSubmit}>
         <input
           className='hidden'
           tabIndex={-1}
           autoComplete='off'
-          value={form.website}
-          onChange={event => setForm(current => ({ ...current, website: event.target.value }))}
+          name='website'
+          value={formik.values.website}
+          onChange={event => formik.setFieldValue('website', event.target.value)}
         />
-        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-1'>
-          <input
+        <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-1'>
+          <StandaloneTextInput
+            name='name'
+            label='Full name'
             required
-            value={form.name}
-            onChange={event => setForm(current => ({ ...current, name: event.target.value }))}
             placeholder='Full name'
-            className={inputClass}
+            value={formik.values.name}
+            onChange={value => formik.setFieldValue('name', value)}
+            error={fieldError(formik, 'name')}
           />
-          <input
+          <StandaloneEmailInput
+            name='email'
+            label='Email'
             required
-            type='email'
-            value={form.email}
-            onChange={event => setForm(current => ({ ...current, email: event.target.value }))}
             placeholder='Email'
-            className={inputClass}
+            value={formik.values.email}
+            onChange={value => formik.setFieldValue('email', value)}
+            error={fieldError(formik, 'email')}
           />
-          <input
+          <StandaloneTextInput
+            name='phone'
+            label='Phone'
             required
-            value={form.phone}
-            onChange={event => setForm(current => ({ ...current, phone: event.target.value }))}
             placeholder='Phone'
-            className={inputClass}
+            value={formik.values.phone}
+            onChange={value => formik.setFieldValue('phone', value)}
+            error={fieldError(formik, 'phone')}
+            autoComplete='tel'
           />
-          <input
-            value={form.whatsapp}
-            onChange={event => setForm(current => ({ ...current, whatsapp: event.target.value }))}
+          <StandaloneTextInput
+            name='whatsapp'
+            label='WhatsApp'
             placeholder='WhatsApp number'
-            className={inputClass}
+            value={formik.values.whatsapp}
+            onChange={value => formik.setFieldValue('whatsapp', value)}
+            error={fieldError(formik, 'whatsapp')}
+            autoComplete='tel'
           />
-          <select
-            value={form.preferredContactMethod}
-            onChange={event =>
-              setForm(current => ({
-                ...current,
-                preferredContactMethod: event.target.value as TenderBoardForm['preferredContactMethod']
-              }))
-            }
-            aria-label='Preferred contact method'
-            className={inputClass}
-          >
-            <option value='email'>Prefer email</option>
-            <option value='phone'>Prefer phone</option>
-            <option value='whatsapp'>Prefer WhatsApp</option>
-          </select>
+          <StandaloneDropDown
+            name='preferredContactMethod'
+            label='Preferred contact method'
+            value={formik.values.preferredContactMethod}
+            onChange={value => formik.setFieldValue('preferredContactMethod', value)}
+            options={PREFERRED_CONTACT_OPTIONS}
+            placeholder='Choose contact method'
+            error={fieldError(formik, 'preferredContactMethod')}
+          />
           {leadKind === 'booking' && (
             <TenderBoardBookingFields
               bookingOptionsLoading={bookingOptionsLoading}
@@ -135,29 +146,36 @@ export function TenderBoardLeadForm({
               onSelectSlot={setSelectedSlot}
             />
           )}
-          <input
-            value={form.company}
-            onChange={event => setForm(current => ({ ...current, company: event.target.value }))}
+          <StandaloneTextInput
+            name='company'
+            label='Company'
             placeholder='Company or provider name'
-            className={inputClass}
+            value={formik.values.company}
+            onChange={value => formik.setFieldValue('company', value)}
+            error={fieldError(formik, 'company')}
+            autoComplete='organization'
           />
         </div>
-        <textarea
+        <StandaloneTextArea
+          name='message'
+          label='Your message'
           required
           minLength={10}
-          value={form.message}
-          onChange={event => setForm(current => ({ ...current, message: event.target.value }))}
           placeholder='Tell us what you need help with'
           rows={5}
-          className={`${inputClass} w-full py-3`}
+          value={formik.values.message}
+          onChange={value => formik.setFieldValue('message', value)}
+          error={fieldError(formik, 'message')}
         />
         <label className='flex gap-3 text-sm leading-6 text-gray-600'>
           <input
             required
             type='checkbox'
-            checked={form.consent}
-            onChange={event => setForm(current => ({ ...current, consent: event.target.checked }))}
-            className='mt-1 h-4 w-4 rounded border-gray-300'
+            checked={formik.values.consent}
+            onChange={event => {
+              void formik.setFieldValue('consent', event.target.checked)
+            }}
+            className='mt-1.5 h-5 w-5 rounded border-gray-300'
           />
           I agree for Care Atlas to contact me about this tender and related opportunities.
         </label>
@@ -177,14 +195,15 @@ export function TenderBoardLeadForm({
           </div>
         )}
         {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
-        <button
+        <Button
           type='submit'
           disabled={submitting || !selectedTender}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden disabled:opacity-50'
+          loading={submitting}
+          fullWidth
+          leftIcon={<SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />}
         >
-          <SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />
-          {submitting ? 'Sending...' : leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
-        </button>
+          {leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
+        </Button>
       </form>
     </>
   )

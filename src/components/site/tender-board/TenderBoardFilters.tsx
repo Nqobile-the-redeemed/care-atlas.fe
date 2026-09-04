@@ -1,6 +1,7 @@
 'use client'
 
 import { SiteIcon } from '../SiteIcon'
+import { Button } from '../ui'
 
 import { inputClass } from './constants'
 
@@ -68,13 +69,9 @@ export function TenderBoardFilters({
             <option key={item}>{item}</option>
           ))}
         </select>
-        <button
-          type='submit'
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
-        >
-          <SiteIcon name='search' className='h-4 w-4' />
+        <Button type='submit' leftIcon={<SiteIcon name='search' className='h-4 w-4' />}>
           Search
-        </button>
+        </Button>
       </div>
     </form>
   )

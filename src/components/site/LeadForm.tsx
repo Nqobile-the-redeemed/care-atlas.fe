@@ -6,6 +6,8 @@ import { services } from '@/data/site'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
+import { RegionCountiesFormSection } from './standalone-inputs'
+import { Button } from './ui'
 
 type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date' | 'password'
 
@@ -412,6 +414,8 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [securityError, setSecurityError] = useState('')
+  const [regions, setRegions] = useState<string[]>([])
+  const [counties, setCounties] = useState<string[]>([])
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const fields = useMemo(() => [...baseFields, ...variantFields[variant]], [variant])
 
@@ -460,12 +464,11 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length === 0) {
-      const details = Object.fromEntries(
-        fields
-          .filter(field => field.type !== 'file')
-          .map(field => [field.label, String(formData.get(field.id) ?? '').trim()])
-          .filter(([, value]) => value)
-      )
+      const baseEntries = fields
+        .filter(field => field.type !== 'file')
+        .map(field => [field.label, String(formData.get(field.id) ?? '').trim()])
+        .filter(([, value]) => value) as [string, unknown][]
+      const details = Object.fromEntries([...baseEntries, ['regions', regions], ['counties', counties]])
       const comment = Object.entries(details)
         .map(([label, value]) => `${label}: ${value}`)
         .join('\n')
@@ -504,6 +507,8 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
 
         setSubmitted(true)
         form.reset()
+        setRegions([])
+        setCounties([])
         formStartedAt.current = Math.floor(Date.now() / 1000)
       } catch (error) {
         if (error instanceof Error && error.message.includes('reCAPTCHA')) {
@@ -602,6 +607,14 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
           })}
         </div>
 
+        <RegionCountiesFormSection
+          id='lead'
+          selectedRegions={regions}
+          selectedCounties={counties}
+          onRegionsChange={setRegions}
+          onCountiesChange={setCounties}
+        />
+
         <div>
           <label className='flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-700'>
             <input
@@ -623,13 +636,14 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
           )}
         </div>
 
-        <button
+        <Button
           type='submit'
           disabled={submission?.status === 'submitting'}
-          className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
+          loading={submission?.status === 'submitting'}
+          fullWidth
         >
-          {submission?.status === 'submitting' ? 'Sending...' : 'Send enquiry'}
-        </button>
+          Send enquiry
+        </Button>
         {securityError && (
           <p className='text-error-600 text-sm font-medium' role='alert'>
             {securityError}

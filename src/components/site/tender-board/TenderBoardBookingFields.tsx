@@ -2,7 +2,7 @@
 
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 
-import { inputClass } from './constants'
+import { StandaloneDropDown } from '../standalone-inputs'
 import { formatSlotDate } from './utils'
 
 type TenderBoardBookingFieldsProps = {
@@ -28,25 +28,23 @@ export function TenderBoardBookingFields({
   onEventTypeChange,
   onSelectSlot
 }: TenderBoardBookingFieldsProps) {
+  const eventTypeOptions = eventTypes.map(eventType => ({
+    code: eventType.slug,
+    value: eventType.slug,
+    name: `${eventType.name} - ${eventType.durationMinutes} min`
+  }))
+
   return (
     <div className='space-y-3 sm:col-span-2 lg:col-span-1'>
-      <select
+      <StandaloneDropDown
+        name='bookingEventType'
+        label='Consultation type'
         value={selectedEventSlug}
-        onChange={event => onEventTypeChange(event.target.value)}
-        aria-label='Consultation type'
-        className={`${inputClass} w-full`}
+        onChange={onEventTypeChange}
+        options={eventTypeOptions}
+        placeholder={eventTypes.length === 0 ? 'Loading consultation types...' : 'Choose consultation type'}
         disabled={bookingOptionsLoading || eventTypes.length === 0}
-      >
-        {eventTypes.length === 0 ? (
-          <option value=''>Loading consultation types...</option>
-        ) : (
-          eventTypes.map(eventType => (
-            <option key={eventType.id} value={eventType.slug}>
-              {eventType.name} - {eventType.durationMinutes} min
-            </option>
-          ))
-        )}
-      </select>
+      />
       {selectedEventType?.description && (
         <p className='text-xs leading-5 text-gray-500'>{selectedEventType.description}</p>
       )}

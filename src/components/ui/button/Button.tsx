@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react'
+import { buttonStyles } from '@/components/site/ui'
 
 interface ButtonProps {
   children: ReactNode // Button text or content
@@ -7,6 +8,9 @@ interface ButtonProps {
   startIcon?: ReactNode // Icon before the text
   endIcon?: ReactNode // Icon after the text
   onClick?: () => void // Click handler
+  type?: 'button' | 'submit' | 'reset'
+  loading?: boolean
+  fullWidth?: boolean
   disabled?: boolean // Disabled state
   className?: string // Disabled state
 }
@@ -18,33 +22,41 @@ const Button: React.FC<ButtonProps> = ({
   startIcon,
   endIcon,
   onClick,
+  type = 'button',
+  loading = false,
+  fullWidth = false,
   className = '',
   disabled = false
 }) => {
-  // Size Classes
-  const sizeClasses = {
-    sm: 'px-4 py-3 text-sm',
-    md: 'px-5 py-3.5 text-sm'
-  }
-
-  // Variant Classes
-  const variantClasses = {
-    primary: 'bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300',
-    outline:
-      'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300'
-  }
+  const isDisabled = disabled || loading
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition ${className} ${
-        sizeClasses[size]
-      } ${variantClasses[variant]} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+      type={type}
+      className={buttonStyles({
+        variant: variant === 'outline' ? 'secondary' : 'primary',
+        size,
+        fullWidth,
+        className
+      })}
       onClick={onClick}
-      disabled={disabled}
+      disabled={isDisabled}
+      aria-busy={loading ? 'true' : undefined}
     >
-      {startIcon && <span className='flex items-center'>{startIcon}</span>}
-      {children}
-      {endIcon && <span className='flex items-center'>{endIcon}</span>}
+      {(loading || startIcon) && (
+        <span className='flex min-w-4 items-center justify-center'>
+          {loading ? (
+            <span
+              aria-hidden='true'
+              className='h-4 w-4 rounded-full border-2 border-current border-r-transparent opacity-80 motion-safe:animate-spin'
+            />
+          ) : (
+            startIcon
+          )}
+        </span>
+      )}
+      <span>{children}</span>
+      {endIcon && !loading && <span className='flex min-w-4 items-center justify-center'>{endIcon}</span>}
     </button>
   )
 }

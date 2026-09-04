@@ -3,6 +3,7 @@
 import type { TenderBoardSelectedTender } from './types'
 
 import { SiteIcon } from '../SiteIcon'
+import { Button, ButtonLink } from '../ui'
 
 import { dateLabel, hasTenderDetails, money, plainText, valueLabel, yesNo } from './utils'
 
@@ -47,22 +48,18 @@ export function TenderBoardSelectedTenderPanel({
       </div>
 
       <div className='mt-4 flex flex-col gap-2 sm:flex-row lg:flex-col'>
-        <button
-          type='button'
-          onClick={onBookMeeting}
-          className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
-        >
-          <SiteIcon name='calendar' className='h-4 w-4' />
+        <Button onClick={onBookMeeting} size='sm' fullWidth leftIcon={<SiteIcon name='calendar' className='h-4 w-4' />}>
           Book meeting
-        </button>
-        <button
-          type='button'
+        </Button>
+        <Button
+          variant='secondary'
           onClick={onSendEnquiry}
-          className='border-brand-200 text-brand-800 hover:bg-brand-50 focus:ring-brand-500/20 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border bg-white px-4 text-sm font-semibold focus:ring-4 focus:outline-hidden'
+          size='sm'
+          fullWidth
+          leftIcon={<SiteIcon name='mail' className='h-4 w-4' />}
         >
-          <SiteIcon name='mail' className='h-4 w-4' />
           Send enquiry
-        </button>
+        </Button>
       </div>
 
       <section className='mt-5 border-t border-gray-200 pt-5'>
@@ -136,26 +133,30 @@ export function TenderBoardSelectedTenderPanel({
           </dl>
           <div className='mt-4 flex flex-col gap-2'>
             {detailedTender.sourceNoticeUrl && (
-              <a
+              <ButtonLink
                 href={detailedTender.sourceNoticeUrl}
                 target='_blank'
                 rel='noreferrer'
-                className='text-brand-700 hover:bg-brand-50 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold'
+                variant='tertiary'
+                size='sm'
+                fullWidth
+                rightIcon={<SiteIcon name='arrow' className='h-4 w-4' />}
               >
                 Original notice
-                <SiteIcon name='arrow' className='h-4 w-4' />
-              </a>
+              </ButtonLink>
             )}
             {detailedTender.responsePortalUrl && (
-              <a
+              <ButtonLink
                 href={detailedTender.responsePortalUrl}
                 target='_blank'
                 rel='noreferrer'
-                className='text-brand-700 hover:bg-brand-50 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold'
+                variant='tertiary'
+                size='sm'
+                fullWidth
+                rightIcon={<SiteIcon name='arrow' className='h-4 w-4' />}
               >
                 Response portal
-                <SiteIcon name='arrow' className='h-4 w-4' />
-              </a>
+              </ButtonLink>
             )}
           </div>
         </section>

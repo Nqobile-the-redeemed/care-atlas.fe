@@ -16,12 +16,15 @@ export interface ModalTemplate<TData = unknown> {
   headerConfig?: ModalHeaderConfig
 }
 
+export type SheetSnap = 'expanded' | 'minimized' | 'closed' | null
+
 type HalfScreenModalState = {
   isOpen: boolean
   data: unknown | null
   template: ModalTemplate | null
   width: string
   headerConfig?: ModalHeaderConfig
+  sheetSnap: SheetSnap
 }
 
 type HalfScreenModalContextProps = HalfScreenModalState & {
@@ -34,6 +37,8 @@ type HalfScreenModalContextProps = HalfScreenModalState & {
     }
   ) => void
   closeModal: () => void
+  minimizeModal: () => void
+  maximizeModal: () => void
   updateModalData: <TData>(data: TData) => void
   setModalWidth: (width: string) => void
 }
@@ -49,7 +54,8 @@ export function HalfScreenModalProvider({ children }: { children: React.ReactNod
     data: null,
     template: null,
     width: DEFAULT_MODAL_WIDTH,
-    headerConfig: undefined
+    headerConfig: undefined,
+    sheetSnap: null
   })
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -80,7 +86,8 @@ export function HalfScreenModalProvider({ children }: { children: React.ReactNod
         data,
         template: template as ModalTemplate,
         width: options?.width ?? DEFAULT_MODAL_WIDTH,
-        headerConfig: options?.headerConfig ?? template.headerConfig
+        headerConfig: options?.headerConfig ?? template.headerConfig,
+        sheetSnap: 'expanded'
       })
     },
     []
@@ -89,7 +96,8 @@ export function HalfScreenModalProvider({ children }: { children: React.ReactNod
   const closeModal = useCallback(() => {
     setModalState(prevState => ({
       ...prevState,
-      isOpen: false
+      isOpen: false,
+      sheetSnap: 'closed'
     }))
 
     if (closeTimeoutRef.current) {
@@ -101,10 +109,25 @@ export function HalfScreenModalProvider({ children }: { children: React.ReactNod
         ...prevState,
         data: null,
         template: null,
-        headerConfig: undefined
+        headerConfig: undefined,
+        sheetSnap: null
       }))
       closeTimeoutRef.current = null
     }, CLOSE_ANIMATION_MS)
+  }, [])
+
+  const minimizeModal = useCallback(() => {
+    setModalState(prevState => {
+      if (!prevState.isOpen || prevState.sheetSnap === 'closed') return prevState
+      return { ...prevState, sheetSnap: 'minimized' }
+    })
+  }, [])
+
+  const maximizeModal = useCallback(() => {
+    setModalState(prevState => {
+      if (!prevState.isOpen || prevState.sheetSnap === 'closed') return prevState
+      return { ...prevState, sheetSnap: 'expanded' }
+    })
   }, [])
 
   const updateModalData = useCallback(<TData,>(data: TData) => {
@@ -126,10 +149,12 @@ export function HalfScreenModalProvider({ children }: { children: React.ReactNod
       ...modalState,
       openModal,
       closeModal,
+      minimizeModal,
+      maximizeModal,
       updateModalData,
       setModalWidth
     }),
-    [closeModal, modalState, openModal, setModalWidth, updateModalData]
+    [closeModal, maximizeModal, minimizeModal, modalState, openModal, setModalWidth, updateModalData]
   )
 
   return <HalfScreenModalContext.Provider value={value}>{children}</HalfScreenModalContext.Provider>

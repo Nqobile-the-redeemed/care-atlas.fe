@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { mainNav, services, site } from '@/data/site'
 import { CareAtlasLogo } from './CareAtlasLogo'
-import { ButtonLink, Container } from './ui'
+import { Button, ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
 const legalLinks = [
@@ -103,12 +103,9 @@ export function SiteFooter() {
                   placeholder='Email address'
                   className='min-w-0 flex-1 rounded-lg border border-white/20 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-4 focus:ring-white/20 focus:outline-hidden'
                 />
-                <button
-                  type='submit'
-                  className='bg-brand-600 hover:bg-brand-500 rounded-lg px-4 py-2 text-sm font-semibold text-white transition focus:ring-4 focus:ring-white/20 focus:outline-hidden'
-                >
+                <Button type='submit' size='sm' className='focus:ring-white/20'>
                   Join
-                </button>
+                </Button>
               </div>
               <p className='text-blue-light-200 mt-2 text-xs leading-5'>
                 Newsletter capture ready for CRM and consent workflow integration.

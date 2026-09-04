@@ -7,7 +7,7 @@ import type { Product } from '@/data/products'
 import type { Service } from '@/data/site'
 import { createCheckoutSession, getCheckoutUrls } from '@/lib/commerce'
 import { CheckoutSummary } from './CommerceBlocks'
-import { ButtonLink } from './ui'
+import { Button, ButtonLink } from './ui'
 
 type CheckoutClientProps = {
   product?: Product
@@ -210,13 +210,9 @@ export function CheckoutClient({ product, service, popularProducts }: CheckoutCl
                 </div>
               )}
 
-              <button
-                type='submit'
-                disabled={isSubmitting}
-                className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 disabled:bg-brand-300 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
-              >
-                {isSubmitting ? 'Preparing checkout...' : product.ctaLabel}
-              </button>
+              <Button type='submit' disabled={isSubmitting} loading={isSubmitting} fullWidth>
+                {product.ctaLabel}
+              </Button>
 
               <p className='text-xs leading-5 text-gray-500'>
                 Payment details are handled by Stripe. Care Atlas receives the selected product, contact details and

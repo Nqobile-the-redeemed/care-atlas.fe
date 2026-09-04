@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { RegionCountiesFormSection } from './standalone-inputs'
+import { Button } from './ui'
 
 const fieldClass =
   'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-brand-500/10 focus:ring-4 focus:outline-hidden'
@@ -63,6 +65,8 @@ export function CareAtlasContactForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues | 'consent', string>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [securityError, setSecurityError] = useState('')
+  const [regions, setRegions] = useState<string[]>([])
+  const [counties, setCounties] = useState<string[]>([])
 
   useEffect(() => {
     preloadRecaptcha()
@@ -105,7 +109,9 @@ export function CareAtlasContactForm() {
           comment: values.message,
           details: {
             Subject: values.subject,
-            Message: values.message
+            Message: values.message,
+            regions,
+            counties
           },
           consent: true,
           formStartedAt: formStartedAt.current,
@@ -121,6 +127,8 @@ export function CareAtlasContactForm() {
 
       setSubmitted(true)
       form.reset()
+      setRegions([])
+      setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
       setSubmitted(false)
@@ -213,6 +221,14 @@ export function CareAtlasContactForm() {
           {errors.message && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.message}</p>}
         </div>
 
+        <RegionCountiesFormSection
+          id='contact'
+          selectedRegions={regions}
+          selectedCounties={counties}
+          onRegionsChange={setRegions}
+          onCountiesChange={setCounties}
+        />
+
         <div className='grid gap-5 md:grid-cols-2'>
           <div>
             <label htmlFor='contact-password' className='mb-1.5 block text-sm font-semibold text-gray-800'>
@@ -267,13 +283,14 @@ export function CareAtlasContactForm() {
           Protected by Google reCAPTCHA. Backend verification is required before accepting submissions.
         </p>
 
-        <button
+        <Button
           type='submit'
           disabled={submission?.status === 'submitting'}
-          className='bg-brand-600 shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20 disabled:bg-brand-300 inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition focus:ring-4 focus:outline-hidden'
+          loading={submission?.status === 'submitting'}
+          fullWidth
         >
-          {submission?.status === 'submitting' ? 'Sending...' : 'Send message'}
-        </button>
+          Send message
+        </Button>
 
         {securityError && (
           <p className='text-error-600 text-sm font-medium' role='alert'>

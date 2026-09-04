@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import type { PropsWithChildren } from 'react'
+import { forwardRef } from 'react'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, PropsWithChildren, ReactNode } from 'react'
+import { twMerge } from 'tailwind-merge'
 import { BlogPost, Checklist, FaqItem, ProcessStep, Service } from '@/data/site'
 import { HeroGuide } from './HeroGuide'
 import { ServiceSupportMeta } from './PeopleUI'
@@ -13,30 +15,143 @@ export function Container({ children, className = '' }: PropsWithChildren<WithCl
   return <div className={`mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 }
 
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'dark' | 'ghost'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+type ButtonStyleProps = {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
+  loading?: boolean
+  className?: string
+}
+
+type ButtonIconProps = {
+  leftIcon?: ReactNode
+  rightIcon?: ReactNode
+}
+
+const buttonBase =
+  'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out focus:ring-4 focus:outline-hidden motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 disabled:pointer-events-none disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55'
+
+const buttonVariants: Record<ButtonVariant, string> = {
+  primary:
+    'bg-brand-600 text-white shadow-theme-xs hover:bg-brand-700 hover:shadow-theme-lg active:bg-brand-800 focus:ring-brand-500/20 disabled:bg-brand-300 disabled:shadow-none',
+  secondary:
+    'border border-brand-200 bg-white text-brand-800 shadow-theme-xs hover:border-brand-300 hover:bg-brand-50 hover:text-brand-900 active:bg-brand-100 focus:ring-brand-500/20 disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:shadow-none',
+  tertiary:
+    'bg-transparent text-brand-700 hover:bg-brand-50 hover:text-brand-900 active:bg-brand-100 focus:ring-brand-500/20 disabled:text-gray-400',
+  destructive:
+    'bg-error-600 text-white shadow-theme-xs hover:bg-error-700 hover:shadow-theme-lg active:bg-error-800 focus:ring-error-500/20 disabled:bg-error-300 disabled:shadow-none',
+  dark: 'bg-gray-950 text-white shadow-theme-xs hover:bg-brand-950 hover:shadow-theme-lg active:bg-gray-900 focus:ring-white/20 disabled:bg-gray-400 disabled:shadow-none',
+  ghost:
+    'bg-transparent text-brand-700 hover:bg-brand-50 hover:text-brand-900 active:bg-brand-100 focus:ring-brand-500/20 disabled:text-gray-400'
+}
+
+const buttonSizes: Record<ButtonSize, string> = {
+  sm: 'min-h-10 px-4 py-2 text-sm',
+  md: 'min-h-11 px-5 py-3 text-sm',
+  lg: 'min-h-12 px-6 py-3.5 text-base'
+}
+
+function LoadingSpinner() {
+  return (
+    <span
+      aria-hidden='true'
+      className='h-4 w-4 shrink-0 rounded-full border-2 border-current border-r-transparent opacity-80 motion-safe:animate-spin'
+    />
+  )
+}
+
+export function buttonStyles({
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  className = ''
+}: ButtonStyleProps = {}) {
+  return twMerge(buttonBase, buttonVariants[variant], buttonSizes[size], fullWidth ? 'w-full' : 'w-fit', className)
+}
+
+export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> &
+  ButtonStyleProps &
+  ButtonIconProps & {
+    disabled?: boolean
+  }
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    children,
+    variant = 'primary',
+    size = 'md',
+    fullWidth = false,
+    loading = false,
+    disabled = false,
+    leftIcon,
+    rightIcon,
+    className = '',
+    type = 'button',
+    ...props
+  },
+  ref
+) {
+  const isDisabled = disabled || loading
+
+  return (
+    <button
+      {...props}
+      ref={ref}
+      type={type}
+      disabled={isDisabled}
+      aria-busy={loading ? 'true' : undefined}
+      className={buttonStyles({ variant, size, fullWidth, className })}
+    >
+      {(loading || leftIcon) && (
+        <span className='inline-flex min-w-4 items-center justify-center'>
+          {loading ? <LoadingSpinner /> : leftIcon}
+        </span>
+      )}
+      {children && <span>{children}</span>}
+      {rightIcon && !loading && <span className='inline-flex min-w-4 items-center justify-center'>{rightIcon}</span>}
+    </button>
+  )
+})
+
 export function ButtonLink({
   href,
   children,
   variant = 'primary',
-  className = ''
+  size = 'md',
+  fullWidth = false,
+  loading = false,
+  leftIcon,
+  rightIcon,
+  className = '',
+  ...props
 }: PropsWithChildren<{
   href: string
-  variant?: 'primary' | 'secondary' | 'dark' | 'ghost'
+  variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
+  loading?: boolean
+  leftIcon?: ReactNode
+  rightIcon?: ReactNode
   className?: string
-}>) {
-  const variants = {
-    primary: 'bg-brand-600 text-white shadow-theme-xs hover:bg-brand-700 focus:ring-brand-500/20',
-    secondary:
-      'border border-brand-200 bg-white text-brand-800 shadow-theme-xs hover:border-brand-300 hover:bg-brand-50 focus:ring-brand-500/20',
-    dark: 'bg-gray-950 text-white shadow-theme-xs hover:bg-brand-950 focus:ring-white/20',
-    ghost: 'text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20'
-  }
-
+}> &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>) {
   return (
     <Link
+      {...props}
       href={href}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${variants[variant]} ${className}`}
+      aria-busy={loading ? 'true' : undefined}
+      className={buttonStyles({ variant, size, fullWidth, loading, className })}
     >
-      {children}
+      {(loading || leftIcon) && (
+        <span className='inline-flex min-w-4 items-center justify-center'>
+          {loading ? <LoadingSpinner /> : leftIcon}
+        </span>
+      )}
+      {children && <span>{children}</span>}
+      {rightIcon && !loading && <span className='inline-flex min-w-4 items-center justify-center'>{rightIcon}</span>}
     </Link>
   )
 }
