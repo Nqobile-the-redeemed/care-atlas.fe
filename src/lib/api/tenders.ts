@@ -1,4 +1,5 @@
 import { apiRequest } from './client'
+import { appendPublicAccountFields, appendPublicFormMeta } from './publicForm'
 
 export type PublicTender = {
   id: string
@@ -70,6 +71,8 @@ export type TenderLeadPayload = {
   phone: string
   whatsapp?: string
   company?: string
+  password?: string
+  passwordConfirmation?: string
   preferredContactMethod?: 'email' | 'phone' | 'whatsapp'
   preferredSlot?: string
   tenderPreferences?: {
@@ -139,8 +142,6 @@ export type TenderNotificationPreferencePayload = {
   tenderTypes: string[]
 }
 
-const WEB_SOURCE = process.env.NEXT_PUBLIC_CARE_ATLAS_WEB_SOURCE ?? 'careatlas.co.uk'
-
 export async function getPublicTenders(filters: { keyword?: string; category?: string; region?: string }) {
   const params = new URLSearchParams()
 
@@ -184,17 +185,12 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
     formData.set('address', JSON.stringify(payload.address))
   }
   formData.set('message', payload.message)
-  formData.set('consent', payload.consent ? '1' : '0')
-  formData.set('form_started_at', String(payload.formStartedAt))
-  formData.set('source_url', payload.sourceUrl)
-  formData.set('web_source', WEB_SOURCE)
-  formData.set('website', payload.website ?? '')
   formData.set('details', JSON.stringify({ page: 'public tender board', lead_kind: kind }))
-
-  if (payload.recaptchaToken) {
-    formData.set('recaptcha_token', payload.recaptchaToken)
-    formData.set('recaptcha_action', payload.recaptchaAction ?? `care_atlas_tender_${kind}`)
-  }
+  appendPublicFormMeta(formData, {
+    ...payload,
+    recaptchaAction: payload.recaptchaAction ?? `care_atlas_tender_${kind}`
+  })
+  appendPublicAccountFields(formData, payload)
 
   return apiRequest<TenderLeadReceipt>(endpoint, {
     method: 'POST',

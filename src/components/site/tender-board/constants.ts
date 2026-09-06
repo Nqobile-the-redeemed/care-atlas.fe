@@ -11,6 +11,8 @@ export const emptyTenderBoardForm: TenderBoardForm = {
   preferredContactMethod: 'email',
   preferredSlot: '',
   company: '',
+  password: '',
+  passwordConfirmation: '',
   message: '',
   consent: false,
   website: ''

@@ -1,4 +1,5 @@
 import { apiRequest } from './client'
+import { WEB_SOURCE } from './publicForm'
 
 export type BookingEventType = {
   id: string
@@ -73,6 +74,8 @@ export type BookingPayload = {
     email: string
     phone?: string
     companyName?: string
+    password?: string
+    passwordConfirmation?: string
   }
   intake: {
     serviceInterest?: string
@@ -85,9 +88,9 @@ export type BookingPayload = {
   formStartedAt: number
   sourceUrl: string
   website?: string
+  recaptchaToken?: string | null
+  recaptchaAction?: string
 }
-
-const WEB_SOURCE = process.env.NEXT_PUBLIC_CARE_ATLAS_WEB_SOURCE ?? 'careatlas.co.uk'
 
 export async function getBookingEventTypes() {
   return apiRequest<BookingEventType[]>('/v1/public/booking-event-types', {
@@ -102,7 +105,7 @@ export async function getBookingAvailability(filters: {
   timezone?: string
 }) {
   const params = new URLSearchParams()
-  params.set('eventTypeSlug', filters.eventTypeSlug)
+  params.set('event_type_slug', filters.eventTypeSlug)
   if (filters.from) params.set('from', filters.from)
   if (filters.to) params.set('to', filters.to)
   if (filters.timezone) params.set('timezone', filters.timezone)
@@ -119,18 +122,27 @@ export async function createPublicBooking(payload: BookingPayload) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      eventTypeSlug: payload.eventTypeSlug,
-      startAt: payload.startAt,
-      endAt: payload.endAt,
-      consultantUserId: payload.consultantUserId ?? null,
+      event_type_slug: payload.eventTypeSlug,
+      start_at: payload.startAt,
+      end_at: payload.endAt,
+      consultant_user_id: payload.consultantUserId ?? null,
       timezone: payload.timezone,
-      customer: payload.customer,
+      customer: {
+        name: payload.customer.name,
+        email: payload.customer.email,
+        phone: payload.customer.phone,
+        company_name: payload.customer.companyName,
+        password: payload.customer.password,
+        password_confirmation: payload.customer.passwordConfirmation
+      },
       intake: payload.intake,
       consent: payload.consent,
-      formStartedAt: payload.formStartedAt,
-      sourceUrl: payload.sourceUrl,
-      webSource: WEB_SOURCE,
-      website: payload.website ?? ''
+      form_started_at: payload.formStartedAt,
+      source_url: payload.sourceUrl,
+      web_source: WEB_SOURCE,
+      website: payload.website ?? '',
+      recaptcha_token: payload.recaptchaToken,
+      recaptcha_action: payload.recaptchaAction
     })
   })
 }

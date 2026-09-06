@@ -270,7 +270,9 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             name: values.name,
             email: values.email,
             phone: values.phone,
-            companyName: values.company
+            companyName: values.company,
+            password: values.password,
+            passwordConfirmation: values.passwordConfirmation
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -284,7 +286,9 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           consent: values.consent,
           formStartedAt,
           sourceUrl: window.location.href,
-          website: values.website
+          website: values.website,
+          recaptchaToken: await getRecaptchaToken('care_atlas_tender_booking'),
+          recaptchaAction: 'care_atlas_tender_booking'
         })
 
         setHandoffUrl(response.data.handoff?.url ?? null)
@@ -321,6 +325,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           notes: ''
         },
         company: values.company,
+        password: values.password,
+        passwordConfirmation: values.passwordConfirmation,
         message: values.message,
         consent: values.consent,
         formStartedAt,

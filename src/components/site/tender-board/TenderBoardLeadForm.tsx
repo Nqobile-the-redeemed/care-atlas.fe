@@ -155,6 +155,28 @@ export function TenderBoardLeadForm({
             error={fieldError(formik, 'company')}
             autoComplete='organization'
           />
+          <StandaloneTextInput
+            name='password'
+            label='Password'
+            required
+            type='password'
+            placeholder='At least 8 characters'
+            value={formik.values.password}
+            onChange={value => formik.setFieldValue('password', value)}
+            error={fieldError(formik, 'password')}
+            autoComplete='new-password'
+          />
+          <StandaloneTextInput
+            name='passwordConfirmation'
+            label='Confirm password'
+            required
+            type='password'
+            placeholder='Re-enter your password'
+            value={formik.values.passwordConfirmation}
+            onChange={value => formik.setFieldValue('passwordConfirmation', value)}
+            error={fieldError(formik, 'passwordConfirmation')}
+            autoComplete='new-password'
+          />
         </div>
         <StandaloneTextArea
           name='message'

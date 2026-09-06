@@ -33,6 +33,10 @@ function validate(values: ContactFormValues, consent: boolean) {
     errors.email = 'Enter a valid email address.'
   }
 
+  if (!values.phone.trim()) {
+    errors.phone = 'Enter a phone number.'
+  }
+
   if (values.subject.length < 3) {
     errors.subject = 'Enter a subject.'
   }
@@ -188,9 +192,16 @@ export function CareAtlasContactForm() {
 
         <div>
           <label htmlFor='contact-phone' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-            Phone number
+            Phone number <span className='text-error-500'>*</span>
           </label>
-          <input id='contact-phone' name='phone' type='tel' className={fieldClass} />
+          <input
+            id='contact-phone'
+            name='phone'
+            type='tel'
+            className={errors.phone ? errorFieldClass : fieldClass}
+            aria-invalid={Boolean(errors.phone)}
+          />
+          {errors.phone && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.phone}</p>}
         </div>
 
         <div>

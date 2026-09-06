@@ -13,6 +13,11 @@ export const TenderBoardFormYup: Yup.ObjectSchema<TenderBoardForm> = Yup.object(
     .default('email'),
   preferredSlot: Yup.string().ensure().default(''),
   company: Yup.string().ensure().default(''),
+  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required').default(''),
+  passwordConfirmation: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords do not match')
+    .required('Confirm your password')
+    .default(''),
   message: Yup.string().min(10, 'Message must be at least 10 characters').required('A message is required').default(''),
   consent: Yup.boolean()
     .oneOf([true], 'You must give your consent to proceed')

@@ -1,4 +1,5 @@
 import { apiRequest } from './client'
+import { appendPublicAccountFields, appendPublicFormMeta } from './publicForm'
 
 export type EnquirySubmission = {
   name: string
@@ -26,8 +27,6 @@ export type EnquiryReceipt = {
   receivedAt: string
 }
 
-const WEB_SOURCE = process.env.NEXT_PUBLIC_CARE_ATLAS_WEB_SOURCE ?? 'careatlas.co.uk'
-
 export async function sendEnquiry(payload: EnquirySubmission) {
   const formData = new FormData()
 
@@ -38,23 +37,8 @@ export async function sendEnquiry(payload: EnquirySubmission) {
   formData.set('enquiry_type', payload.enquiryType)
   formData.set('comment', payload.comment)
   formData.set('details', JSON.stringify(payload.details))
-  formData.set('consent', payload.consent ? '1' : '0')
-  formData.set('form_started_at', String(payload.formStartedAt))
-  formData.set('source_url', payload.sourceUrl)
-  formData.set('web_source', WEB_SOURCE)
-  formData.set('website', payload.website ?? '')
-
-  if (payload.password) {
-    formData.set('password', payload.password)
-  }
-  if (payload.passwordConfirmation) {
-    formData.set('password_confirmation', payload.passwordConfirmation)
-  }
-
-  if (payload.recaptchaToken) {
-    formData.set('recaptcha_token', payload.recaptchaToken)
-    formData.set('recaptcha_action', payload.recaptchaAction ?? 'care_atlas_enquiry')
-  }
+  appendPublicFormMeta(formData, payload)
+  appendPublicAccountFields(formData, payload)
 
   payload.attachments.forEach(file => formData.append('attachments[]', file))
 

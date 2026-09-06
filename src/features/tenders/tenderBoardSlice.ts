@@ -45,6 +45,8 @@ const emptyTenderBoardForm: TenderBoardForm = {
   preferredContactMethod: 'email',
   preferredSlot: '',
   company: '',
+  password: '',
+  passwordConfirmation: '',
   message: '',
   consent: false,
   website: ''
@@ -163,7 +165,9 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
             name: workspace.form.name,
             email: workspace.form.email,
             phone: workspace.form.phone,
-            companyName: workspace.form.company
+            companyName: workspace.form.company,
+            password: workspace.form.password,
+            passwordConfirmation: workspace.form.passwordConfirmation
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -175,7 +179,9 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
           consent: workspace.form.consent,
           formStartedAt: workspace.formStartedAt,
           sourceUrl: payload.sourceUrl,
-          website: workspace.form.website
+          website: workspace.form.website,
+          recaptchaToken: payload.recaptchaToken,
+          recaptchaAction: payload.recaptchaAction
         })
 
         const notice = response.data.handoff?.url
@@ -207,6 +213,8 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
           notes: ''
         },
         company: workspace.form.company,
+        password: workspace.form.password,
+        passwordConfirmation: workspace.form.passwordConfirmation,
         message: workspace.form.message,
         consent: workspace.form.consent,
         formStartedAt: workspace.formStartedAt,
