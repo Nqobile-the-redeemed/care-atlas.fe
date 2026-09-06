@@ -10,9 +10,8 @@ function buildValidForm(): TenderBoardForm {
     name: 'Jane Doe',
     email: 'jane@example.com',
     phone: '020 7946 0000',
-    line1: '10 Downing Street',
-    city: 'London',
-    postcode: 'SW1A 2AA',
+    password: 'validpassword',
+    passwordConfirmation: 'validpassword',
     message: 'I would like to discuss this tender opportunity in detail please.',
     consent: true
   }
@@ -39,9 +38,8 @@ describe('TenderBoardFormYup schema', () => {
     expect(errors.some(m => /full name is required/i.test(String(m)))).toBe(true)
     expect(errors.some(m => /email is required/i.test(String(m)))).toBe(true)
     expect(errors.some(m => /phone number is required/i.test(String(m)))).toBe(true)
-    expect(errors.some(m => /address line 1 is required/i.test(String(m)))).toBe(true)
-    expect(errors.some(m => /city is required/i.test(String(m)))).toBe(true)
-    expect(errors.some(m => /postcode is required/i.test(String(m)))).toBe(true)
+    expect(errors.some(m => /password is required/i.test(String(m)))).toBe(true)
+    expect(errors.some(m => /confirm your password/i.test(String(m)))).toBe(true)
     expect(errors.some(m => /message is required/i.test(String(m)))).toBe(true)
     expect(errors.some(m => /consent/i.test(String(m)))).toBe(true)
   })

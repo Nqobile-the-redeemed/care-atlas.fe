@@ -27,19 +27,12 @@ describe('AC-9: county select-all + form capture end-to-end workflow', () => {
       whatsapp: '',
       preferredContactMethod: 'email',
       preferredSlot: '',
-      tenderPreferenceNotes: '',
       company: 'AC9 Ltd',
-      line1: '1 Main Road',
-      line2: '',
-      city: 'Liverpool',
-      county: 'Merseyside',
-      postcode: 'L1 1AA',
-      country: 'United Kingdom',
       message: 'This test simulates the enquiry workflow for a valid submission with ten chars plus extra.',
       consent: true,
       website: '',
-      password: '',
-      passwordConfirmation: ''
+      password: 'validpassword',
+      passwordConfirmation: 'validpassword'
     }
 
     const onRegionsChange = (next: string[]) => {
