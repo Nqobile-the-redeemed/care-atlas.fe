@@ -270,9 +270,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             name: values.name,
             email: values.email,
             phone: values.phone,
-            companyName: values.company,
-            password: values.password,
-            passwordConfirmation: values.passwordConfirmation
+            companyName: values.company
           },
           intake: {
             serviceInterest: `Tender support: ${selectedTender.title}`,
@@ -325,8 +323,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           notes: ''
         },
         company: values.company,
-        password: values.password,
-        passwordConfirmation: values.passwordConfirmation,
         message: values.message,
         consent: values.consent,
         formStartedAt,

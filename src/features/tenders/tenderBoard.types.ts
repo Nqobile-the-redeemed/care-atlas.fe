@@ -24,8 +24,6 @@ export type TenderBoardForm = {
   preferredContactMethod: PreferredContactMethod
   preferredSlot: string
   company: string
-  password: string
-  passwordConfirmation: string
   message: string
   consent: boolean
   website: string

@@ -129,19 +129,6 @@ export function BookingPanel() {
       nextErrors.slot = 'Choose a consultation time.'
     }
 
-    const password = String(formData.get('password') ?? '')
-    const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
-
-    if (password.length < 8) {
-      nextErrors.password = 'Password must be at least 8 characters.'
-    }
-
-    if (!passwordConfirmation) {
-      nextErrors.passwordConfirmation = 'Confirm your password.'
-    } else if (password !== passwordConfirmation) {
-      nextErrors.passwordConfirmation = 'Passwords do not match.'
-    }
-
     if (!formData.get('consent')) {
       nextErrors.consent = 'Please confirm Care Atlas can contact you about this booking.'
     }
@@ -175,9 +162,7 @@ export function BookingPanel() {
           name: String(formData.get('name') ?? '').trim(),
           email: String(formData.get('email') ?? '').trim(),
           phone: String(formData.get('phone') ?? '').trim(),
-          companyName: String(formData.get('companyName') ?? '').trim(),
-          password: String(formData.get('password') ?? ''),
-          passwordConfirmation: String(formData.get('passwordConfirmation') ?? '')
+          companyName: String(formData.get('companyName') ?? '').trim()
         },
         intake: {
           serviceInterest: selectedEventType?.name,
@@ -382,38 +367,6 @@ export function BookingPanel() {
               <option>Ready to launch</option>
               <option>Need urgent support</option>
             </select>
-          </div>
-          <div>
-            <label htmlFor='booking-password' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Password *
-            </label>
-            <input
-              id='booking-password'
-              name='password'
-              type='password'
-              autoComplete='new-password'
-              className={fieldClass(Boolean(errors.password))}
-              placeholder='At least 8 characters'
-              aria-invalid={Boolean(errors.password)}
-            />
-            {errors.password && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.password}</p>}
-          </div>
-          <div>
-            <label htmlFor='booking-password-confirmation' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Confirm password *
-            </label>
-            <input
-              id='booking-password-confirmation'
-              name='passwordConfirmation'
-              type='password'
-              autoComplete='new-password'
-              className={fieldClass(Boolean(errors.passwordConfirmation))}
-              placeholder='Re-enter your password'
-              aria-invalid={Boolean(errors.passwordConfirmation)}
-            />
-            {errors.passwordConfirmation && (
-              <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.passwordConfirmation}</p>
-            )}
           </div>
         </div>
 

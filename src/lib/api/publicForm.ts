@@ -7,11 +7,6 @@ export type PublicFormSecurityPayload = {
   recaptchaAction?: string
 }
 
-export type PublicAccountPayload = {
-  password?: string
-  passwordConfirmation?: string
-}
-
 export const WEB_SOURCE = process.env.NEXT_PUBLIC_CARE_ATLAS_WEB_SOURCE ?? 'careatlas.co.uk'
 
 export function appendPublicFormMeta(formData: FormData, payload: PublicFormSecurityPayload) {
@@ -25,9 +20,4 @@ export function appendPublicFormMeta(formData: FormData, payload: PublicFormSecu
     formData.set('recaptcha_token', payload.recaptchaToken)
     formData.set('recaptcha_action', payload.recaptchaAction ?? 'care_atlas_form')
   }
-}
-
-export function appendPublicAccountFields(formData: FormData, payload: PublicAccountPayload) {
-  formData.set('password', payload.password ?? '')
-  formData.set('password_confirmation', payload.passwordConfirmation ?? '')
 }

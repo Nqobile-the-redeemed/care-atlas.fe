@@ -18,8 +18,6 @@ type ContactFormValues = {
   phone: string
   subject: string
   message: string
-  password: string
-  passwordConfirmation: string
 }
 
 function validate(values: ContactFormValues, consent: boolean) {
@@ -43,16 +41,6 @@ function validate(values: ContactFormValues, consent: boolean) {
 
   if (values.message.length < 10) {
     errors.message = 'Enter a message with at least 10 characters.'
-  }
-
-  if (values.password.length < 8) {
-    errors.password = 'Password must be at least 8 characters.'
-  }
-
-  if (!values.passwordConfirmation) {
-    errors.passwordConfirmation = 'Confirm your password.'
-  } else if (values.password !== values.passwordConfirmation) {
-    errors.passwordConfirmation = 'Passwords do not match.'
   }
 
   if (!consent) {
@@ -86,9 +74,7 @@ export function CareAtlasContactForm() {
       email: String(formData.get('email') ?? '').trim(),
       phone: String(formData.get('phone') ?? '').trim(),
       subject: String(formData.get('subject') ?? '').trim(),
-      message: String(formData.get('message') ?? '').trim(),
-      password: String(formData.get('password') ?? ''),
-      passwordConfirmation: String(formData.get('passwordConfirmation') ?? '')
+      message: String(formData.get('message') ?? '').trim()
     }
     const nextErrors = validate(values, formData.get('consent') === 'on')
 
@@ -123,9 +109,7 @@ export function CareAtlasContactForm() {
           website: String(formData.get('website') ?? ''),
           attachments: [],
           recaptchaToken,
-          recaptchaAction,
-          password: values.password,
-          passwordConfirmation: values.passwordConfirmation
+          recaptchaAction
         })
       ).unwrap()
 
@@ -239,40 +223,6 @@ export function CareAtlasContactForm() {
           onRegionsChange={setRegions}
           onCountiesChange={setCounties}
         />
-
-        <div className='grid gap-5 md:grid-cols-2'>
-          <div>
-            <label htmlFor='contact-password' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Password <span className='text-error-500'>*</span>
-            </label>
-            <input
-              id='contact-password'
-              name='password'
-              type='password'
-              autoComplete='new-password'
-              className={errors.password ? errorFieldClass : fieldClass}
-              aria-invalid={Boolean(errors.password)}
-            />
-            {errors.password && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.password}</p>}
-          </div>
-
-          <div>
-            <label htmlFor='contact-password-confirmation' className='mb-1.5 block text-sm font-semibold text-gray-800'>
-              Confirm password <span className='text-error-500'>*</span>
-            </label>
-            <input
-              id='contact-password-confirmation'
-              name='passwordConfirmation'
-              type='password'
-              autoComplete='new-password'
-              className={errors.passwordConfirmation ? errorFieldClass : fieldClass}
-              aria-invalid={Boolean(errors.passwordConfirmation)}
-            />
-            {errors.passwordConfirmation && (
-              <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.passwordConfirmation}</p>
-            )}
-          </div>
-        </div>
 
         <div>
           <label className='flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-700'>

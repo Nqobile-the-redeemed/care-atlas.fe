@@ -74,8 +74,6 @@ export type BookingPayload = {
     email: string
     phone?: string
     companyName?: string
-    password?: string
-    passwordConfirmation?: string
   }
   intake: {
     serviceInterest?: string
@@ -131,9 +129,7 @@ export async function createPublicBooking(payload: BookingPayload) {
         name: payload.customer.name,
         email: payload.customer.email,
         phone: payload.customer.phone,
-        company_name: payload.customer.companyName,
-        password: payload.customer.password,
-        password_confirmation: payload.customer.passwordConfirmation
+        company_name: payload.customer.companyName
       },
       intake: payload.intake,
       consent: payload.consent,

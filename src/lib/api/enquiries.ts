@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import { appendPublicAccountFields, appendPublicFormMeta } from './publicForm'
+import { appendPublicFormMeta } from './publicForm'
 
 export type EnquirySubmission = {
   name: string
@@ -16,8 +16,6 @@ export type EnquirySubmission = {
   attachments: File[]
   recaptchaToken?: string | null
   recaptchaAction?: string
-  password?: string
-  passwordConfirmation?: string
 }
 
 export type EnquiryReceipt = {
@@ -38,7 +36,6 @@ export async function sendEnquiry(payload: EnquirySubmission) {
   formData.set('comment', payload.comment)
   formData.set('details', JSON.stringify(payload.details))
   appendPublicFormMeta(formData, payload)
-  appendPublicAccountFields(formData, payload)
 
   payload.attachments.forEach(file => formData.append('attachments[]', file))
 

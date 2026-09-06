@@ -9,7 +9,7 @@ import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { RegionCountiesFormSection } from './standalone-inputs'
 import { Button } from './ui'
 
-type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date' | 'password'
+type FieldType = 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'file' | 'date'
 
 type Field = {
   id: string
@@ -49,20 +49,6 @@ const baseFields: Field[] = [
       'Care professional',
       'Other organisation'
     ]
-  },
-  {
-    id: 'password',
-    label: 'Password',
-    type: 'password',
-    required: true,
-    placeholder: 'At least 8 characters'
-  },
-  {
-    id: 'passwordConfirmation',
-    label: 'Confirm password',
-    type: 'password',
-    required: true,
-    placeholder: 'Re-enter your password'
   }
 ]
 
@@ -436,17 +422,7 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
       if (field.type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         nextErrors[field.id] = 'Enter a valid email address.'
       }
-
-      if (field.id === 'password' && value && value.length < 8) {
-        nextErrors.password = 'Password must be at least 8 characters.'
-      }
     })
-
-    const password = String(formData.get('password') ?? '')
-    const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
-    if (password && passwordConfirmation && password !== passwordConfirmation) {
-      nextErrors.passwordConfirmation = 'Passwords do not match.'
-    }
 
     if (!formData.get('consent')) {
       nextErrors.consent = 'Please confirm you are happy for Care Atlas to contact you about this enquiry.'
@@ -499,9 +475,7 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
             website: String(formData.get('website') ?? ''),
             attachments,
             recaptchaToken,
-            recaptchaAction,
-            password: String(formData.get('password') ?? ''),
-            passwordConfirmation: String(formData.get('passwordConfirmation') ?? '')
+            recaptchaAction
           })
         ).unwrap()
 
@@ -591,7 +565,6 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
                     name={field.id}
                     type={field.type}
                     placeholder={field.placeholder}
-                    autoComplete={field.type === 'password' ? 'new-password' : undefined}
                     aria-invalid={hasError}
                     aria-describedby={hasError ? errorId : undefined}
                     className={getFieldClass(hasError)}

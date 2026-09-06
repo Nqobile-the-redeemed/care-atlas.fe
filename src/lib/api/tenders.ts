@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import { appendPublicAccountFields, appendPublicFormMeta } from './publicForm'
+import { appendPublicFormMeta } from './publicForm'
 
 export type PublicTender = {
   id: string
@@ -71,8 +71,6 @@ export type TenderLeadPayload = {
   phone: string
   whatsapp?: string
   company?: string
-  password?: string
-  passwordConfirmation?: string
   preferredContactMethod?: 'email' | 'phone' | 'whatsapp'
   preferredSlot?: string
   tenderPreferences?: {
@@ -190,7 +188,6 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
     ...payload,
     recaptchaAction: payload.recaptchaAction ?? `care_atlas_tender_${kind}`
   })
-  appendPublicAccountFields(formData, payload)
 
   return apiRequest<TenderLeadReceipt>(endpoint, {
     method: 'POST',

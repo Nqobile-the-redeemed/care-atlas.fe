@@ -30,9 +30,7 @@ describe('AC-9: county select-all + form capture end-to-end workflow', () => {
       company: 'AC9 Ltd',
       message: 'This test simulates the enquiry workflow for a valid submission with ten chars plus extra.',
       consent: true,
-      website: '',
-      password: 'validpassword',
-      passwordConfirmation: 'validpassword'
+      website: ''
     }
 
     const onRegionsChange = (next: string[]) => {
