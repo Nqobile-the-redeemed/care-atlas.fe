@@ -8,6 +8,8 @@ import { CareAtlasLogo } from './CareAtlasLogo'
 import { Button, ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
+const phoneHref = `tel:${site.phone.replace(/[^\d+]/g, '')}`
+
 function isActive(pathname: string, href: string) {
   if (href === '/') {
     return pathname === '/'
@@ -68,10 +70,10 @@ export function SiteHeader() {
       <div className='border-brand-50 bg-brand-950 hidden border-b text-white lg:block'>
         <Container className='flex h-9 items-center justify-between text-xs'>
           <div className='flex items-center gap-5'>
-            <span className='inline-flex items-center gap-2'>
+            <a href={phoneHref} className='inline-flex items-center gap-2 transition hover:text-white'>
               <SiteIcon name='phone' className='text-blue-light-200 h-3.5 w-3.5' />
               {site.phone}
-            </span>
+            </a>
             <span className='inline-flex items-center gap-2'>
               <SiteIcon name='mail' className='text-blue-light-200 h-3.5 w-3.5' />
               {site.email}

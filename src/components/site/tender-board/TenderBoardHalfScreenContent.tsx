@@ -11,19 +11,9 @@ import {
   type BookingSlot
 } from '@/lib/api/bookings'
 import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
-import {
-  getPublicTender,
-  getPublicTenderFilters,
-  resendTenderOnboardingOtp,
-  saveTenderNotificationPreferences,
-  sendTenderLead,
-  verifyTenderOnboardingOtp,
-  type TenderFilters,
-  type TenderLeadKind
-} from '@/lib/api/tenders'
+import { getPublicTender, sendTenderLead, type TenderLeadKind } from '@/lib/api/tenders'
 
 import { TenderBoardFormYup, emptyTenderBoardFormValues } from './tenderLeadFormSchema'
-import { RegionCountiesFormSection } from '../standalone-inputs'
 import { Button } from '../ui'
 import { TenderBoardLeadForm } from './TenderBoardLeadForm'
 import { TenderBoardSelectedTenderPanel } from './TenderBoardSelectedTenderPanel'
@@ -35,7 +25,7 @@ type TenderBoardHalfScreenContentProps = {
   onClose: () => void
 }
 
-type FlowStep = 'form' | 'verify' | 'confirmed' | 'preferences'
+type FlowStep = 'form' | 'confirmed'
 
 type PendingSubmission = {
   id: string
@@ -60,17 +50,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [bookingOptionsLoading, setBookingOptionsLoading] = useState(false)
   const [flowStep, setFlowStep] = useState<FlowStep>('form')
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null)
-  const [otpCode, setOtpCode] = useState('')
-  const [otpMessage, setOtpMessage] = useState('Enter the six-digit code sent to your email address.')
-  const [otpResendSeconds, setOtpResendSeconds] = useState(45)
-  const [authToken, setAuthToken] = useState('')
-  const [profileComplete, setProfileComplete] = useState(false)
-  const [availableFilters, setAvailableFilters] = useState<TenderFilters>({ categories: [], regions: [] })
   const [selectedRegions, setSelectedRegions] = useState<string[]>([])
   const [selectedCounties, setSelectedCounties] = useState<string[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedTenderTypes, setSelectedTenderTypes] = useState<string[]>([])
-  const [preferenceConsent, setPreferenceConsent] = useState(false)
 
   const formik: FormikProps<TenderBoardForm> = useFormik<TenderBoardForm>({
     initialValues: {
@@ -97,15 +78,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     setFormStartedAt(Math.floor(Date.now() / 1000))
     setFlowStep('form')
     setPendingSubmission(null)
-    setOtpCode('')
-    setOtpMessage('Enter the six-digit code sent to your email address.')
-    setAuthToken('')
-    setProfileComplete(false)
-    setPreferenceConsent(false)
     setSelectedRegions([])
     setSelectedCounties([])
-    setSelectedCategories([])
-    setSelectedTenderTypes([])
     formik.resetForm({
       values: {
         ...structuredClone(emptyTenderBoardFormValues),
@@ -118,13 +92,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   useEffect(() => {
     preloadRecaptcha()
   }, [])
-
-  useEffect(() => {
-    if (flowStep !== 'verify' || otpResendSeconds <= 0) return
-
-    const timer = window.setTimeout(() => setOtpResendSeconds(seconds => Math.max(0, seconds - 1)), 1000)
-    return () => window.clearTimeout(timer)
-  }, [flowStep, otpResendSeconds])
 
   useEffect(() => {
     if (hasTenderDetails(selectedTender)) return
@@ -151,29 +118,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
       alive = false
     }
   }, [selectedTender])
-
-  useEffect(() => {
-    if (flowStep !== 'preferences') return
-
-    let alive = true
-
-    getPublicTenderFilters()
-      .then(response => {
-        if (!alive) return
-        setAvailableFilters(response.data)
-      })
-      .catch(() => {
-        if (!alive) return
-        setAvailableFilters({
-          categories: selectedTender?.categories ?? [],
-          regions: selectedTender?.regions ?? []
-        })
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [flowStep, selectedTender])
 
   useEffect(() => {
     if (leadKind !== 'booking' || eventTypes.length > 0) return
@@ -298,9 +242,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           reference: response.data.bookingReference
         })
         setSelectedRegions(selectedTender.regions ?? [])
-        setSelectedCategories(selectedTender.categories ?? [])
         setFlowStep('confirmed')
-        setOtpResendSeconds(45)
         setSelectedSlot(null)
         return
       }
@@ -340,118 +282,12 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         email: values.email
       })
       setSelectedRegions(selectedTender.regions ?? [])
-      setSelectedCategories(selectedTender.categories ?? [])
       setFlowStep('confirmed')
-      setOtpResendSeconds(45)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The tender request could not be sent.')
     } finally {
       setSubmitting(false)
     }
-  }
-
-  async function verifyOtp() {
-    if (!pendingSubmission) return
-
-    setSubmitting(true)
-    setError('')
-    try {
-      const response = await verifyTenderOnboardingOtp({
-        email: pendingSubmission.email,
-        otpCode,
-        submissionId: pendingSubmission.id,
-        submissionType: pendingSubmission.type
-      })
-
-      setAuthToken(response.data.auth.token)
-      setProfileComplete(response.data.profileComplete)
-      setNotice('Verified. We have sent your confirmation email.')
-      setFlowStep('confirmed')
-    } catch (err) {
-      setOtpMessage(err instanceof Error ? err.message : 'The code could not be verified.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  async function resendOtp() {
-    if (!pendingSubmission || otpResendSeconds > 0) return
-
-    setSubmitting(true)
-    try {
-      const response = await resendTenderOnboardingOtp(pendingSubmission.email)
-      setOtpMessage(response.message)
-      setOtpResendSeconds(45)
-    } catch (err) {
-      setOtpMessage(err instanceof Error ? err.message : 'A new code could not be sent yet.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  async function savePreferences() {
-    if (!authToken) return
-
-    if (!preferenceConsent) {
-      setError('Confirm that you want to receive tender notifications.')
-      return
-    }
-
-    setSubmitting(true)
-    setError('')
-    try {
-      await saveTenderNotificationPreferences(authToken, {
-        optedIn: true,
-        isActive: true,
-        consentSource: 'care_atlas_tender_onboarding',
-        regions: selectedRegions,
-        categories: selectedCategories,
-        tenderTypes: selectedTenderTypes
-      })
-      setNotice('Tender notifications saved.')
-      if (!profileComplete) {
-        window.location.href = '/profile-complete'
-        return
-      }
-      formik.resetForm({ values: structuredClone(emptyTenderBoardFormValues) })
-      setFormStartedAt(Math.floor(Date.now() / 1000))
-      onClose()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Preferences could not be saved.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  function toggleValue(values: string[], value: string) {
-    return values.includes(value) ? values.filter(item => item !== value) : [...values, value]
-  }
-
-  if (flowStep === 'verify' && pendingSubmission) {
-    return (
-      <div className='space-y-5 p-4 md:p-6'>
-        <div>
-          <p className='text-brand-700 text-xs font-semibold uppercase'>Email verification</p>
-          <h2 className='mt-2 text-xl font-semibold text-gray-950'>Check your inbox</h2>
-          <p className='mt-2 text-sm leading-6 text-gray-600'>{otpMessage}</p>
-        </div>
-        <input
-          inputMode='numeric'
-          autoComplete='one-time-code'
-          maxLength={6}
-          value={otpCode}
-          onChange={event => setOtpCode(event.target.value.replace(/\D/g, ''))}
-          aria-label='Verification code'
-          className='focus:border-brand-500 focus:ring-brand-500/10 h-14 w-full rounded-lg border border-gray-300 bg-white px-4 text-center text-xl tracking-[0.35em] text-gray-950 outline-hidden transition focus:ring-4'
-        />
-        <Button disabled={submitting || otpCode.length !== 6} onClick={verifyOtp} loading={submitting} fullWidth>
-          Verify email
-        </Button>
-        <Button variant='tertiary' disabled={submitting || otpResendSeconds > 0} onClick={resendOtp} fullWidth>
-          {otpResendSeconds > 0 ? `Send a new code in ${otpResendSeconds}s` : 'Send a new code'}
-        </Button>
-      </div>
-    )
   }
 
   if (flowStep === 'confirmed') {
@@ -485,70 +321,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           className='border-gray-300 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
         >
           Maybe later
-        </Button>
-      </div>
-    )
-  }
-
-  if (flowStep === 'preferences') {
-    const tenderTypeOptions = ['services', 'framework', 'dynamic_market', 'open', 'selective']
-
-    return (
-      <div className='space-y-5 p-4 md:p-6'>
-        <div>
-          <p className='text-brand-700 text-xs font-semibold uppercase'>Tender notifications</p>
-          <h2 className='mt-2 text-xl font-semibold text-gray-950'>Choose matching preferences</h2>
-        </div>
-        <RegionCountiesFormSection
-          id='tender-preferences'
-          selectedRegions={selectedRegions}
-          selectedCounties={selectedCounties}
-          onRegionsChange={setSelectedRegions}
-          onCountiesChange={setSelectedCounties}
-        />
-        <fieldset className='space-y-2'>
-          <legend className='text-sm font-semibold text-gray-900'>Categories</legend>
-          <div className='grid gap-2'>
-            {availableFilters.categories.map(category => (
-              <label key={category} className='flex items-center gap-2 text-sm text-gray-700'>
-                <input
-                  type='checkbox'
-                  checked={selectedCategories.includes(category)}
-                  onChange={() => setSelectedCategories(current => toggleValue(current, category))}
-                />
-                {category}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className='space-y-2'>
-          <legend className='text-sm font-semibold text-gray-900'>Tender types</legend>
-          <div className='grid gap-2'>
-            {tenderTypeOptions.map(type => (
-              <label key={type} className='flex items-center gap-2 text-sm text-gray-700 capitalize'>
-                <input
-                  type='checkbox'
-                  checked={selectedTenderTypes.includes(type)}
-                  onChange={() => setSelectedTenderTypes(current => toggleValue(current, type))}
-                />
-                {type.replace(/_/g, ' ')}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <label className='flex gap-3 text-sm leading-6 text-gray-600'>
-          <input
-            required
-            type='checkbox'
-            checked={preferenceConsent}
-            onChange={event => setPreferenceConsent(event.target.checked)}
-            className='mt-1 h-4 w-4 rounded border-gray-300'
-          />
-          I agree to receive tender notification emails and understand I can unsubscribe later.
-        </label>
-        {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
-        <Button disabled={submitting} onClick={savePreferences} loading={submitting} fullWidth>
-          Save preferences
         </Button>
       </div>
     )

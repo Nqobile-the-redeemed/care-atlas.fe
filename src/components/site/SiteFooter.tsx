@@ -10,6 +10,8 @@ const legalLinks = [
   { label: 'Cookies', href: '/cookies' }
 ]
 
+const phoneHref = `tel:${site.phone.replace(/[^\d+]/g, '')}`
+
 export function SiteFooter() {
   return (
     <footer className='bg-brand-950 text-white'>
@@ -78,10 +80,10 @@ export function SiteFooter() {
           <div>
             <h2 className='text-blue-light-200 text-sm font-semibold tracking-[0.12em] uppercase'>Contact</h2>
             <div className='text-blue-light-100 mt-5 space-y-3 text-sm'>
-              <p className='flex gap-3'>
+              <a href={phoneHref} className='flex gap-3 transition hover:text-white'>
                 <SiteIcon name='phone' className='text-blue-light-200 mt-0.5 h-4 w-4 shrink-0' />
                 {site.phone}
-              </p>
+              </a>
               <p className='flex gap-3'>
                 <SiteIcon name='mail' className='text-blue-light-200 mt-0.5 h-4 w-4 shrink-0' />
                 {site.email}

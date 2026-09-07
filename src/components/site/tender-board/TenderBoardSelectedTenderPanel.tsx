@@ -3,7 +3,7 @@
 import type { TenderBoardSelectedTender } from './types'
 
 import { SiteIcon } from '../SiteIcon'
-import { Button, ButtonLink } from '../ui'
+import { Button } from '../ui'
 
 import { dateLabel, hasTenderDetails, money, plainText, valueLabel, yesNo } from './utils'
 
@@ -131,34 +131,6 @@ export function TenderBoardSelectedTenderPanel({
               </dd>
             </div>
           </dl>
-          <div className='mt-4 flex flex-col gap-2'>
-            {detailedTender.sourceNoticeUrl && (
-              <ButtonLink
-                href={detailedTender.sourceNoticeUrl}
-                target='_blank'
-                rel='noreferrer'
-                variant='tertiary'
-                size='sm'
-                fullWidth
-                rightIcon={<SiteIcon name='arrow' className='h-4 w-4' />}
-              >
-                Original notice
-              </ButtonLink>
-            )}
-            {detailedTender.responsePortalUrl && (
-              <ButtonLink
-                href={detailedTender.responsePortalUrl}
-                target='_blank'
-                rel='noreferrer'
-                variant='tertiary'
-                size='sm'
-                fullWidth
-                rightIcon={<SiteIcon name='arrow' className='h-4 w-4' />}
-              >
-                Response portal
-              </ButtonLink>
-            )}
-          </div>
         </section>
       )}
     </>

@@ -99,7 +99,7 @@ export const site = {
   name: 'Care Atlas',
   legalName: 'CARE ATLAS',
   email: 'admin@careatlas.co.uk',
-  phone: '020 0000 0000',
+  phone: process.env.NEXT_PUBLIC_CARE_ATLAS_PHONE || '+44 7400 492608',
   address: 'UK-wide remote and on-site consultancy support',
   summary:
     'Care Atlas helps UK care providers, supported living operators, founders, and care professionals launch, stabilise, improve, and grow stronger care services.',

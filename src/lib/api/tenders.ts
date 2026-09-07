@@ -118,28 +118,6 @@ export type TenderFilters = {
   regions: string[]
 }
 
-export type TenderOnboardingVerification = {
-  submission: {
-    id: string
-    type: TenderLeadKind
-    verifiedAt: string
-  }
-  auth: {
-    token: string
-    tokenExpiresAt: number
-  }
-  profileComplete: boolean
-}
-
-export type TenderNotificationPreferencePayload = {
-  optedIn: boolean
-  isActive?: boolean
-  consentSource?: string
-  regions: string[]
-  categories: string[]
-  tenderTypes: string[]
-}
-
 export async function getPublicTenders(filters: { keyword?: string; category?: string; region?: string }) {
   const params = new URLSearchParams()
 
@@ -192,37 +170,5 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   return apiRequest<TenderLeadReceipt>(endpoint, {
     method: 'POST',
     body: formData
-  })
-}
-
-export async function verifyTenderOnboardingOtp(payload: {
-  email: string
-  otpCode: string
-  submissionType: TenderLeadKind
-  submissionId: string
-}) {
-  return apiRequest<TenderOnboardingVerification>('/v1/public/tender-onboarding/otp/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-}
-
-export async function resendTenderOnboardingOtp(email: string) {
-  return apiRequest<null>('/v1/public/tender-onboarding/otp/resend', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  })
-}
-
-export async function saveTenderNotificationPreferences(token: string, payload: TenderNotificationPreferencePayload) {
-  return apiRequest('/v1/user/tender-notifications', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
   })
 }

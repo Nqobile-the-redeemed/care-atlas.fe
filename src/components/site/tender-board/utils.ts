@@ -61,16 +61,13 @@ export function hasTenderDetails(tender: TenderBoardSelectedTender): tender is P
 }
 
 export function tenderBookingMessage(tender: TenderBoardSelectedTender, message: string) {
-  const sourceNoticeUrl = hasTenderDetails(tender) ? tender.sourceNoticeUrl : null
-
   return [
     message.trim(),
     '',
     `Tender: ${tender.title}`,
     tender.buyer ? `Buyer: ${tender.buyer}` : '',
     tender.sourceReference ? `Reference: ${tender.sourceReference}` : '',
-    tender.submissionDeadline ? `Deadline: ${dateLabel(tender.submissionDeadline)}` : '',
-    sourceNoticeUrl ? `Notice: ${sourceNoticeUrl}` : ''
+    tender.submissionDeadline ? `Deadline: ${dateLabel(tender.submissionDeadline)}` : ''
   ]
     .filter(Boolean)
     .join('\n')

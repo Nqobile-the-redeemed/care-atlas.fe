@@ -184,6 +184,8 @@ describe('TenderBoardClient', () => {
     expect(await screen.findByRole('dialog', { name: 'Supported Living Tender' })).toBeInTheDocument()
     expect(await screen.findByText('Tender details')).toBeInTheDocument()
     expect(await screen.findByText('Full detailed description')).toBeInTheDocument()
+    expect(screen.queryByText('Original notice')).not.toBeInTheDocument()
+    expect(screen.queryByText('Response portal')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /booking/i }))
 
