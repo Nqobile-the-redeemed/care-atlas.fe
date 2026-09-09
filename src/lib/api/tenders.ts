@@ -135,6 +135,9 @@ export type PublicTenderQuery = {
   keyword?: string
   category?: string
   region?: string
+  industry?: string
+  subcategory?: string
+  source?: string
   page?: number
   perPage?: number
   sort?: 'deadline' | 'newest'
@@ -146,6 +149,8 @@ export async function getPublicTenders(filters: PublicTenderQuery) {
   if (filters.keyword) params.set('keyword', filters.keyword)
   if (filters.category) params.set('category', filters.category)
   if (filters.region) params.set('region', filters.region)
+  if (filters.industry) params.set('industry', filters.industry)
+  if (filters.subcategory) params.set('subcategory', filters.subcategory)
   if (filters.page && filters.page > 1) params.set('page', String(filters.page))
   if (filters.perPage) params.set('per_page', String(filters.perPage))
   if (filters.sort) params.set('sort', filters.sort)
@@ -163,8 +168,18 @@ export async function getPublicTender(tenderId: string) {
   })
 }
 
-export async function getPublicTenderFilters() {
-  return apiRequest<TenderFilters>('/v1/public/tender-filters', {
+export async function getPublicTenderFilters(
+  filters: Partial<Pick<PublicTenderQuery, 'industry' | 'subcategory' | 'source'>> = {}
+) {
+  const params = new URLSearchParams()
+
+  if (filters.industry) params.set('industry', filters.industry)
+  if (filters.subcategory) params.set('subcategory', filters.subcategory)
+  if (filters.source) params.set('source', filters.source)
+
+  const suffix = params.toString()
+
+  return apiRequest<TenderFilters>(`/v1/public/tender-filters${suffix ? `?${suffix}` : ''}`, {
     cache: 'no-store'
   })
 }

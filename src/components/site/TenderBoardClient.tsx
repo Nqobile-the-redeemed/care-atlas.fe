@@ -22,6 +22,9 @@ import {
   type TenderBoardPanelData
 } from './tender-board'
 
+const CARE_ATLAS_INDUSTRY = 'Health and Social Care'
+const TENDERS_PER_PAGE = 15
+
 export function TenderBoardClient() {
   const { openModal } = useHalfScreenModal()
   const [keyword, setKeyword] = useState('')
@@ -51,7 +54,12 @@ export function TenderBoardClient() {
     setError('')
 
     try {
-      const response = await getPublicTenders({ ...filters, page, perPage: 15 })
+      const response = await getPublicTenders({
+        ...filters,
+        industry: CARE_ATLAS_INDUSTRY,
+        page,
+        perPage: TENDERS_PER_PAGE
+      })
       setTenders(response.data)
       setPagination((response.meta as { pagination?: TenderPagination } | undefined)?.pagination ?? null)
     } catch (err) {
@@ -72,7 +80,7 @@ export function TenderBoardClient() {
   }, [])
 
   useEffect(() => {
-    void getPublicTenderFilters()
+    void getPublicTenderFilters({ industry: CARE_ATLAS_INDUSTRY })
       .then(response => setFilterOptions(response.data))
       .catch(() => setFilterOptions({ categories: [], regions: [] }))
   }, [])
@@ -91,6 +99,37 @@ export function TenderBoardClient() {
       }
     })
   }
+
+  const paginationLabel = pagination
+    ? `${pagination.total.toLocaleString('en-GB')} opportunities · Page ${pagination.currentPage} of ${pagination.lastPage}`
+    : tenders.length
+      ? `${tenders.length.toLocaleString('en-GB')} opportunities`
+      : 'Tender opportunities'
+
+  const paginationControls = (
+    <div className='flex items-center gap-2'>
+      <button
+        type='button'
+        disabled={!pagination || pagination.currentPage <= 1 || loading}
+        onClick={() => setPage(current => Math.max(1, current - 1))}
+        aria-label='Previous tender page'
+        title='Previous tender page'
+        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
+      >
+        <SiteIcon name='arrow' className='h-4 w-4 rotate-180' />
+      </button>
+      <button
+        type='button'
+        disabled={!pagination || pagination.currentPage >= pagination.lastPage || loading}
+        onClick={() => setPage(current => current + 1)}
+        aria-label='Next tender page'
+        title='Next tender page'
+        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
+      >
+        <SiteIcon name='arrow' className='h-4 w-4' />
+      </button>
+    </div>
+  )
 
   return (
     <div className='space-y-4'>
@@ -112,6 +151,11 @@ export function TenderBoardClient() {
           }}
         />
 
+        <div className='flex flex-col gap-3 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between'>
+          <p className='text-sm font-semibold text-gray-950'>{paginationLabel}</p>
+          {paginationControls}
+        </div>
+
         <TenderBoardList
           loading={loading}
           tenders={tenders}
@@ -120,35 +164,8 @@ export function TenderBoardClient() {
         />
 
         <footer className='flex flex-col gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between'>
-          <p className='text-sm text-gray-600'>
-            {pagination
-              ? `${pagination.total.toLocaleString('en-GB')} opportunities · Page ${pagination.currentPage} of ${pagination.lastPage}`
-              : tenders.length
-                ? `${tenders.length.toLocaleString('en-GB')} opportunities`
-                : 'Tender opportunities'}
-          </p>
-          <div className='flex items-center gap-2'>
-            <button
-              type='button'
-              disabled={!pagination || pagination.currentPage <= 1 || loading}
-              onClick={() => setPage(current => Math.max(1, current - 1))}
-              aria-label='Previous tender page'
-              title='Previous tender page'
-              className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-            >
-              <SiteIcon name='arrow' className='h-4 w-4 rotate-180' />
-            </button>
-            <button
-              type='button'
-              disabled={!pagination || pagination.currentPage >= pagination.lastPage || loading}
-              onClick={() => setPage(current => current + 1)}
-              aria-label='Next tender page'
-              title='Next tender page'
-              className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-            >
-              <SiteIcon name='arrow' className='h-4 w-4' />
-            </button>
-          </div>
+          <p className='text-sm text-gray-600'>{paginationLabel}</p>
+          {paginationControls}
         </footer>
       </section>
     </div>
