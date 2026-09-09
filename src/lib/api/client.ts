@@ -2,6 +2,7 @@ export type ApiEnvelope<T> = {
   success: boolean
   message: string
   data: T
+  meta?: unknown
   errors?: Record<string, string[]>
 }
 
@@ -48,6 +49,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     success: body.success ?? true,
     message: body.message ?? 'Success',
     data: body.data as T,
+    meta: body.meta,
     errors: body.errors
   }
 }

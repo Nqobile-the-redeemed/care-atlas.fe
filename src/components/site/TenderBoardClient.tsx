@@ -2,10 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { getPublicTenders, type PublicTender, type TenderLeadKind } from '@/lib/api/tenders'
+import {
+  getPublicTenderFilters,
+  getPublicTenders,
+  type PublicTender,
+  type TenderFilters,
+  type TenderLeadKind,
+  type TenderPagination
+} from '@/lib/api/tenders'
 import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 
+import { SiteIcon } from './SiteIcon'
 import {
   TenderBoardFilters,
   TenderBoardHalfScreenContent,
@@ -20,12 +28,15 @@ export function TenderBoardClient() {
   const [category, setCategory] = useState('')
   const [region, setRegion] = useState('')
   const [filters, setFilters] = useState<TenderBoardFiltersState>({ keyword: '', category: '', region: '' })
+  const [page, setPage] = useState(1)
   const [tenders, setTenders] = useState<PublicTender[]>([])
+  const [pagination, setPagination] = useState<TenderPagination | null>(null)
+  const [filterOptions, setFilterOptions] = useState<TenderFilters>({ categories: [], regions: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const categories = useMemo(() => Array.from(new Set(tenders.flatMap(tender => tender.categories))).sort(), [tenders])
-  const regions = useMemo(() => Array.from(new Set(tenders.flatMap(tender => tender.regions))).sort(), [tenders])
+  const categories = useMemo(() => [...filterOptions.categories].sort(), [filterOptions.categories])
+  const regions = useMemo(() => [...filterOptions.regions].sort(), [filterOptions.regions])
 
   const tenderBoardTemplate = useMemo(
     () => ({
@@ -40,15 +51,17 @@ export function TenderBoardClient() {
     setError('')
 
     try {
-      const response = await getPublicTenders(filters)
+      const response = await getPublicTenders({ ...filters, page, perPage: 15 })
       setTenders(response.data)
+      setPagination((response.meta as { pagination?: TenderPagination } | undefined)?.pagination ?? null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The tender list could not be loaded.')
       setTenders([])
+      setPagination(null)
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [filters, page])
 
   useEffect(() => {
     void load()
@@ -56,6 +69,12 @@ export function TenderBoardClient() {
 
   useEffect(() => {
     preloadRecaptcha()
+  }, [])
+
+  useEffect(() => {
+    void getPublicTenderFilters()
+      .then(response => setFilterOptions(response.data))
+      .catch(() => setFilterOptions({ categories: [], regions: [] }))
   }, [])
 
   function openTenderWorkspace(tender: PublicTender, initialLeadKind?: TenderLeadKind) {
@@ -87,7 +106,10 @@ export function TenderBoardClient() {
           onKeywordChange={setKeyword}
           onCategoryChange={setCategory}
           onRegionChange={setRegion}
-          onSubmit={() => setFilters({ keyword: keyword.trim(), category, region })}
+          onSubmit={() => {
+            setPage(1)
+            setFilters({ keyword: keyword.trim(), category, region })
+          }}
         />
 
         <TenderBoardList
@@ -96,6 +118,38 @@ export function TenderBoardClient() {
           onOpenDetails={tender => openTenderWorkspace(tender)}
           onOpenForm={openTenderWorkspace}
         />
+
+        <footer className='flex flex-col gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between'>
+          <p className='text-sm text-gray-600'>
+            {pagination
+              ? `${pagination.total.toLocaleString('en-GB')} opportunities · Page ${pagination.currentPage} of ${pagination.lastPage}`
+              : tenders.length
+                ? `${tenders.length.toLocaleString('en-GB')} opportunities`
+                : 'Tender opportunities'}
+          </p>
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              disabled={!pagination || pagination.currentPage <= 1 || loading}
+              onClick={() => setPage(current => Math.max(1, current - 1))}
+              aria-label='Previous tender page'
+              title='Previous tender page'
+              className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
+            >
+              <SiteIcon name='arrow' className='h-4 w-4 rotate-180' />
+            </button>
+            <button
+              type='button'
+              disabled={!pagination || pagination.currentPage >= pagination.lastPage || loading}
+              onClick={() => setPage(current => current + 1)}
+              aria-label='Next tender page'
+              title='Next tender page'
+              className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
+            >
+              <SiteIcon name='arrow' className='h-4 w-4' />
+            </button>
+          </div>
+        </footer>
       </section>
     </div>
   )

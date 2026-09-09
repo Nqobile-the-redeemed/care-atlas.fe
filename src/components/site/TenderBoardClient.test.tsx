@@ -15,6 +15,17 @@ vi.mock('@/lib/recaptcha', () => ({
 
 vi.mock('@/lib/api/tenders', () => ({
   getPublicTenders: vi.fn(async () => ({
+    meta: {
+      pagination: {
+        currentPage: 1,
+        lastPage: 1,
+        perPage: 15,
+        total: 1,
+        nextPageUrl: null,
+        previousPageUrl: null,
+        dataLastUpdated: null
+      }
+    },
     data: [
       {
         id: 'tender-1',
@@ -43,6 +54,15 @@ vi.mock('@/lib/api/tenders', () => ({
         lastSeenAt: null
       }
     ]
+  })),
+  getPublicTenderFilters: vi.fn(async () => ({
+    data: {
+      categories: ['Care', 'Cleaning'],
+      regions: ['London', 'North West'],
+      industries: ['Health and Social Care'],
+      subcategories: [],
+      sources: ['find_a_tender', 'proactis_due_north']
+    }
   })),
   getPublicTender: vi.fn(async () => ({
     data: {

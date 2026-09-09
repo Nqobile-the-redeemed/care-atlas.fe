@@ -30,6 +30,16 @@ export type PublicTender = {
   lastSeenAt: string | null
 }
 
+export type TenderPagination = {
+  currentPage: number
+  lastPage: number
+  perPage: number
+  total: number
+  nextPageUrl: string | null
+  previousPageUrl: string | null
+  dataLastUpdated: string | null
+}
+
 export type PublicTenderLot = {
   id: string
   sourceLotId: string | null
@@ -116,14 +126,29 @@ export type TenderLeadReceipt = {
 export type TenderFilters = {
   categories: string[]
   regions: string[]
+  industries?: string[]
+  subcategories?: string[]
+  sources?: string[]
 }
 
-export async function getPublicTenders(filters: { keyword?: string; category?: string; region?: string }) {
+export type PublicTenderQuery = {
+  keyword?: string
+  category?: string
+  region?: string
+  page?: number
+  perPage?: number
+  sort?: 'deadline' | 'newest'
+}
+
+export async function getPublicTenders(filters: PublicTenderQuery) {
   const params = new URLSearchParams()
 
   if (filters.keyword) params.set('keyword', filters.keyword)
   if (filters.category) params.set('category', filters.category)
   if (filters.region) params.set('region', filters.region)
+  if (filters.page && filters.page > 1) params.set('page', String(filters.page))
+  if (filters.perPage) params.set('per_page', String(filters.perPage))
+  if (filters.sort) params.set('sort', filters.sort)
 
   const suffix = params.toString()
 
