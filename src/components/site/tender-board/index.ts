@@ -1,6 +1,7 @@
 export { inputClass, emptyTenderBoardForm } from './constants'
 export { TenderBoardBookingFields } from './TenderBoardBookingFields'
 export { TenderBoardFilters } from './TenderBoardFilters'
+export type { TenderBoardViewMode } from './TenderBoardFilters'
 export { TenderBoardHalfScreenContent } from './TenderBoardHalfScreenContent'
 export { TenderBoardLeadForm } from './TenderBoardLeadForm'
 export { TenderBoardList } from './TenderBoardList'

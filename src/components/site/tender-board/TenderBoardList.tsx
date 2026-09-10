@@ -3,10 +3,12 @@
 import type { PublicTender, TenderLeadKind } from '@/lib/api/tenders'
 
 import { TenderBoardListItem } from './TenderBoardListItem'
+import type { TenderBoardViewMode } from './TenderBoardFilters'
 
 type TenderBoardListProps = {
   loading: boolean
   tenders: PublicTender[]
+  viewMode?: TenderBoardViewMode
   selectedTenderId?: string
   onOpenDetails: (tender: PublicTender) => void
   onOpenForm: (tender: PublicTender, kind: TenderLeadKind) => void
@@ -15,12 +17,19 @@ type TenderBoardListProps = {
 export function TenderBoardList({
   loading,
   tenders,
+  viewMode = 'list',
   selectedTenderId,
   onOpenDetails,
   onOpenForm
 }: TenderBoardListProps) {
   if (loading) {
-    return <p className='p-8 text-sm text-gray-600'>Loading tender opportunities...</p>
+    return (
+      <div className={viewMode === 'grid' ? 'grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3' : 'grid gap-3 p-4'}>
+        {Array.from({ length: viewMode === 'grid' ? 6 : 5 }).map((_, index) => (
+          <div key={index} className='h-36 animate-pulse rounded-lg bg-gray-100' />
+        ))}
+      </div>
+    )
   }
 
   if (tenders.length === 0) {
@@ -35,11 +44,12 @@ export function TenderBoardList({
   }
 
   return (
-    <div className='divide-y divide-gray-200'>
+    <div className={viewMode === 'grid' ? 'grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3' : 'divide-y divide-gray-200'}>
       {tenders.map(tender => (
         <TenderBoardListItem
           key={tender.id}
           tender={tender}
+          variant={viewMode}
           isSelected={selectedTenderId === tender.id}
           onOpenDetails={onOpenDetails}
           onOpenForm={onOpenForm}

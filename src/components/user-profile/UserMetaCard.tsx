@@ -5,7 +5,7 @@ import { Modal } from '../ui/modal'
 import Button from '../ui/button/Button'
 import Input from '../form/input/InputField'
 import Label from '../form/Label'
-import Image from 'next/image'
+import Avatar from '../ui/avatar/Avatar'
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal()
@@ -20,7 +20,7 @@ export default function UserMetaCard() {
         <div className='flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between'>
           <div className='flex w-full flex-col items-center gap-6 xl:flex-row'>
             <div className='h-20 w-20 overflow-hidden rounded-full border border-gray-200 dark:border-gray-800'>
-              <Image width={80} height={80} src='/images/user/owner.jpg' alt='user' />
+              <Avatar name='Care Atlas Client' alt='Care Atlas Client avatar' size='xxlarge' />
             </div>
             <div className='order-3 xl:order-2'>
               <h4 className='mb-2 text-center text-lg font-semibold text-gray-800 xl:text-left dark:text-white/90'>

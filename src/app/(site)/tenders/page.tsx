@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { TenderBoardClient } from '@/components/site/TenderBoardClient'
 import { Container, CtaBand } from '@/components/site/ui'
 
@@ -28,7 +29,15 @@ export default function TendersPage() {
 
       <section className='bg-gray-50 py-12'>
         <Container>
-          <TenderBoardClient />
+          <Suspense
+            fallback={
+              <div className='rounded-lg border border-gray-200 bg-white p-8 text-sm text-gray-600'>
+                Loading tender navigator...
+              </div>
+            }
+          >
+            <TenderBoardClient />
+          </Suspense>
         </Container>
       </section>
 

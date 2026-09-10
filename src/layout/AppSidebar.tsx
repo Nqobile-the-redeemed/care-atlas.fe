@@ -8,6 +8,7 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
+  FileIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -36,6 +37,11 @@ const navItems: NavItem[] = [
     icon: <CalenderIcon />,
     name: 'Calendar',
     path: '/calendar'
+  },
+  {
+    icon: <FileIcon />,
+    name: 'Tender Navigator',
+    path: '/tenders'
   },
   {
     icon: <UserCircleIcon />,

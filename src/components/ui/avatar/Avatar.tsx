@@ -1,9 +1,12 @@
 import Image from 'next/image'
 import React from 'react'
 
+import AvatarText from './AvatarText'
+
 interface AvatarProps {
-  src: string // URL of the avatar image
+  src?: string | null // URL of the avatar image
   alt?: string // Alt text for the avatar
+  name?: string
   size?: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge' // Avatar size
   status?: 'online' | 'offline' | 'busy' | 'none' // Status indicator
 }
@@ -32,13 +35,21 @@ const statusColorClasses = {
   busy: 'bg-warning-500'
 }
 
-const Avatar: React.FC<AvatarProps> = ({ src, alt = 'User Avatar', size = 'medium', status = 'none' }) => {
+const Avatar: React.FC<AvatarProps> = ({
+  src,
+  alt = 'User Avatar',
+  name = 'User',
+  size = 'medium',
+  status = 'none'
+}) => {
   return (
-    <div className={`relative rounded-full ${sizeClasses[size]}`}>
-      {/* Avatar Image */}
-      <Image width='0' height='0' sizes='100vw' src={src} alt={alt} className='w-full rounded-full object-cover' />
+    <div className={`relative overflow-hidden rounded-full ${sizeClasses[size]}`}>
+      {src ? (
+        <Image fill sizes='64px' src={src} alt={alt} className='rounded-full object-cover' />
+      ) : (
+        <AvatarText name={name} className='h-full w-full max-w-none' />
+      )}
 
-      {/* Status Indicator */}
       {status !== 'none' && (
         <span
           className={`absolute right-0 bottom-0 rounded-full border-[1.5px] border-white dark:border-gray-900 ${

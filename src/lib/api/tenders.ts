@@ -151,6 +151,7 @@ export async function getPublicTenders(filters: PublicTenderQuery) {
   if (filters.region) params.set('region', filters.region)
   if (filters.industry) params.set('industry', filters.industry)
   if (filters.subcategory) params.set('subcategory', filters.subcategory)
+  if (filters.source) params.set('source', filters.source)
   if (filters.page && filters.page > 1) params.set('page', String(filters.page))
   if (filters.perPage) params.set('per_page', String(filters.perPage))
   if (filters.sort) params.set('sort', filters.sort)
