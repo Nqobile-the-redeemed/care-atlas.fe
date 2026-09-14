@@ -31,6 +31,11 @@ type SubmitTenderBoardLeadPayload = {
   recaptchaAction?: string
 }
 
+type SubmitTenderBoardLeadResult = {
+  notice: string
+  handoffUrl: string | null
+}
+
 const defaultFilters: TenderBoardFilters = {
   keyword: '',
   category: '',
@@ -138,78 +143,43 @@ export const fetchTenderBoardBookingAvailability = createAsyncThunk<
   }
 })
 
-export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardLeadPayload, TenderBoardThunkConfig>(
-  'tenderBoard/submitLead',
-  async (payload, { dispatch, getState, rejectWithValue }) => {
-    const workspace = getState().tenderBoard.workspace
-    const selectedTender = workspace.selectedTender
+export const submitTenderBoardLead = createAsyncThunk<
+  SubmitTenderBoardLeadResult,
+  SubmitTenderBoardLeadPayload,
+  TenderBoardThunkConfig
+>('tenderBoard/submitLead', async (payload, { dispatch, getState, rejectWithValue }) => {
+  const workspace = getState().tenderBoard.workspace
+  const selectedTender = workspace.selectedTender
 
-    if (!selectedTender) {
-      return rejectWithValue('Choose a tender before sending an enquiry.')
-    }
+  if (!selectedTender) {
+    return rejectWithValue('Choose a tender before sending an enquiry.')
+  }
 
-    try {
-      if (workspace.leadKind === 'booking') {
-        if (!workspace.selectedSlot) {
-          return rejectWithValue('Choose an available meeting slot.')
-        }
-
-        const response = await createPublicBooking({
-          eventTypeSlug: workspace.selectedEventSlug,
-          startAt: workspace.selectedSlot.startAt,
-          endAt: workspace.selectedSlot.endAt,
-          timezone: workspace.selectedSlot.timezone,
-          customer: {
-            name: workspace.form.name,
-            email: workspace.form.email,
-            phone: workspace.form.phone,
-            companyName: workspace.form.company
-          },
-          intake: {
-            serviceInterest: `Tender support: ${selectedTender.title}`,
-            currentStage: selectedTender.sourceReference
-              ? `Tender reference: ${selectedTender.sourceReference}`
-              : 'Tender support booking',
-            message: `${workspace.form.message}\n\nTender: ${selectedTender.title}`
-          },
-          consent: workspace.form.consent,
-          formStartedAt: workspace.formStartedAt,
-          sourceUrl: payload.sourceUrl,
-          website: workspace.form.website,
-          recaptchaToken: payload.recaptchaToken,
-          recaptchaAction: payload.recaptchaAction
-        })
-
-        const notice = response.data.handoff?.url
-          ? `Meeting booked. Your reference is ${response.data.bookingReference}. Continue to Orbit Mirai to track it.`
-          : `Meeting booked. Your reference is ${response.data.bookingReference}.`
-
-        dispatch(
-          showNotification({
-            type: 'success',
-            title: 'Meeting booked',
-            message: notice
-          })
-        )
-
-        return notice
+  try {
+    if (workspace.leadKind === 'booking') {
+      if (!workspace.selectedSlot) {
+        return rejectWithValue('Choose an available meeting slot.')
       }
 
-      const response = await sendTenderLead(selectedTender.id, workspace.leadKind, {
-        name: workspace.form.name,
-        email: workspace.form.email,
-        phone: workspace.form.phone,
-        whatsapp: workspace.form.whatsapp,
-        preferredContactMethod: workspace.form.preferredContactMethod,
-        preferredSlot: workspace.form.preferredSlot,
-        tenderPreferences: {
-          categories: selectedTender.categories,
-          regions: selectedTender.regions,
-          channels: ['email', 'whatsapp'],
-          notes: ''
+      const response = await createPublicBooking({
+        eventTypeSlug: workspace.selectedEventSlug,
+        procurementId: selectedTender.id,
+        startAt: workspace.selectedSlot.startAt,
+        endAt: workspace.selectedSlot.endAt,
+        timezone: workspace.selectedSlot.timezone,
+        customer: {
+          name: workspace.form.name,
+          email: workspace.form.email,
+          phone: workspace.form.phone,
+          companyName: workspace.form.company
         },
-        company: workspace.form.company,
-        message: workspace.form.message,
+        intake: {
+          serviceInterest: `Tender support: ${selectedTender.title}`,
+          currentStage: selectedTender.sourceReference
+            ? `Tender reference: ${selectedTender.sourceReference}`
+            : 'Tender support booking',
+          message: `${workspace.form.message}\n\nTender: ${selectedTender.title}`
+        },
         consent: workspace.form.consent,
         formStartedAt: workspace.formStartedAt,
         sourceUrl: payload.sourceUrl,
@@ -219,23 +189,66 @@ export const submitTenderBoardLead = createAsyncThunk<string, SubmitTenderBoardL
       })
 
       const notice = response.data.handoff?.url
-        ? 'Tender enquiry sent. Continue to Orbit Mirai to track it.'
-        : 'Tender enquiry sent.'
+        ? `Meeting booked. Your reference is ${response.data.bookingReference}. Continue to Orbit Mirai to track it.`
+        : `Meeting booked. Your reference is ${response.data.bookingReference}.`
 
       dispatch(
         showNotification({
           type: 'success',
-          title: 'Enquiry sent',
+          title: 'Meeting booked',
           message: notice
         })
       )
 
-      return notice
-    } catch (error) {
-      return rejectWithValue(getErrorMessage(error, 'The tender request could not be sent.'))
+      return {
+        notice,
+        handoffUrl: response.data.handoff?.url ?? null
+      }
     }
+
+    const response = await sendTenderLead(selectedTender.id, workspace.leadKind, {
+      name: workspace.form.name,
+      email: workspace.form.email,
+      phone: workspace.form.phone,
+      whatsapp: workspace.form.whatsapp,
+      preferredContactMethod: workspace.form.preferredContactMethod,
+      preferredSlot: workspace.form.preferredSlot,
+      tenderPreferences: {
+        categories: selectedTender.categories,
+        regions: selectedTender.regions,
+        channels: ['email', 'whatsapp'],
+        notes: ''
+      },
+      company: workspace.form.company,
+      message: workspace.form.message,
+      consent: workspace.form.consent,
+      formStartedAt: workspace.formStartedAt,
+      sourceUrl: payload.sourceUrl,
+      website: workspace.form.website,
+      recaptchaToken: payload.recaptchaToken,
+      recaptchaAction: payload.recaptchaAction
+    })
+
+    const notice = response.data.handoff?.url
+      ? 'Tender enquiry sent. Continue to Orbit Mirai to track it.'
+      : 'Tender enquiry sent.'
+
+    dispatch(
+      showNotification({
+        type: 'success',
+        title: 'Enquiry sent',
+        message: notice
+      })
+    )
+
+    return {
+      notice,
+      handoffUrl: response.data.handoff?.url ?? null
+    }
+  } catch (error) {
+    return rejectWithValue(getErrorMessage(error, 'The tender request could not be sent.'))
   }
-)
+})
 
 const tenderBoardSlice = createSlice({
   name: 'tenderBoard',
@@ -372,8 +385,8 @@ const tenderBoardSlice = createSlice({
         const selectedTender = state.workspace.selectedTender
 
         state.workspace.submitting = false
-        state.workspace.notice = action.payload
-        state.workspace.handoffUrl = null
+        state.workspace.notice = action.payload.notice
+        state.workspace.handoffUrl = action.payload.handoffUrl
         state.workspace.formStartedAt = Math.floor(Date.now() / 1000)
         state.workspace.form = buildInitialTenderBoardForm(selectedTender?.title ?? '')
         state.workspace.selectedSlot = null

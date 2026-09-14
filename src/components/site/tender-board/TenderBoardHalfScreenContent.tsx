@@ -206,6 +206,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
 
         const response = await createPublicBooking({
           eventTypeSlug: selectedEventSlug,
+          procurementId: selectedTender.id,
           startAt: selectedSlot.startAt,
           endAt: selectedSlot.endAt,
           consultantUserId: selectedSlot.consultantUserId ?? null,

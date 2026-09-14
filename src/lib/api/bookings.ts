@@ -65,6 +65,7 @@ export type PublicBooking = {
 
 export type BookingPayload = {
   eventTypeSlug: string
+  procurementId?: string | null
   startAt: string
   endAt: string
   timezone: string
@@ -121,6 +122,7 @@ export async function createPublicBooking(payload: BookingPayload) {
     },
     body: JSON.stringify({
       event_type_slug: payload.eventTypeSlug,
+      procurement_id: payload.procurementId ?? null,
       start_at: payload.startAt,
       end_at: payload.endAt,
       consultant_user_id: payload.consultantUserId ?? null,
