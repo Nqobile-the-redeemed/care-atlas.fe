@@ -285,10 +285,13 @@ export function BookingPanel() {
                   <p className='mb-2 text-xs font-semibold text-gray-500 uppercase'>{formatSlotDate(date)}</p>
                   <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
                     {daySlots.map(slot => {
-                      const active = selectedSlot?.startAt === slot.startAt
+                      const slotKey = `${slot.startAt}-${slot.consultantUserId ?? 'any'}`
+                      const active =
+                        selectedSlot?.startAt === slot.startAt &&
+                        selectedSlot?.consultantUserId === slot.consultantUserId
                       return (
                         <button
-                          key={slot.startAt}
+                          key={slotKey}
                           type='button'
                           onClick={() => setSelectedSlot(slot)}
                           className={`rounded-lg border px-3 py-2 text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${
@@ -298,6 +301,9 @@ export function BookingPanel() {
                           }`}
                         >
                           {slot.label}
+                          {slot.consultant?.name && (
+                            <span className='block text-[10px] font-normal'>{slot.consultant.name}</span>
+                          )}
                         </button>
                       )
                     })}
