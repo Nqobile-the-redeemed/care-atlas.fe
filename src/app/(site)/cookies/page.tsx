@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { Container } from '@/components/site/ui'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: 'Cookie Policy | Care Atlas',
-  description: 'Cookie policy placeholder for Care Atlas analytics, booking and form tracking readiness.'
-}
+  description: 'Cookie policy for Care Atlas analytics, booking and form tracking readiness.',
+  path: '/cookies'
+})
 
 const sections = [
   {

@@ -129,6 +129,17 @@ export default function SignInForm() {
                   Sign Up
                 </Link>
               </p>
+              <p className='mt-3 text-center text-xs text-gray-500 sm:text-start dark:text-gray-400'>
+                Review the{' '}
+                <Link href='/privacy-policy' className='hover:text-brand-500 hover:underline dark:hover:text-brand-400'>
+                  Privacy Policy
+                </Link>{' '}
+                and{' '}
+                <Link href='/terms' className='hover:text-brand-500 hover:underline dark:hover:text-brand-400'>
+                  Terms
+                </Link>
+                .
+              </p>
             </div>
           </div>
         </div>

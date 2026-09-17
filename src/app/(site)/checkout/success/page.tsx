@@ -3,11 +3,12 @@ import { CheckoutSummary, PaymentStatusMessage } from '@/components/site/Commerc
 import { ButtonLink, Container, CtaBand } from '@/components/site/ui'
 import { getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
+import { noIndexMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Payment Successful | Care Atlas',
-  description: 'Confirmation page for successful Care Atlas service, consultation or package payments.'
-}
+export const metadata: Metadata = noIndexMetadata(
+  'Payment Successful | Care Atlas',
+  'Confirmation page for successful Care Atlas service, consultation or package payments.'
+)
 
 type PaymentSuccessPageProps = {
   searchParams?: Promise<{

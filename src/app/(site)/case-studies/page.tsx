@@ -1,12 +1,13 @@
-import type { Metadata } from 'next'
 import { ButtonLink, Container, CtaBand, SectionHeading } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Care Atlas Case Studies | Care Consultancy Outcomes',
   description:
-    'Case-study-ready examples for Care Atlas consultancy outcomes across supported living, compliance, recruitment and care technology.'
-}
+    'Case-study-ready examples for Care Atlas consultancy outcomes across supported living, compliance, recruitment and care technology.',
+  path: '/case-studies'
+})
 
 const caseStudies = [
   {

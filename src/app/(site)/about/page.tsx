@@ -1,13 +1,14 @@
-import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ButtonLink, Container, CtaBand, ProcessTimeline, SectionHeading } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'About Care Atlas | Care Consultancy for UK Providers',
   description:
-    'Learn about Care Atlas, a UK care consultancy and care enablement platform supporting providers with compliance, operations, staffing, technology and growth.'
-}
+    'Learn about Care Atlas, a UK care consultancy and care enablement platform supporting providers with compliance, operations, staffing, technology and growth.',
+  path: '/about'
+})
 
 const values = [
   {

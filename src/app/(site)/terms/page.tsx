@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import { Container } from '@/components/site/ui'
 import { site } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: 'Terms and Conditions | Care Atlas',
   description:
-    'Terms and Conditions for Care Atlas website use, consultancy, recruitment, training, tender, technology, booking and payment services.'
-}
+    'Terms and Conditions for Care Atlas website use, consultancy, recruitment, training, tender, technology, booking and payment services.',
+  path: '/terms'
+})
 
 const lastUpdated = '17 September 2026'
 

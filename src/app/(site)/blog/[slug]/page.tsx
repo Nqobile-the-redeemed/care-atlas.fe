@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/site/JsonLd'
 import { BlogCard, Container, CtaBand } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { blogPosts, getBlogPostBySlug } from '@/data/site'
+import { articleJsonLd, publicPageMetadata } from '@/lib/seo'
 
 type BlogPageProps = {
   params: Promise<{
@@ -27,10 +29,12 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     }
   }
 
-  return {
+  return publicPageMetadata({
     title: post.seo.title,
-    description: post.seo.description
-  }
+    description: post.seo.description,
+    path: `/blog/${post.slug}`,
+    type: 'article'
+  })
 }
 
 export default async function BlogDetailPage({ params }: BlogPageProps) {
@@ -45,6 +49,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
 
   return (
     <>
+      <JsonLd data={articleJsonLd(post)} />
       <article className='bg-white py-16 sm:py-20'>
         <Container className='max-w-4xl'>
           <Link href='/blog' className='text-brand-700 mb-8 inline-flex items-center gap-2 text-sm font-semibold'>

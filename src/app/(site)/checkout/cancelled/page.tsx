@@ -3,11 +3,12 @@ import { CheckoutSummary, PaymentStatusMessage } from '@/components/site/Commerc
 import { ButtonLink, Container, CtaBand } from '@/components/site/ui'
 import { getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
+import { noIndexMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Payment Cancelled | Care Atlas',
-  description: 'Return page for cancelled Care Atlas checkout sessions.'
-}
+export const metadata: Metadata = noIndexMetadata(
+  'Payment Cancelled | Care Atlas',
+  'Return page for cancelled Care Atlas checkout sessions.'
+)
 
 type PaymentCancelledPageProps = {
   searchParams?: Promise<{

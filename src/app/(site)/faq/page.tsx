@@ -1,12 +1,13 @@
-import type { Metadata } from 'next'
 import { Container, CtaBand, FaqList, SectionHeading } from '@/components/site/ui'
 import { globalFaqs, serviceCategories, services } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Care Atlas FAQ | Care Consultancy Questions',
   description:
-    'Frequently asked questions about Care Atlas services, including compliance, registration, supported living, recruitment, training and technology support.'
-}
+    'Frequently asked questions about Care Atlas services, including compliance, registration, supported living, recruitment, training and technology support.',
+  path: '/faq'
+})
 
 export default function FaqPage() {
   return (
