@@ -3,7 +3,7 @@
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 
 import { StandaloneDropDown } from '../standalone-inputs'
-import { formatSlotDate } from './utils'
+import { BookingDateSlotPicker } from '../booking/BookingDateSlotPicker'
 
 type TenderBoardBookingFieldsProps = {
   bookingOptionsLoading: boolean
@@ -14,7 +14,7 @@ type TenderBoardBookingFieldsProps = {
   slotGroups: Record<string, BookingSlot[]>
   selectedSlot: BookingSlot | null
   onEventTypeChange: (slug: string) => void
-  onSelectSlot: (slot: BookingSlot) => void
+  onSelectSlot: (slot: BookingSlot | null) => void
 }
 
 export function TenderBoardBookingFields({
@@ -53,44 +53,14 @@ export function TenderBoardBookingFields({
           <p className='text-sm font-semibold text-gray-800'>Available times</p>
           <span className='text-xs font-medium text-gray-500'>{slots.length} slots</span>
         </div>
-        {bookingOptionsLoading ? (
-          <p className='text-sm text-gray-600'>Loading slots...</p>
-        ) : slots.length === 0 ? (
-          <p className='text-sm text-gray-600'>No live slots are available right now.</p>
-        ) : (
-          <div className='max-h-64 space-y-4 overflow-y-auto pr-1'>
-            {Object.entries(slotGroups).map(([date, daySlots]) => (
-              <div key={date}>
-                <p className='mb-2 text-xs font-semibold text-gray-500 uppercase'>{formatSlotDate(date)}</p>
-                <div className='grid grid-cols-2 gap-2'>
-                  {daySlots.map(slot => {
-                    const slotKey = `${slot.startAt}-${slot.consultantUserId ?? 'any'}`
-                    const active =
-                      selectedSlot?.startAt === slot.startAt && selectedSlot?.consultantUserId === slot.consultantUserId
-
-                    return (
-                      <button
-                        key={slotKey}
-                        type='button'
-                        onClick={() => onSelectSlot(slot)}
-                        className={`min-h-9 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${
-                          active
-                            ? 'border-brand-600 bg-brand-600 focus:ring-brand-500/20 text-white'
-                            : 'border-brand-200 text-brand-800 hover:border-brand-400 hover:bg-brand-50 focus:ring-brand-500/10 bg-white'
-                        }`}
-                      >
-                        {slot.label}
-                        {slot.consultant?.name && (
-                          <span className='block text-[10px] font-normal'>{slot.consultant.name}</span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <BookingDateSlotPicker
+          slots={slots}
+          slotGroups={slotGroups}
+          selectedSlot={selectedSlot}
+          loading={bookingOptionsLoading}
+          onSelectSlot={onSelectSlot}
+          onClearSlot={() => onSelectSlot(null)}
+        />
       </div>
     </div>
   )

@@ -23,6 +23,7 @@ export function TenderBoardSelectedTenderPanel({
   if (!selectedTender) return null
 
   const detailedTender = hasTenderDetails(selectedTender) ? selectedTender : null
+  const sourceLabel = [selectedTender.sourceName, selectedTender.sourceReference].filter(Boolean).join(' / ')
 
   return (
     <>
@@ -44,6 +45,14 @@ export function TenderBoardSelectedTenderPanel({
         <div className='rounded-lg bg-gray-50 p-3'>
           <p className='text-xs text-gray-500'>Value</p>
           <p className='mt-1 font-semibold text-gray-950'>{valueLabel(selectedTender)}</p>
+        </div>
+        <div className='rounded-lg bg-gray-50 p-3'>
+          <p className='text-xs text-gray-500'>Source</p>
+          <p className='mt-1 font-semibold text-gray-950'>{sourceLabel || selectedTender.sourceKey || 'Not stated'}</p>
+        </div>
+        <div className='rounded-lg bg-gray-50 p-3'>
+          <p className='text-xs text-gray-500'>Reference</p>
+          <p className='mt-1 font-semibold text-gray-950'>{selectedTender.sourceReference ?? selectedTender.id}</p>
         </div>
       </div>
 
@@ -128,6 +137,30 @@ export function TenderBoardSelectedTenderPanel({
                 {detailedTender.deliveryLocations.length > 0
                   ? detailedTender.deliveryLocations.join(', ')
                   : detailedTender.region}
+              </dd>
+            </div>
+            <div>
+              <dt className='text-xs text-gray-500'>Original notice</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.sourceNoticeUrl ? (
+                  <a href={detailedTender.sourceNoticeUrl} target='_blank' rel='noreferrer' className='text-brand-700 hover:underline'>
+                    Open source
+                  </a>
+                ) : (
+                  'Not stated'
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className='text-xs text-gray-500'>Response portal</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.responsePortalUrl ? (
+                  <a href={detailedTender.responsePortalUrl} target='_blank' rel='noreferrer' className='text-brand-700 hover:underline'>
+                    Open portal
+                  </a>
+                ) : (
+                  'Not stated'
+                )}
               </dd>
             </div>
           </dl>

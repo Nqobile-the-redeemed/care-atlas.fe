@@ -8,6 +8,13 @@ import { HalfScreenModalProvider } from '@/context/HalfScreenModalContext'
 import { HalfScreenModal } from './HalfScreenModal'
 import { TenderBoardClient } from './TenderBoardClient'
 
+const replaceMock = vi.fn()
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: replaceMock }),
+  useSearchParams: () => new URLSearchParams()
+}))
+
 vi.mock('@/lib/recaptcha', () => ({
   preloadRecaptcha: vi.fn(),
   getRecaptchaToken: vi.fn(async () => 'test-token')
@@ -204,8 +211,8 @@ describe('TenderBoardClient', () => {
     expect(await screen.findByRole('dialog', { name: 'Supported Living Tender' })).toBeInTheDocument()
     expect(await screen.findByText('Tender details')).toBeInTheDocument()
     expect(await screen.findByText('Full detailed description')).toBeInTheDocument()
-    expect(screen.queryByText('Original notice')).not.toBeInTheDocument()
-    expect(screen.queryByText('Response portal')).not.toBeInTheDocument()
+    expect(await screen.findByText('Original notice')).toBeInTheDocument()
+    expect(await screen.findByText('Response portal')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /booking/i }))
 

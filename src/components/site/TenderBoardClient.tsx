@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import {
   getPublicTenderFilters,
+  getPublicTender,
   getPublicTenders,
   type PublicTender,
   type TenderFilters,
@@ -211,6 +212,8 @@ export function TenderBoardClient() {
   const [viewMode, setViewMode] = useState<TenderBoardViewMode>(() =>
     searchParams.get('view') === 'grid' ? 'grid' : 'list'
   )
+  const [activeTenderId, setActiveTenderId] = useState(() => searchParams.get('tender') ?? '')
+  const initialTenderOpenedRef = useRef(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [tenders, setTenders] = useState<PublicTender[]>([])
   const [pagination, setPagination] = useState<TenderPagination | null>(null)
@@ -286,17 +289,19 @@ export function TenderBoardClient() {
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
+    if (activeTenderId) next.set('tender', activeTenderId)
 
     const query = next.toString()
     router.replace(query ? `/tenders?${query}` : '/tenders', { scroll: false })
-  }, [filters, page, router, viewMode])
+  }, [activeTenderId, filters, page, router, viewMode])
 
-  function openTenderWorkspace(tender: PublicTender, initialLeadKind?: TenderLeadKind) {
+  const openTenderWorkspace = useCallback((tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
     const modalData: TenderBoardPanelData = {
       tender,
       initialLeadKind
     }
 
+    setActiveTenderId(tender.id)
     openModal(modalData, tenderBoardTemplate, {
       width: 'min(100vw, 760px)',
       headerConfig: {
@@ -304,7 +309,23 @@ export function TenderBoardClient() {
         subtitle: tender.buyer ?? 'Buyer not stated'
       }
     })
-  }
+  }, [openModal, tenderBoardTemplate])
+
+  useEffect(() => {
+    if (!activeTenderId || initialTenderOpenedRef.current) return
+    if (loading) return
+
+    initialTenderOpenedRef.current = true
+    const listedTender = tenders.find(tender => tender.id === activeTenderId)
+    if (listedTender) {
+      openTenderWorkspace(listedTender)
+      return
+    }
+
+    void getPublicTender(activeTenderId)
+      .then(response => openTenderWorkspace(response.data))
+      .catch(() => setError('The tender link could not be opened. It may no longer be available.'))
+  }, [activeTenderId, loading, openTenderWorkspace, tenders])
 
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
     setPage(1)

@@ -123,6 +123,12 @@ export type TenderLeadReceipt = {
   }
 }
 
+export type TenderNotificationUnsubscribeReceipt = {
+  unsubscribed: boolean
+  email?: string | null
+  message?: string | null
+}
+
 export type TenderFilters = {
   categories: string[]
   regions: string[]
@@ -212,4 +218,13 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
     method: 'POST',
     body: formData
   })
+}
+
+export async function unsubscribeTenderNotifications(token: string) {
+  return apiRequest<TenderNotificationUnsubscribeReceipt>(
+    `/v1/public/tender-notifications/unsubscribe/${encodeURIComponent(token)}`,
+    {
+      cache: 'no-store'
+    }
+  )
 }

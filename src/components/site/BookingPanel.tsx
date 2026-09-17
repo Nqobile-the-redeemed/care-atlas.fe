@@ -12,6 +12,7 @@ import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
 import { Button } from './ui'
+import { BookingDateSlotPicker } from './booking/BookingDateSlotPicker'
 
 type BookingStatus = 'idle' | 'loading' | 'submitting' | 'success' | 'error'
 
@@ -21,14 +22,6 @@ function fieldClass(hasError = false) {
       ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
       : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
   }`
-}
-
-function formatSlotDate(date: string) {
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short'
-  }).format(new Date(`${date}T12:00:00`))
 }
 
 function groupSlots(slots: BookingSlot[]) {
@@ -272,46 +265,14 @@ export function BookingPanel() {
             <label className='block text-sm font-semibold text-gray-800'>Available times</label>
             <span className='text-xs font-medium text-gray-500'>{slots.length} slots</span>
           </div>
-          {status === 'loading' ? (
-            <div className='rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600'>Loading slots...</div>
-          ) : slots.length === 0 ? (
-            <div className='rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600'>
-              No slots are available right now. Please send an enquiry and we will arrange a time.
-            </div>
-          ) : (
-            <div className='max-h-72 space-y-4 overflow-y-auto pr-1'>
-              {Object.entries(slotGroups).map(([date, daySlots]) => (
-                <div key={date}>
-                  <p className='mb-2 text-xs font-semibold text-gray-500 uppercase'>{formatSlotDate(date)}</p>
-                  <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
-                    {daySlots.map(slot => {
-                      const slotKey = `${slot.startAt}-${slot.consultantUserId ?? 'any'}`
-                      const active =
-                        selectedSlot?.startAt === slot.startAt &&
-                        selectedSlot?.consultantUserId === slot.consultantUserId
-                      return (
-                        <button
-                          key={slotKey}
-                          type='button'
-                          onClick={() => setSelectedSlot(slot)}
-                          className={`rounded-lg border px-3 py-2 text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${
-                            active
-                              ? 'border-brand-600 bg-brand-600 focus:ring-brand-500/20 text-white'
-                              : 'border-brand-200 text-brand-800 hover:border-brand-400 hover:bg-brand-50 focus:ring-brand-500/10 bg-white'
-                          }`}
-                        >
-                          {slot.label}
-                          {slot.consultant?.name && (
-                            <span className='block text-[10px] font-normal'>{slot.consultant.name}</span>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <BookingDateSlotPicker
+            slots={slots}
+            slotGroups={slotGroups}
+            selectedSlot={selectedSlot}
+            loading={status === 'loading'}
+            onSelectSlot={setSelectedSlot}
+            onClearSlot={() => setSelectedSlot(null)}
+          />
           {errors.slot && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.slot}</p>}
         </div>
 
