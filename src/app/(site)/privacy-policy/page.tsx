@@ -5,7 +5,7 @@ import { site } from '@/data/site'
 export const metadata: Metadata = {
   title: 'Privacy Policy | Care Atlas',
   description:
-    'Privacy policy for Care Atlas explaining how contact, booking, recruitment, tender, payment and Google user data is collected, used, stored and shared.'
+    'Privacy policy for the Care Atlas application explaining what personal information and Google user data is accessed, used, shared, protected, retained and deleted.'
 }
 
 const lastUpdated = '17 September 2026'
@@ -14,7 +14,8 @@ const policySections = [
   {
     title: '1. Who we are',
     body: [
-      `${site.legalName} trading as ${site.name} provides care consultancy, recruitment, training, tender navigation, technology support and related services for UK care providers, founders, candidates and professionals.`,
+      `${site.legalName} trading as ${site.name} provides care consultancy, recruitment, training, tender navigation, technology support and related services for UK care providers, founders, candidates and professionals. This Privacy Policy applies to the Care Atlas application and website at https://www.careatlas.co.uk and https://careatlas.co.uk.`,
+      'Application name: Care Atlas. Developer and organisation responsible for the application: CARE ATLAS.',
       `For privacy questions, data access requests or deletion requests, contact us at ${site.email}.`
     ]
   },
@@ -27,94 +28,117 @@ const policySections = [
     ]
   },
   {
-    title: '3. Google user data and Google API Services',
+    title: '3. Google user data accessed by Care Atlas',
     body: [
-      'If you choose to sign in with Google or connect a Google service to Care Atlas, we only request the Google permissions needed to provide the feature you are using.',
-      'Depending on the feature, this may include basic Google account profile information such as your name, email address and profile image, or other Google user data that you explicitly authorise through the Google consent screen.',
-      'We use Google user data only to provide or improve user-facing Care Atlas features that are visible to you, such as account sign-in, calendar booking, file upload, workflow automation or communication features that you have requested.',
-      'We do not sell Google user data, use it for advertising, use it for credit or lending decisions, transfer it to data brokers, or use it to build unrelated products.',
-      'Human access to Google user data is limited to situations where you have asked for support, it is necessary for security or abuse investigation, it is required by law, or the data has been aggregated for internal operations in accordance with applicable privacy law.',
-      'Our use and transfer of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.'
+      'If you choose to sign in with Google or connect a Google account to Care Atlas, the application may access the Google user data shown on the Google OAuth consent screen.',
+      'For sign-in and account identification, Care Atlas may access your Google account identifier, primary Google Account email address, basic personal profile information, name and profile image. These permissions correspond to the openid, userinfo.email and userinfo.profile scopes.',
+      'Where you authorise Google Cloud access, Care Atlas may access Google Cloud Platform information connected to the Google account or Google Cloud project that you authorise. This may include project identifiers, resource metadata, configuration information, service status, usage information and related administrative data available through the cloud-platform or cloud-platform.read-only scopes.',
+      'Where you authorise Google BigQuery access, Care Atlas may access BigQuery resources connected to the authorised account or project. This may include BigQuery project, dataset, table, job, query, metadata and result information available through the bigquery or bigquery.readonly scopes.',
+      'Where you authorise Google Cloud App Optimize access, Care Atlas may access App Optimize API data connected to the authorised account or project, including configuration and performance-related information available through the appoptimize scope.',
+      'Where you authorise Google Cloud App Topology access, Care Atlas may access App Topology data connected to the authorised account or project, including topology, health, cost and security status information available through the apptopology.read-only or apptopology.read-write scopes.',
+      'Care Atlas does not access Gmail messages, Google Drive files, Google Photos, Google Contacts, Google Docs, Google Sheets, YouTube data or other Google account content unless a future feature requests that specific permission from you on the Google OAuth consent screen. If additional Google permissions are introduced, this policy will be updated to describe the additional data before the feature is used.'
     ]
   },
   {
-    title: '4. How we use personal information',
+    title: '4. How Care Atlas uses Google user data',
+    body: [
+      'Care Atlas uses Google account profile data to identify the signed-in user, create or manage the user session, pre-fill account details where appropriate, prevent duplicate records and provide support linked to the correct account.',
+      'Care Atlas uses authorised Google Cloud, BigQuery, App Optimize and App Topology data to provide the application features requested by the user, including reviewing authorised cloud resources, analysing usage or activity, understanding project configuration, surfacing operational insights, preparing reports, troubleshooting integrations, supporting account setup, and helping users understand activity, cost, security or performance information in their authorised Google Cloud environment.',
+      'If write permissions are authorised, Care Atlas uses them only for user-requested actions within the application, such as configuring, updating or managing authorised Google Cloud resources or related settings that the user has chosen to connect. Care Atlas does not make unrelated changes to Google Cloud resources.',
+      'Care Atlas does not use Google user data for advertising, retargeting, sale, credit decisions, lending decisions, unrelated analytics, training unrelated AI models, or any purpose unrelated to providing or improving Care Atlas user-facing features.'
+    ]
+  },
+  {
+    title: '5. How we use personal information',
     body: [
       'We use personal information to respond to enquiries, arrange consultations, deliver services, manage bookings, assess recruitment or candidate interest, provide tender information, process purchases, send requested resources, provide customer support, maintain website security, improve our services and meet legal or regulatory obligations.',
       'Where you opt in to marketing or service updates, we may send relevant updates about Care Atlas services, training, tenders, resources or events. You can unsubscribe or ask us to stop marketing at any time.'
     ]
   },
   {
-    title: '5. Lawful bases for processing',
+    title: '6. Lawful bases for processing',
     body: [
       'We process personal information where it is necessary to take steps before entering into a contract, perform a contract, comply with legal obligations, pursue our legitimate interests in operating and improving Care Atlas, protect website security, respond to enquiries, or where you have given consent.',
       'Where we rely on consent, you can withdraw that consent at any time by contacting us.'
     ]
   },
   {
-    title: '6. When we share information',
+    title: '7. When we share, transfer or disclose information',
     body: [
       'We share personal information only where necessary to operate our services, respond to your request, comply with law, protect our rights, or work with trusted suppliers acting on our behalf.',
       'Suppliers may include hosting providers, website analytics providers, CRM and enquiry systems, email providers, payment processors, calendar or booking tools, recruitment systems, document storage services, professional advisers, and technology delivery partners including Cosmonaut Labs where relevant.',
-      'We require service providers to protect personal information and use it only for the services they provide to us. We do not sell personal information.'
+      'We do not sell personal information or Google user data. We do not transfer or disclose Google user data to third parties except as necessary to provide the Care Atlas features you requested, comply with law, protect security, or work with service providers that process data for us under appropriate confidentiality and data protection obligations.',
+      'Google account and Google Cloud data may be visible to Care Atlas staff or authorised delivery partners only where needed to provide support, investigate errors, maintain security, deliver requested analysis, or complete the user-requested workflow. Google Cloud and BigQuery data remains subject to Google services and infrastructure when accessed through Google APIs.'
     ]
   },
   {
-    title: '7. Payments and checkout',
+    title: '8. Payments and checkout',
     body: [
       'If you purchase a product or service through Care Atlas, payment details are handled by our payment processor. We receive information such as purchase status, transaction reference, product purchased, billing contact details and any information needed to deliver the service.',
       'We do not store full card numbers on our website.'
     ]
   },
   {
-    title: '8. Cookies, analytics and similar technologies',
+    title: '9. Cookies, analytics and similar technologies',
     body: [
       'We may use cookies and similar technologies to run the website, remember preferences, protect forms from abuse, understand website performance and improve the user experience.',
       'Where required, non-essential analytics or marketing cookies will be used only with appropriate consent. More detail is available on our Cookie Policy page.'
     ]
   },
   {
-    title: '9. How long we keep information',
+    title: '10. Data retention and deletion',
     body: [
       'We keep personal information only for as long as needed for the purpose it was collected, including to provide services, manage enquiries, keep business records, meet legal obligations, resolve disputes and protect legitimate business interests.',
-      'Typical enquiry and service records may be retained for up to six years where needed for accounting, contractual or legal purposes. Recruitment or candidate information is normally retained only for as long as it remains relevant to the opportunity or consent given, unless a longer period is required by law.'
+      'Typical enquiry and service records may be retained for up to six years where needed for accounting, contractual or legal purposes. Recruitment or candidate information is normally retained only for as long as it remains relevant to the opportunity or consent given, unless a longer period is required by law.',
+      'Google account profile data is retained while your Care Atlas account, booking record or service relationship remains active, unless a shorter period is required by law or you request deletion. Google Cloud, BigQuery, App Optimize and App Topology data retrieved through Google APIs is retained only for as long as needed to provide the requested feature, deliver support, maintain audit records, troubleshoot issues, maintain business records and meet legal or accounting obligations.',
+      `You can request deletion of Google user data associated with Care Atlas by emailing ${site.email}. We will delete or anonymise the relevant Google user data unless we must retain limited information for legal, security, accounting, fraud-prevention or dispute-resolution purposes.`
     ]
   },
   {
-    title: '10. Security',
+    title: '11. Data protection and security mechanisms',
     body: [
-      'We use reasonable technical and organisational measures to protect personal information against unauthorised access, loss, misuse, alteration or disclosure.',
-      'These measures include access controls, secure hosting, encrypted transport where supported, limited staff access, supplier due diligence and monitoring for security issues. No online system is completely risk free, so we encourage users to avoid sending unnecessary sensitive information through general enquiry forms.'
+      'Security procedures are in place to protect the confidentiality, integrity and availability of personal information and Google user data.',
+      'We use reasonable technical and organisational measures to protect personal information and Google user data against unauthorised access, loss, misuse, alteration or disclosure.',
+      'These measures include HTTPS encrypted transport, secure hosting, access controls, role-based access where available, limited staff access, authentication controls, supplier due diligence, logging or monitoring for security issues, and restricting human access to Google user data to support, security, legal or operational purposes that are necessary for the Care Atlas service.',
+      'No online system is completely risk free, so we encourage users to avoid sending unnecessary sensitive information through general enquiry forms.'
     ]
   },
   {
-    title: '11. International transfers',
+    title: '12. International transfers',
     body: [
       'Some suppliers may process personal information outside the United Kingdom. Where this happens, we use appropriate safeguards required by UK data protection law, such as adequacy regulations, standard contractual clauses, supplier security commitments or equivalent protections.'
     ]
   },
   {
-    title: '12. Your rights',
+    title: '13. Your rights',
     body: [
       'Depending on your circumstances, you may have rights to access your personal information, correct inaccurate information, request deletion, restrict processing, object to processing, request data portability, withdraw consent and complain to a data protection authority.',
       `To exercise these rights, contact ${site.email}. We may need to verify your identity before responding. You also have the right to complain to the UK Information Commissioner's Office at ico.org.uk.`
     ]
   },
   {
-    title: '13. Deleting or disconnecting Google data',
+    title: '14. Deleting or disconnecting Google data',
     body: [
       'You can revoke Care Atlas access to your Google account from your Google Account permissions page. You can also ask us to delete Google user data associated with your Care Atlas use by contacting us.',
-      'When deletion is requested, we will delete or anonymise the relevant information unless we need to retain limited records for legal, security, accounting or dispute-resolution purposes.'
+      'Revoking access may stop Google sign-in, Google Cloud, BigQuery, App Optimize, App Topology or other Google-connected features from working. It does not automatically delete records already needed for confirmed services, accounting, legal compliance, security or dispute-resolution purposes.',
+      `To request deletion, email ${site.email} with the Google account email address connected to Care Atlas. We will respond in line with applicable data protection law.`
     ]
   },
   {
-    title: '14. Children',
+    title: '15. Google API Services User Data Policy',
+    body: [
+      'Care Atlas use and transfer of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.',
+      'Care Atlas does not allow humans to read Google user data unless you have given us permission, it is necessary for security purposes, it is necessary to comply with law, or our use is limited to internal operations and the data has been aggregated and anonymised where appropriate.'
+    ]
+  },
+  {
+    title: '16. Children',
     body: [
       'Care Atlas services are intended for adults, care providers, professionals, organisations and candidates. Our website is not directed at children under 13, and we do not knowingly collect personal information from children under 13.'
     ]
   },
   {
-    title: '15. Changes to this policy',
+    title: '17. Changes to this policy',
     body: [
       'We may update this Privacy Policy from time to time. The latest version will be published on this page with the updated date. If we make material changes to how we use personal information or Google user data, we will take reasonable steps to notify affected users where required.'
     ]
