@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
-import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { careAtlasEnquiryRecaptchaAction, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -444,7 +444,11 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
         .filter(field => field.type !== 'file')
         .map(field => [field.label, String(formData.get(field.id) ?? '').trim()])
         .filter(([, value]) => value) as [string, unknown][]
-      const details = Object.fromEntries([...baseEntries, ['regions', regions], ['counties', counties]])
+      const details = Object.fromEntries([
+        ...baseEntries,
+        ['Regions', regions.join(', ')],
+        ['Counties', counties.join(', ')]
+      ])
       const comment = Object.entries(details)
         .map(([label, value]) => `${label}: ${value}`)
         .join('\n')
@@ -457,7 +461,7 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
 
       try {
         setSecurityError('')
-        const recaptchaAction = `care_atlas_${variant}_enquiry`.replace(/[^a-zA-Z0-9_]/g, '_')
+        const recaptchaAction = careAtlasEnquiryRecaptchaAction(variant)
         const recaptchaToken = await getRecaptchaToken(recaptchaAction)
 
         await dispatch(

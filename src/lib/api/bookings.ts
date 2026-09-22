@@ -21,12 +21,6 @@ export type BookingSlot = {
   label: string
   date: string
   timezone: string
-  consultantUserId?: number | null
-  consultant?: {
-    id: number
-    email: string
-    name: string
-  } | null
 }
 
 export type BookingAvailability = {
@@ -69,7 +63,6 @@ export type BookingPayload = {
   startAt: string
   endAt: string
   timezone: string
-  consultantUserId?: number | null
   customer: {
     name: string
     email: string
@@ -125,7 +118,6 @@ export async function createPublicBooking(payload: BookingPayload) {
       procurement_id: payload.procurementId ?? null,
       start_at: payload.startAt,
       end_at: payload.endAt,
-      consultant_user_id: payload.consultantUserId ?? null,
       timezone: payload.timezone,
       customer: {
         name: payload.customer.name,

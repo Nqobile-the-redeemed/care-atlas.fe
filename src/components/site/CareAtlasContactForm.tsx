@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
-import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -86,7 +86,7 @@ export function CareAtlasContactForm() {
     }
 
     try {
-      const recaptchaAction = 'care_atlas_contact'
+      const recaptchaAction = CARE_ATLAS_RECAPTCHA_ACTIONS.contact
       const recaptchaToken = await getRecaptchaToken(recaptchaAction)
 
       await dispatch(
@@ -100,8 +100,8 @@ export function CareAtlasContactForm() {
           details: {
             Subject: values.subject,
             Message: values.message,
-            regions,
-            counties
+            Regions: regions.join(', '),
+            Counties: counties.join(', ')
           },
           consent: true,
           formStartedAt: formStartedAt.current,

@@ -152,7 +152,7 @@ export function BookingDateSlotPicker({
         </button>
       </div>
 
-      <div className='mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase text-gray-500'>
+      <div className='mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-gray-500 uppercase'>
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
           <span key={day}>{day}</span>
         ))}
@@ -174,7 +174,7 @@ export function BookingDateSlotPicker({
               aria-label={`${dayLabel(day.key)}${isAvailable ? `, ${daySlots.length} slots available` : ', no slots available'}`}
               className={`aspect-square rounded-lg border text-sm font-semibold transition focus:ring-4 focus:outline-hidden ${
                 isSelected
-                  ? 'border-brand-600 bg-brand-600 text-white focus:ring-brand-500/20'
+                  ? 'border-brand-600 bg-brand-600 focus:ring-brand-500/20 text-white'
                   : isAvailable
                     ? 'border-brand-200 bg-brand-50 text-brand-800 hover:border-brand-400 focus:ring-brand-500/10'
                     : day.inMonth
@@ -190,7 +190,7 @@ export function BookingDateSlotPicker({
 
       <div className='mt-4'>
         <div className='mb-2 flex items-center justify-between gap-3'>
-          <p className='text-xs font-semibold uppercase text-gray-500'>
+          <p className='text-xs font-semibold text-gray-500 uppercase'>
             {selectedDate ? dayLabel(selectedDate) : 'Choose a date'}
           </p>
           <span className='text-xs font-medium text-gray-500'>{visibleSlots.length} slots</span>
@@ -200,9 +200,8 @@ export function BookingDateSlotPicker({
         ) : (
           <div className='grid max-h-48 grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3'>
             {visibleSlots.map(slot => {
-              const slotKey = `${slot.startAt}-${slot.consultantUserId ?? 'any'}`
-              const active =
-                selectedSlot?.startAt === slot.startAt && selectedSlot?.consultantUserId === slot.consultantUserId
+              const slotKey = `${slot.startAt}-${slot.endAt}`
+              const active = selectedSlot?.startAt === slot.startAt && selectedSlot?.endAt === slot.endAt
               const duration = slotDurationLabel(slot)
 
               return (
@@ -217,9 +216,7 @@ export function BookingDateSlotPicker({
                   }`}
                 >
                   {slot.label}
-                  <span className='block text-[10px] font-normal'>
-                    {[duration, slot.consultant?.name].filter(Boolean).join(' / ')}
-                  </span>
+                  {duration ? <span className='block text-[10px] font-normal'>{duration}</span> : null}
                 </button>
               )
             })}

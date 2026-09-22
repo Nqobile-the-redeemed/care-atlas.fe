@@ -10,7 +10,12 @@ import {
   type BookingEventType,
   type BookingSlot
 } from '@/lib/api/bookings'
-import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import {
+  CARE_ATLAS_RECAPTCHA_ACTIONS,
+  careAtlasEnquiryRecaptchaAction,
+  getRecaptchaToken,
+  preloadRecaptcha
+} from '@/lib/recaptcha'
 import { getPublicTender, sendTenderLead, type TenderLeadKind } from '@/lib/api/tenders'
 
 import { TenderBoardFormYup, emptyTenderBoardFormValues } from './tenderLeadFormSchema'
@@ -209,7 +214,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           procurementId: selectedTender.id,
           startAt: selectedSlot.startAt,
           endAt: selectedSlot.endAt,
-          consultantUserId: selectedSlot.consultantUserId ?? null,
           timezone: selectedSlot.timezone,
           customer: {
             name: values.name,
@@ -230,8 +234,8 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           formStartedAt,
           sourceUrl: window.location.href,
           website: values.website,
-          recaptchaToken: await getRecaptchaToken('care_atlas_tender_booking'),
-          recaptchaAction: 'care_atlas_tender_booking'
+          recaptchaToken: await getRecaptchaToken(CARE_ATLAS_RECAPTCHA_ACTIONS.tenderBooking),
+          recaptchaAction: CARE_ATLAS_RECAPTCHA_ACTIONS.tenderBooking
         })
 
         setHandoffUrl(response.data.handoff?.url ?? null)
@@ -248,7 +252,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         return
       }
 
-      const recaptchaAction = `care_atlas_tender_${leadKind}`
+      const recaptchaAction = careAtlasEnquiryRecaptchaAction('tender')
       const recaptchaToken = await getRecaptchaToken(recaptchaAction)
 
       const response = await sendTenderLead(selectedTender.id, leadKind, {

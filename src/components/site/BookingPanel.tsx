@@ -8,7 +8,7 @@ import {
   getBookingAvailability,
   getBookingEventTypes
 } from '@/lib/api/bookings'
-import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
 import { Button } from './ui'
@@ -143,13 +143,12 @@ export function BookingPanel() {
 
     try {
       setStatus('submitting')
-      const recaptchaAction = 'care_atlas_booking'
+      const recaptchaAction = CARE_ATLAS_RECAPTCHA_ACTIONS.booking
       const recaptchaToken = await getRecaptchaToken(recaptchaAction)
       const response = await createPublicBooking({
         eventTypeSlug: selectedEventSlug,
         startAt: selectedSlot.startAt,
         endAt: selectedSlot.endAt,
-        consultantUserId: selectedSlot.consultantUserId ?? null,
         timezone: selectedSlot.timezone,
         customer: {
           name: String(formData.get('name') ?? '').trim(),

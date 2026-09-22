@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
 import { Button } from './ui'
@@ -79,14 +79,14 @@ export function WhatsappChatBox() {
         await wait((3 - elapsed) * 1000)
       }
 
-      const recaptchaToken = await getRecaptchaToken('care_atlas_whatsapp')
+      const recaptchaToken = await getRecaptchaToken(CARE_ATLAS_RECAPTCHA_ACTIONS.whatsapp)
 
       await verifyCareAtlasWhatsappIntent({
         intent,
         sourceUrl: window.location.href,
         formStartedAt: startedAt,
         recaptchaToken,
-        recaptchaAction: 'care_atlas_whatsapp'
+        recaptchaAction: CARE_ATLAS_RECAPTCHA_ACTIONS.whatsapp
       })
 
       window.open(buildWhatsappUrl(message), '_blank', 'noopener,noreferrer')

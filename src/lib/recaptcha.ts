@@ -10,6 +10,18 @@ declare global {
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_CARE_ATLAS_RECAPTCHA_SITE_KEY
 let recaptchaScriptPromise: Promise<void> | null = null
 
+export const CARE_ATLAS_RECAPTCHA_ACTIONS = {
+  booking: 'care_atlas_booking',
+  contact: 'care_atlas_contact',
+  newsletter: 'care_atlas_newsletter',
+  tenderBooking: 'care_atlas_tender_booking',
+  whatsapp: 'care_atlas_whatsapp'
+} as const
+
+export function careAtlasEnquiryRecaptchaAction(scope: string) {
+  return `care_atlas_${scope}_enquiry`.replace(/[^a-zA-Z0-9_]/g, '_')
+}
+
 function loadRecaptchaScript() {
   if (!RECAPTCHA_SITE_KEY) {
     return Promise.resolve()
@@ -57,6 +69,10 @@ export function preloadRecaptcha() {
 
 export async function getRecaptchaToken(action: string) {
   if (!RECAPTCHA_SITE_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('reCAPTCHA is not configured. Please contact Care Atlas support.')
+    }
+
     return null
   }
 

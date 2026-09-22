@@ -29,6 +29,28 @@ const slotGroups = {
 }
 
 describe('BookingDateSlotPicker', () => {
+  it('shows available times without exposing staff identity data', () => {
+    const legacySlot = {
+      ...slots[0],
+      consultantUserId: 42,
+      consultant: { id: 42, email: 'staff@orbit.test', name: 'Nqobile Team' }
+    } as BookingSlot
+
+    render(
+      <BookingDateSlotPicker
+        slots={[legacySlot]}
+        slotGroups={{ '2026-09-21': [legacySlot] }}
+        selectedSlot={null}
+        onSelectSlot={vi.fn()}
+        onClearSlot={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('09:00')).toBeInTheDocument()
+    expect(screen.getByText('30 min')).toBeInTheDocument()
+    expect(screen.queryByText('Nqobile Team')).not.toBeInTheDocument()
+  })
+
   it('requires a date before selecting slots and supports future month navigation', async () => {
     const user = userEvent.setup()
     const onSelectSlot = vi.fn()

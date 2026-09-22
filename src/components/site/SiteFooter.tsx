@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { mainNav, services, site } from '@/data/site'
 import { CareAtlasLogo } from './CareAtlasLogo'
-import { Button, ButtonLink, Container } from './ui'
+import { FooterNewsletterForm } from './FooterNewsletterForm'
+import { ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
 
 const legalLinks = [
@@ -93,26 +94,7 @@ export function SiteFooter() {
                 {site.address}
               </p>
             </div>
-            <form className='mt-6 rounded-lg border border-white/10 bg-white/5 p-4'>
-              <label htmlFor='footer-newsletter' className='text-sm font-semibold text-white'>
-                Get care operations updates
-              </label>
-              <div className='mt-3 flex gap-2'>
-                <input
-                  id='footer-newsletter'
-                  type='email'
-                  required
-                  placeholder='Email address'
-                  className='min-w-0 flex-1 rounded-lg border border-white/20 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-4 focus:ring-white/20 focus:outline-hidden'
-                />
-                <Button type='submit' size='sm' className='focus:ring-white/20'>
-                  Join
-                </Button>
-              </div>
-              <p className='text-blue-light-200 mt-2 text-xs leading-5'>
-                Newsletter capture ready for CRM and consent workflow integration.
-              </p>
-            </form>
+            <FooterNewsletterForm />
           </div>
         </div>
       </Container>
