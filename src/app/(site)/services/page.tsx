@@ -1,12 +1,13 @@
-import type { Metadata } from 'next'
 import { ButtonLink, Container, CtaBand, ProcessTimeline, SectionHeading, ServiceCard } from '@/components/site/ui'
 import { serviceCategories, services } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Care Atlas Services | Care Consultancy, Compliance, Recruitment and Technology',
   description:
-    'Explore Care Atlas services across care operations, regulatory compliance, supported living housing, recruitment, training and technology support.'
-}
+    'Explore Care Atlas services across care operations, regulatory compliance, supported living housing, recruitment, training and technology support.',
+  path: '/services'
+})
 
 const benefits = [
   'Clear service pathways for providers at different stages',

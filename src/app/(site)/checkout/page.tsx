@@ -4,12 +4,12 @@ import { CheckoutClient } from '@/components/site/CheckoutClient'
 import { Container } from '@/components/site/ui'
 import { getPopularProducts, getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
+import { noIndexMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Checkout | Care Atlas',
-  description:
-    'Review and purchase Care Atlas consultations, service packages and recurring care provider support products.'
-}
+export const metadata: Metadata = noIndexMetadata(
+  'Checkout | Care Atlas',
+  'Review and purchase Care Atlas consultations, service packages and recurring care provider support products.'
+)
 
 type CheckoutPageProps = {
   searchParams?: Promise<{

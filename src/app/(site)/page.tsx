@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
 import { CareersRoleGrid } from '@/components/site/CareersRoleGrid'
 import {
   AvatarStack,
@@ -21,12 +22,14 @@ import {
 } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { blogPosts, services, testimonials } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: 'Care Atlas | UK Care Consultancy, Compliance, Staffing and Technology Support',
   description:
-    'Care Atlas helps UK care providers build care infrastructure, launch with confidence, stay compliant, recruit staff and improve operations with technology support from Cosmonaut Labs.'
-}
+    'Care Atlas helps UK care providers build care infrastructure, launch with confidence, stay compliant, recruit staff and improve operations with technology support from Cosmonaut Labs.',
+  path: '/'
+})
 
 const whoWeHelp = [
   'Supported living providers',

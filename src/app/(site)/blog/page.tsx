@@ -1,13 +1,14 @@
-import type { Metadata } from 'next'
 import { BlogCard, ButtonLink, Container, SectionHeading } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { blogCategories, blogPosts } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Care Atlas Blog | Care Compliance, Supported Living and Care Technology Insights',
   description:
-    'Read Care Atlas insights on care compliance, CQC, supported living, housing benefit, care recruitment, technology, training and care business growth.'
-}
+    'Read Care Atlas insights on care compliance, CQC, supported living, housing benefit, care recruitment, technology, training and care business growth.',
+  path: '/blog'
+})
 
 export default function BlogPage() {
   const featured = blogPosts[0]

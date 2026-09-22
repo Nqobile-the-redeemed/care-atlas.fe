@@ -122,8 +122,13 @@ export default function SignUpForm() {
                   <Checkbox className='h-5 w-5' checked={isChecked} onChange={setIsChecked} />
                   <p className='inline-block font-normal text-gray-500 dark:text-gray-400'>
                     By creating an account means you agree to the{' '}
-                    <span className='text-gray-800 dark:text-white/90'>Terms and Conditions,</span> and our{' '}
-                    <span className='text-gray-800 dark:text-white'>Privacy Policy</span>
+                    <Link href='/terms' className='text-gray-800 hover:underline dark:text-white/90'>
+                      Terms and Conditions
+                    </Link>
+                    , and our{' '}
+                    <Link href='/privacy-policy' className='text-gray-800 hover:underline dark:text-white'>
+                      Privacy Policy
+                    </Link>
                   </p>
                 </div>
                 {/* <!-- Button --> */}

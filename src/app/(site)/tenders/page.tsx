@@ -1,13 +1,14 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { TenderBoardClient } from '@/components/site/TenderBoardClient'
 import { Container, CtaBand } from '@/components/site/ui'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Tender Navigator | Care Atlas',
   description:
-    'Browse current UK care, supported living, housing and cleaning tenders for free, then book a Care Atlas bid-support meeting.'
-}
+    'Browse current UK care, supported living, housing and cleaning tenders for free, then book a Care Atlas bid-support meeting.',
+  path: '/tenders'
+})
 
 export default function TendersPage() {
   return (

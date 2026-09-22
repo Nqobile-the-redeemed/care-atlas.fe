@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/site/JsonLd'
 import { ServiceDetailPage } from '@/components/site/ServiceDetailPage'
 import { getServiceBySlug, services } from '@/data/site'
+import { publicPageMetadata, serviceJsonLd } from '@/lib/seo'
 
 type ServicePageProps = {
   params: Promise<{
@@ -25,10 +27,11 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
     }
   }
 
-  return {
+  return publicPageMetadata({
     title: service.seo.title,
-    description: service.seo.description
-  }
+    description: service.seo.description,
+    path: service.href
+  })
 }
 
 export default async function ServicePage({ params }: ServicePageProps) {
@@ -39,5 +42,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
     notFound()
   }
 
-  return <ServiceDetailPage service={service} />
+  return (
+    <>
+      <JsonLd data={serviceJsonLd(service)} />
+      <ServiceDetailPage service={service} />
+    </>
+  )
 }

@@ -1,15 +1,16 @@
-import type { Metadata } from 'next'
 import { BookingPanel } from '@/components/site/BookingPanel'
 import { CareAtlasContactForm } from '@/components/site/CareAtlasContactForm'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { Container, CtaBand, FaqList, SectionHeading } from '@/components/site/ui'
 import { globalFaqs, site } from '@/data/site'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Contact Care Atlas | Book a Care Consultancy Consultation',
   description:
-    'Contact Care Atlas to book a consultation for care consultancy, CQC registration support, supported living housing benefit support, recruitment, training or technology.'
-}
+    'Contact Care Atlas to book a consultation for care consultancy, CQC registration support, supported living housing benefit support, recruitment, training or technology.',
+  path: '/contact'
+})
 
 const contactPoints = [
   {

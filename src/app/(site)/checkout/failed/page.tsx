@@ -3,11 +3,12 @@ import { CheckoutSummary, PaymentStatusMessage } from '@/components/site/Commerc
 import { ButtonLink, Container, CtaBand } from '@/components/site/ui'
 import { getProductBySlug } from '@/data/products'
 import { getServiceBySlug } from '@/data/site'
+import { noIndexMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Payment Failed | Care Atlas',
-  description: 'Return page for failed or incomplete Care Atlas checkout attempts.'
-}
+export const metadata: Metadata = noIndexMetadata(
+  'Payment Failed | Care Atlas',
+  'Return page for failed or incomplete Care Atlas checkout attempts.'
+)
 
 type PaymentFailedPageProps = {
   searchParams?: Promise<{

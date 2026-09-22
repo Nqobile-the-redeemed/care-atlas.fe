@@ -1,15 +1,16 @@
-import type { Metadata } from 'next'
 import { LeadForm } from '@/components/site/LeadForm'
 import { JobRoleCard } from '@/components/site/JobRoleCard'
 import { ButtonLink, Container, CtaBand, SectionHeading } from '@/components/site/ui'
 import { SiteIcon } from '@/components/site/SiteIcon'
 import { jobRoles } from '@/data/careers'
+import { publicPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata = publicPageMetadata({
   title: 'Careers | Find a Job as a Carer | Care Atlas',
   description:
-    'Explore individual care and consultant role pages, then register interest through the Care Atlas careers and candidate signup flow.'
-}
+    'Explore individual care and consultant role pages, then register interest through the Care Atlas careers and candidate signup flow.',
+  path: '/careers'
+})
 
 const roleGroups = [
   'Domiciliary care',
