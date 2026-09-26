@@ -64,15 +64,44 @@ function dedupeTenders(tenders: PublicTender[]) {
   })
 }
 
-function FilterGroup({ title, children }: { title: string; children: ReactNode }) {
+function FilterGroup({
+  title,
+  selectedLabel,
+  optionCount,
+  children
+}: {
+  title: string
+  selectedLabel?: string
+  optionCount?: number
+  children: ReactNode
+}) {
+  const [isOpen, setIsOpen] = useState(Boolean(selectedLabel))
+
+  useEffect(() => {
+    if (selectedLabel) setIsOpen(true)
+  }, [selectedLabel])
+
   return (
-    <details open className='border-b border-gray-200 py-4 last:border-b-0'>
-      <summary className='flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-gray-950'>
-        {title}
-        <SiteIcon name='chevron' className='h-4 w-4 text-gray-400' />
-      </summary>
-      <div className='mt-3 space-y-2'>{children}</div>
-    </details>
+    <section className='border-b border-gray-200 last:border-b-0'>
+      <button
+        type='button'
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen(current => !current)}
+        className='focus:ring-brand-500/20 flex w-full items-center justify-between gap-3 rounded-lg py-3 text-left focus:ring-4 focus:outline-hidden'
+      >
+        <span className='min-w-0'>
+          <span className='block text-sm font-semibold text-gray-950'>{title}</span>
+          <span className='mt-0.5 block truncate text-xs text-gray-500'>
+            {selectedLabel || (optionCount === undefined ? 'Expand options' : `${optionCount} options`)}
+          </span>
+        </span>
+        <SiteIcon
+          name='chevron'
+          className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {isOpen && <div className='max-h-64 space-y-2 overflow-y-auto pr-1 pb-3'>{children}</div>}
+    </section>
   )
 }
 
@@ -148,7 +177,11 @@ function FilterPanel({
         )}
       </div>
       <div className='px-4'>
-        <FilterGroup title='Tender service type'>
+        <FilterGroup
+          title='Tender service type'
+          selectedLabel={subcategory || undefined}
+          optionCount={subcategories.length}
+        >
           {subcategories.length > 0 ? (
             <FilterRadioList
               name='service-type'
@@ -161,7 +194,7 @@ function FilterPanel({
             <p className='text-sm text-gray-500'>Service subcategories are not available from the API yet.</p>
           )}
         </FilterGroup>
-        <FilterGroup title='Tender category'>
+        <FilterGroup title='Tender category' selectedLabel={category || undefined} optionCount={categories.length}>
           <FilterRadioList
             name='tender-category'
             value={category}
@@ -170,7 +203,7 @@ function FilterPanel({
             onChange={onCategoryChange}
           />
         </FilterGroup>
-        <FilterGroup title='Region or location'>
+        <FilterGroup title='Region or location' selectedLabel={region || undefined} optionCount={regions.length}>
           <FilterRadioList
             name='region'
             value={region}
@@ -295,21 +328,24 @@ export function TenderBoardClient() {
     router.replace(query ? `/tenders?${query}` : '/tenders', { scroll: false })
   }, [activeTenderId, filters, page, router, viewMode])
 
-  const openTenderWorkspace = useCallback((tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
-    const modalData: TenderBoardPanelData = {
-      tender,
-      initialLeadKind
-    }
-
-    setActiveTenderId(tender.id)
-    openModal(modalData, tenderBoardTemplate, {
-      width: 'min(100vw, 760px)',
-      headerConfig: {
-        title: tender.title,
-        subtitle: tender.buyer ?? 'Buyer not stated'
+  const openTenderWorkspace = useCallback(
+    (tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
+      const modalData: TenderBoardPanelData = {
+        tender,
+        initialLeadKind
       }
-    })
-  }, [openModal, tenderBoardTemplate])
+
+      setActiveTenderId(tender.id)
+      openModal(modalData, tenderBoardTemplate, {
+        width: 'min(100vw, 760px)',
+        headerConfig: {
+          title: tender.title,
+          subtitle: tender.buyer ?? 'Buyer not stated'
+        }
+      })
+    },
+    [openModal, tenderBoardTemplate]
+  )
 
   useEffect(() => {
     if (!activeTenderId || initialTenderOpenedRef.current) return

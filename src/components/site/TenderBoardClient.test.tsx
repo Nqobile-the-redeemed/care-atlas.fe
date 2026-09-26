@@ -192,6 +192,32 @@ vi.mock('@/lib/api/bookings', () => ({
 }))
 
 describe('TenderBoardClient', () => {
+  it('keeps sidebar filter categories compact until expanded', async () => {
+    const user = userEvent.setup()
+
+    render(
+      React.createElement(
+        HalfScreenModalProvider,
+        null,
+        React.createElement(TenderBoardClient),
+        React.createElement(HalfScreenModal)
+      )
+    )
+
+    const categoryGroup = await screen.findByRole('button', { name: /Tender category.*2 options/i })
+    const regionGroup = screen.getByRole('button', { name: /Region or location.*2 options/i })
+
+    expect(categoryGroup).toHaveAttribute('aria-expanded', 'false')
+    expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('radio', { name: 'Care' })).not.toBeInTheDocument()
+
+    await user.click(categoryGroup)
+
+    expect(categoryGroup).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('radio', { name: 'Care' })).toBeInTheDocument()
+    expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('opens the tender drawer and renders migrated detail and workflow content', async () => {
     const user = userEvent.setup()
 
