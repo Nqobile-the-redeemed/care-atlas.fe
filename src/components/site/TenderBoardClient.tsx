@@ -26,7 +26,6 @@ import {
   type TenderBoardPanelData
 } from './tender-board'
 
-const CARE_ATLAS_INDUSTRY = 'Health and Social Care'
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'deadline'
 
@@ -283,7 +282,6 @@ export function TenderBoardClient() {
     try {
       const response = await getPublicTenders({
         ...filters,
-        industry: CARE_ATLAS_INDUSTRY,
         page,
         perPage: TENDERS_PER_PAGE,
         sort: filters.sort
@@ -308,7 +306,7 @@ export function TenderBoardClient() {
   }, [])
 
   useEffect(() => {
-    void getPublicTenderFilters({ industry: CARE_ATLAS_INDUSTRY })
+    void getPublicTenderFilters()
       .then(response => setFilterOptions(response.data))
       .catch(() => setFilterOptions({ categories: [], regions: [] }))
   }, [])
