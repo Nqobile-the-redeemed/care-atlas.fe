@@ -14,6 +14,8 @@ type TenderBoardListItemProps = {
   variant?: 'list' | 'grid'
   onOpenDetails: (tender: PublicTender) => void
   onOpenForm: (tender: PublicTender, kind: TenderLeadKind) => void
+  isSaved?: boolean
+  onToggleSaved?: (tender: PublicTender) => void
 }
 
 function sourceLabel(tender: PublicTender) {
@@ -25,6 +27,10 @@ function sourceLabel(tender: PublicTender) {
 }
 
 function TenderMeta({ tender, compact = false }: { tender: PublicTender; compact?: boolean }) {
+  const regionLabel = tender.regions.length
+    ? `${tender.regions.slice(0, 2).join(', ')}${tender.regions.length > 2 ? ` +${tender.regions.length - 2}` : ''}`
+    : tender.region
+
   return (
     <dl className={`mt-4 grid gap-3 text-sm ${compact ? 'grid-cols-2' : 'sm:grid-cols-4'}`}>
       <div>
@@ -41,7 +47,7 @@ function TenderMeta({ tender, compact = false }: { tender: PublicTender; compact
       </div>
       <div>
         <dt className='text-xs text-gray-500'>Region</dt>
-        <dd className='mt-1 font-semibold text-gray-950'>{tender.region}</dd>
+        <dd className='mt-1 font-semibold text-gray-950'>{regionLabel}</dd>
       </div>
     </dl>
   )
@@ -73,7 +79,9 @@ export function TenderBoardListItem({
   isSelected,
   variant = 'list',
   onOpenDetails,
-  onOpenForm
+  onOpenForm,
+  isSaved = false,
+  onToggleSaved
 }: TenderBoardListItemProps) {
   if (variant === 'grid') {
     return (
@@ -115,6 +123,11 @@ export function TenderBoardListItem({
             Open details
           </Button>
           <TenderShareButton tender={tender} />
+          {onToggleSaved && (
+            <Button variant='secondary' onClick={() => onToggleSaved(tender)} fullWidth>
+              {isSaved ? 'Saved' : 'Save tender'}
+            </Button>
+          )}
         </div>
       </article>
     )
@@ -166,6 +179,11 @@ export function TenderBoardListItem({
           Open details
         </Button>
         <TenderShareButton tender={tender} />
+        {onToggleSaved && (
+          <Button variant='secondary' onClick={() => onToggleSaved(tender)} fullWidth className='sm:w-fit'>
+            {isSaved ? 'Saved' : 'Save tender'}
+          </Button>
+        )}
       </div>
     </article>
   )

@@ -28,6 +28,8 @@ export type PublicTender = {
   }
   locked: boolean
   lastSeenAt: string | null
+  publicPath?: string
+  canonicalUrl?: string
 }
 
 export type TenderPagination = {
@@ -135,15 +137,21 @@ export type TenderFilters = {
   industries?: string[]
   subcategories?: string[]
   sources?: string[]
+  facets?: Partial<
+    Record<
+      'categories' | 'regions' | 'industries' | 'subcategories' | 'sources',
+      Array<{ value: string; count: number }>
+    >
+  >
 }
 
 export type PublicTenderQuery = {
   keyword?: string
-  category?: string
-  region?: string
-  industry?: string
-  subcategory?: string
-  source?: string
+  category?: string | string[]
+  region?: string | string[]
+  industry?: string | string[]
+  subcategory?: string | string[]
+  source?: string | string[]
   page?: number
   perPage?: number
   sort?: 'deadline' | 'newest'
@@ -153,11 +161,11 @@ export async function getPublicTenders(filters: PublicTenderQuery) {
   const params = new URLSearchParams()
 
   if (filters.keyword) params.set('keyword', filters.keyword)
-  if (filters.category) params.set('category', filters.category)
-  if (filters.region) params.set('region', filters.region)
-  if (filters.industry) params.set('industry', filters.industry)
-  if (filters.subcategory) params.set('subcategory', filters.subcategory)
-  if (filters.source) params.set('source', filters.source)
+  appendMany(params, 'category', filters.category)
+  appendMany(params, 'region', filters.region)
+  appendMany(params, 'industry', filters.industry)
+  appendMany(params, 'subcategory', filters.subcategory)
+  appendMany(params, 'source', filters.source)
   if (filters.page && filters.page > 1) params.set('page', String(filters.page))
   if (filters.perPage) params.set('per_page', String(filters.perPage))
   if (filters.sort) params.set('sort', filters.sort)
@@ -180,15 +188,20 @@ export async function getPublicTenderFilters(
 ) {
   const params = new URLSearchParams()
 
-  if (filters.industry) params.set('industry', filters.industry)
-  if (filters.subcategory) params.set('subcategory', filters.subcategory)
-  if (filters.source) params.set('source', filters.source)
+  appendMany(params, 'industry', filters.industry)
+  appendMany(params, 'subcategory', filters.subcategory)
+  appendMany(params, 'source', filters.source)
 
   const suffix = params.toString()
 
   return apiRequest<TenderFilters>(`/v1/public/tender-filters${suffix ? `?${suffix}` : ''}`, {
     cache: 'no-store'
   })
+}
+
+function appendMany(params: URLSearchParams, key: string, values?: string | string[]) {
+  const normalized = typeof values === 'string' ? [values] : values
+  normalized?.filter(Boolean).forEach(value => params.append(`${key}[]`, value))
 }
 
 export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, payload: TenderLeadPayload) {

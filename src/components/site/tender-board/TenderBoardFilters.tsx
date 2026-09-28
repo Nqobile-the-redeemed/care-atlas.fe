@@ -9,9 +9,9 @@ export type TenderBoardViewMode = 'list' | 'grid'
 
 type TenderBoardFiltersProps = {
   keyword: string
-  category: string
-  region: string
-  subcategory: string
+  categoriesSelected: string[]
+  regionsSelected: string[]
+  subcategoriesSelected: string[]
   sort: 'deadline' | 'newest'
   viewMode: TenderBoardViewMode
   categories: string[]
@@ -20,9 +20,9 @@ type TenderBoardFiltersProps = {
   activeFilterCount: number
   loading?: boolean
   onKeywordChange: (value: string) => void
-  onCategoryChange: (value: string) => void
-  onRegionChange: (value: string) => void
-  onSubcategoryChange: (value: string) => void
+  onCategoryToggle: (value: string) => void
+  onRegionToggle: (value: string) => void
+  onSubcategoryToggle: (value: string) => void
   onSortChange: (value: 'deadline' | 'newest') => void
   onViewModeChange: (value: TenderBoardViewMode) => void
   onClear: () => void
@@ -32,9 +32,9 @@ type TenderBoardFiltersProps = {
 
 export function TenderBoardFilters({
   keyword,
-  category,
-  region,
-  subcategory,
+  categoriesSelected,
+  regionsSelected,
+  subcategoriesSelected,
   sort,
   viewMode,
   categories,
@@ -43,9 +43,9 @@ export function TenderBoardFilters({
   activeFilterCount,
   loading = false,
   onKeywordChange,
-  onCategoryChange,
-  onRegionChange,
-  onSubcategoryChange,
+  onCategoryToggle,
+  onRegionToggle,
+  onSubcategoryToggle,
   onSortChange,
   onViewModeChange,
   onClear,
@@ -62,15 +62,15 @@ export function TenderBoardFilters({
         onSubmit()
       }}
     >
-      <div className='grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]'>
-        <label className='relative'>
+      <div className='grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]'>
+        <label className='relative min-w-0'>
           <span className='sr-only'>Search tenders</span>
           <SiteIcon name='search' className='absolute top-3.5 left-3 h-4 w-4 text-gray-400' />
           <input
             value={keyword}
             onChange={event => onKeywordChange(event.target.value)}
-            placeholder='Search tender title, buyer or keyword'
-            className={`${inputClass} w-full pl-10`}
+            placeholder='Search title, description, buyer, borough, region or reference'
+            className={`${inputClass} w-full min-w-0 pl-10`}
           />
         </label>
         <Button
@@ -90,8 +90,8 @@ export function TenderBoardFilters({
       <div className='mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
         <div className='hidden flex-wrap items-center gap-2 lg:flex'>
           <select
-            value={subcategory}
-            onChange={event => onSubcategoryChange(event.target.value)}
+            value=''
+            onChange={event => event.target.value && onSubcategoryToggle(event.target.value)}
             aria-label='Service type'
             className={`${inputClass} w-56`}
           >
@@ -101,8 +101,8 @@ export function TenderBoardFilters({
             ))}
           </select>
           <select
-            value={category}
-            onChange={event => onCategoryChange(event.target.value)}
+            value=''
+            onChange={event => event.target.value && onCategoryToggle(event.target.value)}
             aria-label='Tender category'
             className={`${inputClass} w-56`}
           >
@@ -112,8 +112,8 @@ export function TenderBoardFilters({
             ))}
           </select>
           <select
-            value={region}
-            onChange={event => onRegionChange(event.target.value)}
+            value=''
+            onChange={event => event.target.value && onRegionToggle(event.target.value)}
             aria-label='Region'
             className={`${inputClass} w-52`}
           >
@@ -122,6 +122,9 @@ export function TenderBoardFilters({
               <option key={item}>{item}</option>
             ))}
           </select>
+          {subcategoriesSelected.length + categoriesSelected.length + regionsSelected.length > 0 && (
+            <span className='text-xs font-semibold text-gray-500'>Selections appear below</span>
+          )}
           {hasActiveFilters && (
             <button
               type='button'
@@ -132,7 +135,7 @@ export function TenderBoardFilters({
             </button>
           )}
         </div>
-        <div className='flex items-center justify-between gap-3'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
           <label className='flex items-center gap-2 text-sm text-gray-600'>
             <span>Sort</span>
             <select
