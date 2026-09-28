@@ -11,19 +11,19 @@ export const metadata: Metadata = publicPageMetadata({
 const sections = [
   {
     title: 'Essential cookies',
-    body: 'Essential cookies may be needed for security, form behaviour, consent preferences and basic website functionality.'
+    body: 'These are required for website security, form protection, basic functionality and storing your cookie choices. They cannot be disabled through the preference centre.'
   },
   {
-    title: 'Analytics readiness',
-    body: 'The frontend is prepared for analytics integration, but production tracking should only be enabled with appropriate consent and configuration.'
+    title: 'Analytics cookies',
+    body: 'With your permission, analytics cookies can help us understand how people use Care Atlas and improve tender discovery. They remain disabled unless you opt in.'
   },
   {
-    title: 'Booking and embedded tools',
-    body: 'Future calendar booking, CRM, video or form integrations may set their own cookies. These should be listed before launch.'
+    title: 'Functional and third-party services',
+    body: 'Optional embedded services may need functional storage. Security services used to protect public forms may process limited technical information as strictly necessary.'
   },
   {
     title: 'Managing preferences',
-    body: 'A production cookie banner or preference centre can be added to allow users to manage non-essential cookies.'
+    body: 'You can accept, reject or customise optional cookies from the first-visit notice. Use Cookie settings in the footer at any time to change or withdraw your choice.'
   }
 ]
 
@@ -36,8 +36,8 @@ export default function CookiePolicyPage() {
         </p>
         <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>Cookie Policy</h1>
         <p className='mt-5 text-lg leading-8 text-gray-600'>
-          This placeholder explains how cookie and analytics wording can be completed once production integrations are
-          confirmed.
+          Care Atlas uses essential storage to keep the website secure and working. Optional cookies are only enabled
+          after you choose to allow them, and you can change that choice at any time.
         </p>
         <div className='mt-10 space-y-8'>
           {sections.map(section => (

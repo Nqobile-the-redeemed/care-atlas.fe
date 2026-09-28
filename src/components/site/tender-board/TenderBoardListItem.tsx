@@ -6,6 +6,7 @@ import { SiteIcon } from '../SiteIcon'
 import { Button } from '../ui'
 
 import { dateLabel, valueLabel } from './utils'
+import { TenderShareButton } from './TenderShareButton'
 
 type TenderBoardListItemProps = {
   tender: PublicTender
@@ -113,6 +114,7 @@ export function TenderBoardListItem({
           >
             Open details
           </Button>
+          <TenderShareButton tender={tender} />
         </div>
       </article>
     )
@@ -163,6 +165,7 @@ export function TenderBoardListItem({
         >
           Open details
         </Button>
+        <TenderShareButton tender={tender} />
       </div>
     </article>
   )

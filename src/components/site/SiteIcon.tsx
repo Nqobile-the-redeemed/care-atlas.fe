@@ -51,7 +51,13 @@ const paths: Record<string, string[]> = {
   contract: ['M9 3v6H3', 'M3 9l6-6', 'M15 21v-6h6', 'M21 15l-6 6'],
   plus: ['M12 5v14', 'M5 12h14'],
   minus: ['M5 12h14'],
-  alertCircle: ['M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z', 'M12 8v4', 'M12 16h.01']
+  alertCircle: ['M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z', 'M12 8v4', 'M12 16h.01'],
+  share: ['M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7', 'm16 6-4-4-4 4', 'M12 2v14'],
+  link: [
+    'M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15',
+    'M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15'
+  ],
+  message: ['M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z', 'M8 10h.01M12 10h.01M16 10h.01']
 }
 
 export function SiteIcon({ name, className = 'h-5 w-5' }: SiteIconProps) {

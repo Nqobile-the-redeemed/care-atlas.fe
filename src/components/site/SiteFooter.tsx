@@ -4,6 +4,7 @@ import { CareAtlasLogo } from './CareAtlasLogo'
 import { FooterNewsletterForm } from './FooterNewsletterForm'
 import { ButtonLink, Container } from './ui'
 import { SiteIcon } from './SiteIcon'
+import { CookieSettingsButton } from './CookieSettingsButton'
 
 const legalLinks = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
@@ -108,6 +109,7 @@ export function SiteFooter() {
                 {link.label}
               </Link>
             ))}
+            <CookieSettingsButton />
             {site.social.map(link => (
               <Link key={link.label} href={link.href} className='transition hover:text-white'>
                 {link.label}
