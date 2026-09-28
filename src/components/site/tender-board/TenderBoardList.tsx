@@ -12,6 +12,8 @@ type TenderBoardListProps = {
   selectedTenderId?: string
   onOpenDetails: (tender: PublicTender) => void
   onOpenForm: (tender: PublicTender, kind: TenderLeadKind) => void
+  savedTenderIds?: Set<string>
+  onToggleSaved?: (tender: PublicTender) => void
 }
 
 export function TenderBoardList({
@@ -20,7 +22,9 @@ export function TenderBoardList({
   viewMode = 'list',
   selectedTenderId,
   onOpenDetails,
-  onOpenForm
+  onOpenForm,
+  savedTenderIds,
+  onToggleSaved
 }: TenderBoardListProps) {
   if (loading) {
     return (
@@ -53,6 +57,8 @@ export function TenderBoardList({
           isSelected={selectedTenderId === tender.id}
           onOpenDetails={onOpenDetails}
           onOpenForm={onOpenForm}
+          isSaved={savedTenderIds?.has(tender.id) ?? false}
+          onToggleSaved={onToggleSaved}
         />
       ))}
     </div>

@@ -3,6 +3,7 @@ import { HalfScreenModal } from '@/components/site/HalfScreenModal'
 import { JsonLd } from '@/components/site/JsonLd'
 import { SiteHeader } from '@/components/site/SiteHeader'
 import { WhatsappChatBox } from '@/components/site/WhatsappChatBox'
+import { CookieConsent } from '@/components/site/CookieConsent'
 import { HalfScreenModalProvider } from '@/context/HalfScreenModalContext'
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo'
 import type { ReactNode } from 'react'
@@ -16,6 +17,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
         <main>{children}</main>
         <SiteFooter />
         <WhatsappChatBox />
+        <CookieConsent />
         <HalfScreenModal />
       </div>
     </HalfScreenModalProvider>

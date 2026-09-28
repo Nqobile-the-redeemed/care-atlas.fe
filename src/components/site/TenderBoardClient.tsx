@@ -29,22 +29,24 @@ import {
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'deadline'
 
-type AppliedTenderFilters = TenderBoardFiltersState & {
-  subcategory: string
+type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
+  category: string[]
+  region: string[]
+  subcategory: string[]
   sort: 'deadline' | 'newest'
 }
 
 type FilterPanelProps = {
-  category: string
-  region: string
-  subcategory: string
+  category: string[]
+  region: string[]
+  subcategory: string[]
   categories: string[]
   regions: string[]
   subcategories: string[]
   activeFilterCount: number
-  onCategoryChange: (value: string) => void
-  onRegionChange: (value: string) => void
-  onSubcategoryChange: (value: string) => void
+  onCategoryToggle: (value: string) => void
+  onRegionToggle: (value: string) => void
+  onSubcategoryToggle: (value: string) => void
   onClear: () => void
 }
 
@@ -104,24 +106,21 @@ function FilterGroup({
   )
 }
 
-function FilterRadioList({
+function FilterCheckboxList({
   name,
   value,
   options,
-  emptyLabel,
-  onChange
+  onToggle
 }: {
   name: string
-  value: string
+  value: string[]
   options: string[]
-  emptyLabel: string
-  onChange: (value: string) => void
+  onToggle: (value: string) => void
 }) {
   return (
     <div className='space-y-1'>
-      {[emptyLabel, ...options].map(option => {
-        const optionValue = option === emptyLabel ? '' : option
-        const checked = value === optionValue
+      {options.map(option => {
+        const checked = value.includes(option)
 
         return (
           <label
@@ -131,10 +130,10 @@ function FilterRadioList({
             }`}
           >
             <input
-              type='radio'
+              type='checkbox'
               name={name}
               checked={checked}
-              onChange={() => onChange(optionValue)}
+              onChange={() => onToggle(option)}
               className='text-brand-600 focus:ring-brand-500/20 h-4 w-4 border-gray-300'
             />
             <span className='line-clamp-2'>{option}</span>
@@ -153,9 +152,9 @@ function FilterPanel({
   regions,
   subcategories,
   activeFilterCount,
-  onCategoryChange,
-  onRegionChange,
-  onSubcategoryChange,
+  onCategoryToggle,
+  onRegionToggle,
+  onSubcategoryToggle,
   onClear
 }: FilterPanelProps) {
   return (
@@ -178,38 +177,38 @@ function FilterPanel({
       <div className='px-4'>
         <FilterGroup
           title='Tender service type'
-          selectedLabel={subcategory || undefined}
+          selectedLabel={subcategory.length ? `${subcategory.length} selected` : undefined}
           optionCount={subcategories.length}
         >
           {subcategories.length > 0 ? (
-            <FilterRadioList
+            <FilterCheckboxList
               name='service-type'
               value={subcategory}
               options={subcategories}
-              emptyLabel='All care service types'
-              onChange={onSubcategoryChange}
+              onToggle={onSubcategoryToggle}
             />
           ) : (
             <p className='text-sm text-gray-500'>Service subcategories are not available from the API yet.</p>
           )}
         </FilterGroup>
-        <FilterGroup title='Tender category' selectedLabel={category || undefined} optionCount={categories.length}>
-          <FilterRadioList
+        <FilterGroup
+          title='Tender category'
+          selectedLabel={category.length ? `${category.length} selected` : undefined}
+          optionCount={categories.length}
+        >
+          <FilterCheckboxList
             name='tender-category'
             value={category}
             options={categories}
-            emptyLabel='All categories'
-            onChange={onCategoryChange}
+            onToggle={onCategoryToggle}
           />
         </FilterGroup>
-        <FilterGroup title='Region or location' selectedLabel={region || undefined} optionCount={regions.length}>
-          <FilterRadioList
-            name='region'
-            value={region}
-            options={regions}
-            emptyLabel='All regions'
-            onChange={onRegionChange}
-          />
+        <FilterGroup
+          title='Region or location'
+          selectedLabel={region.length ? `${region.length} selected` : undefined}
+          optionCount={regions.length}
+        >
+          <FilterCheckboxList name='region' value={region} options={regions} onToggle={onRegionToggle} />
         </FilterGroup>
         <FilterGroup title='Other filters'>
           <p className='text-sm leading-6 text-gray-500'>
@@ -227,17 +226,17 @@ export function TenderBoardClient() {
   const searchParams = useSearchParams()
   const { openModal } = useHalfScreenModal()
   const [keyword, setKeyword] = useState(() => searchParams.get('keyword') ?? '')
-  const [category, setCategory] = useState(() => searchParams.get('category') ?? '')
-  const [region, setRegion] = useState(() => searchParams.get('region') ?? '')
-  const [subcategory, setSubcategory] = useState(() => searchParams.get('subcategory') ?? '')
+  const [category, setCategory] = useState(() => searchParams.getAll('category'))
+  const [region, setRegion] = useState(() => searchParams.getAll('region'))
+  const [subcategory, setSubcategory] = useState(() => searchParams.getAll('subcategory'))
   const [sort, setSort] = useState<'deadline' | 'newest'>(() =>
     searchParams.get('sort') === 'newest' ? 'newest' : DEFAULT_SORT
   )
   const [filters, setFilters] = useState<AppliedTenderFilters>(() => ({
     keyword: searchParams.get('keyword')?.trim() ?? '',
-    category: searchParams.get('category') ?? '',
-    region: searchParams.get('region') ?? '',
-    subcategory: searchParams.get('subcategory') ?? '',
+    category: searchParams.getAll('category'),
+    region: searchParams.getAll('region'),
+    subcategory: searchParams.getAll('subcategory'),
     sort: searchParams.get('sort') === 'newest' ? 'newest' : DEFAULT_SORT
   }))
   const [page, setPage] = useState(() => Math.max(1, Number(searchParams.get('page') ?? 1) || 1))
@@ -252,20 +251,21 @@ export function TenderBoardClient() {
   const [filterOptions, setFilterOptions] = useState<TenderFilters>({ categories: [], regions: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [saveNotice, setSaveNotice] = useState('')
+  const [savedTenderIds, setSavedTenderIds] = useState<Set<string>>(new Set())
 
   const categories = useMemo(() => [...filterOptions.categories].sort(), [filterOptions.categories])
   const regions = useMemo(() => [...filterOptions.regions].sort(), [filterOptions.regions])
   const subcategories = useMemo(() => [...(filterOptions.subcategories ?? [])].sort(), [filterOptions.subcategories])
-  const activeFilterCount = [filters.keyword, filters.category, filters.region, filters.subcategory].filter(
-    Boolean
-  ).length
+  const activeFilterCount =
+    Number(Boolean(filters.keyword)) + filters.category.length + filters.region.length + filters.subcategory.length
 
   const activeFilterLabels = [
     filters.keyword ? { key: 'keyword', label: `Search: ${filters.keyword}` } : null,
-    filters.subcategory ? { key: 'subcategory', label: filters.subcategory } : null,
-    filters.category ? { key: 'category', label: filters.category } : null,
-    filters.region ? { key: 'region', label: filters.region } : null
-  ].filter((item): item is { key: keyof TenderBoardFiltersState | 'subcategory'; label: string } => item !== null)
+    ...filters.subcategory.map(label => ({ key: 'subcategory' as const, label })),
+    ...filters.category.map(label => ({ key: 'category' as const, label })),
+    ...filters.region.map(label => ({ key: 'region' as const, label }))
+  ].filter((item): item is { key: 'keyword' | 'category' | 'region' | 'subcategory'; label: string } => item !== null)
 
   const tenderBoardTemplate = useMemo(
     () => ({
@@ -282,6 +282,7 @@ export function TenderBoardClient() {
     try {
       const response = await getPublicTenders({
         ...filters,
+        industry: [CARE_ATLAS_INDUSTRY],
         page,
         perPage: TENDERS_PER_PAGE,
         sort: filters.sort
@@ -306,17 +307,25 @@ export function TenderBoardClient() {
   }, [])
 
   useEffect(() => {
-    void getPublicTenderFilters()
+    void getPublicTenderFilters({ industry: [CARE_ATLAS_INDUSTRY] })
       .then(response => setFilterOptions(response.data))
       .catch(() => setFilterOptions({ categories: [], regions: [] }))
   }, [])
 
   useEffect(() => {
+    try {
+      setSavedTenderIds(new Set(JSON.parse(localStorage.getItem('care-atlas:saved-tenders') ?? '[]') as string[]))
+    } catch {
+      setSavedTenderIds(new Set())
+    }
+  }, [])
+
+  useEffect(() => {
     const next = new URLSearchParams()
     if (filters.keyword) next.set('keyword', filters.keyword)
-    if (filters.category) next.set('category', filters.category)
-    if (filters.region) next.set('region', filters.region)
-    if (filters.subcategory) next.set('subcategory', filters.subcategory)
+    filters.category.forEach(value => next.append('category', value))
+    filters.region.forEach(value => next.append('region', value))
+    filters.subcategory.forEach(value => next.append('subcategory', value))
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
@@ -375,22 +384,50 @@ export function TenderBoardClient() {
 
   function clearFilters() {
     setKeyword('')
-    setCategory('')
-    setRegion('')
-    setSubcategory('')
+    setCategory([])
+    setRegion([])
+    setSubcategory([])
     setSort(DEFAULT_SORT)
     setPage(1)
-    setFilters({ keyword: '', category: '', region: '', subcategory: '', sort: DEFAULT_SORT })
+    setFilters({ keyword: '', category: [], region: [], subcategory: [], sort: DEFAULT_SORT })
   }
 
-  function removeFilter(key: keyof TenderBoardFiltersState | 'subcategory') {
+  function removeFilter(key: 'keyword' | 'category' | 'region' | 'subcategory', label?: string) {
     if (key === 'keyword') setKeyword('')
-    if (key === 'category') setCategory('')
-    if (key === 'region') setRegion('')
-    if (key === 'subcategory') setSubcategory('')
+    if (key === 'category') setCategory(current => current.filter(value => value !== label))
+    if (key === 'region') setRegion(current => current.filter(value => value !== label))
+    if (key === 'subcategory') setSubcategory(current => current.filter(value => value !== label))
 
     setPage(1)
-    setFilters(current => ({ ...current, [key]: '' }))
+    setFilters(current => ({
+      ...current,
+      [key]: key === 'keyword' ? '' : current[key].filter(value => value !== label)
+    }))
+  }
+
+  function toggleFilter(key: 'category' | 'region' | 'subcategory', value: string, apply = true) {
+    const setter = key === 'category' ? setCategory : key === 'region' ? setRegion : setSubcategory
+    setter(current => {
+      const next = current.includes(value) ? current.filter(item => item !== value) : [...current, value]
+      if (apply) {
+        setPage(1)
+        setFilters(filtersCurrent => ({ ...filtersCurrent, [key]: next }))
+      }
+      return next
+    })
+  }
+
+  function toggleSaved(tender: PublicTender) {
+    setSavedTenderIds(current => {
+      const next = new Set(current)
+      if (next.has(tender.id)) next.delete(tender.id)
+      else {
+        next.add(tender.id)
+        setSaveNotice('Saved on this device. Sign in to OrbitMirai when you need a permanent shortlist across devices.')
+      }
+      localStorage.setItem('care-atlas:saved-tenders', JSON.stringify([...next]))
+      return next
+    })
   }
 
   const paginationLabel = pagination
@@ -425,15 +462,27 @@ export function TenderBoardClient() {
   )
 
   return (
-    <div className='space-y-4'>
+    <div className='min-w-0 space-y-4 overflow-x-hidden'>
       {error && !loading && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
+      {saveNotice && (
+        <p role='status' className='border-brand-200 bg-brand-50 text-brand-900 rounded-lg border p-3 text-sm'>
+          {saveNotice}{' '}
+          <a
+            href={process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://app.orbitmirai.com/sign-up'}
+            className='font-semibold underline'
+          >
+            Create or open your account
+          </a>
+          .
+        </p>
+      )}
 
-      <section className='rounded-lg border border-gray-200 bg-white'>
+      <section className='min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white'>
         <TenderBoardFilters
           keyword={keyword}
-          category={category}
-          region={region}
-          subcategory={subcategory}
+          categoriesSelected={category}
+          regionsSelected={region}
+          subcategoriesSelected={subcategory}
           sort={sort}
           viewMode={viewMode}
           categories={categories}
@@ -442,12 +491,9 @@ export function TenderBoardClient() {
           activeFilterCount={activeFilterCount}
           loading={loading}
           onKeywordChange={setKeyword}
-          onCategoryChange={setCategory}
-          onRegionChange={setRegion}
-          onSubcategoryChange={value => {
-            setSubcategory(value)
-            applyCurrentFilters({ subcategory: value })
-          }}
+          onCategoryToggle={value => toggleFilter('category', value)}
+          onRegionToggle={value => toggleFilter('region', value)}
+          onSubcategoryToggle={value => toggleFilter('subcategory', value)}
           onSortChange={value => {
             setSort(value)
             applyCurrentFilters({ sort: value })
@@ -467,7 +513,7 @@ export function TenderBoardClient() {
                   <button
                     key={filter.key}
                     type='button'
-                    onClick={() => removeFilter(filter.key)}
+                    onClick={() => removeFilter(filter.key, filter.label)}
                     className='bg-brand-50 text-brand-800 hover:bg-brand-100 focus:ring-brand-500/20 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold focus:ring-4 focus:outline-hidden'
                   >
                     {filter.label}
@@ -490,18 +536,9 @@ export function TenderBoardClient() {
               regions={regions}
               subcategories={subcategories}
               activeFilterCount={activeFilterCount}
-              onCategoryChange={value => {
-                setCategory(value)
-                applyCurrentFilters({ category: value })
-              }}
-              onRegionChange={value => {
-                setRegion(value)
-                applyCurrentFilters({ region: value })
-              }}
-              onSubcategoryChange={value => {
-                setSubcategory(value)
-                applyCurrentFilters({ subcategory: value })
-              }}
+              onCategoryToggle={value => toggleFilter('category', value)}
+              onRegionToggle={value => toggleFilter('region', value)}
+              onSubcategoryToggle={value => toggleFilter('subcategory', value)}
               onClear={clearFilters}
             />
           </aside>
@@ -511,6 +548,8 @@ export function TenderBoardClient() {
             viewMode={viewMode}
             onOpenDetails={tender => openTenderWorkspace(tender)}
             onOpenForm={openTenderWorkspace}
+            savedTenderIds={savedTenderIds}
+            onToggleSaved={toggleSaved}
           />
         </div>
 
@@ -556,9 +595,9 @@ export function TenderBoardClient() {
                 regions={regions}
                 subcategories={subcategories}
                 activeFilterCount={activeFilterCount}
-                onCategoryChange={setCategory}
-                onRegionChange={setRegion}
-                onSubcategoryChange={setSubcategory}
+                onCategoryToggle={value => toggleFilter('category', value, false)}
+                onRegionToggle={value => toggleFilter('region', value, false)}
+                onSubcategoryToggle={value => toggleFilter('subcategory', value, false)}
                 onClear={clearFilters}
               />
             </div>
