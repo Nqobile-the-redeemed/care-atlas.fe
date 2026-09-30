@@ -26,7 +26,6 @@ import {
   type TenderBoardPanelData
 } from './tender-board'
 
-const CARE_ATLAS_INDUSTRY = 'Health and Social Care'
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'deadline'
 
