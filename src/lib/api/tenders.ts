@@ -201,7 +201,14 @@ export async function getPublicTenderFilters(
 
 function appendMany(params: URLSearchParams, key: string, values?: string | string[]) {
   const normalized = typeof values === 'string' ? [values] : values
-  normalized?.filter(Boolean).forEach(value => params.append(`${key}[]`, value))
+  const present = normalized?.filter(Boolean) ?? []
+
+  if (present.length === 1) {
+    params.set(key, present[0])
+    return
+  }
+
+  present.forEach(value => params.append(`${key}[]`, value))
 }
 
 export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, payload: TenderLeadPayload) {

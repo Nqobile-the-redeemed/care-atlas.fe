@@ -30,7 +30,7 @@ describe('getPublicTenders', () => {
     await getPublicTenders({ keyword: 'care', category: ['services', 'supported living'], region: ['London'] })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/v1/public/tenders?keyword=care&category%5B%5D=services&category%5B%5D=supported+living&region%5B%5D=London',
+      'http://localhost:8000/v1/public/tenders?keyword=care&category%5B%5D=services&category%5B%5D=supported+living&region=London',
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({
