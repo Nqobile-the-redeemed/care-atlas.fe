@@ -282,7 +282,6 @@ export function TenderBoardClient() {
     try {
       const response = await getPublicTenders({
         ...filters,
-        industry: [CARE_ATLAS_INDUSTRY],
         page,
         perPage: TENDERS_PER_PAGE,
         sort: filters.sort
@@ -307,7 +306,7 @@ export function TenderBoardClient() {
   }, [])
 
   useEffect(() => {
-    void getPublicTenderFilters({ industry: [CARE_ATLAS_INDUSTRY] })
+    void getPublicTenderFilters()
       .then(response => setFilterOptions(response.data))
       .catch(() => setFilterOptions({ categories: [], regions: [] }))
   }, [])

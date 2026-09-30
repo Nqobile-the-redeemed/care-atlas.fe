@@ -214,7 +214,7 @@ describe('TenderBoardClient', () => {
     await user.click(categoryGroup)
 
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('radio', { name: 'Care' })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Care' })).toBeInTheDocument()
     expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
   })
 
