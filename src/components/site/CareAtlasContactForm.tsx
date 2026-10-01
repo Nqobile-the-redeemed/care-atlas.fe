@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from 'react'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
+import { trackEvent } from '@/components/analytics/trackEvent'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -77,6 +78,10 @@ export function CareAtlasContactForm() {
     setErrors(nextErrors)
     setSecurityError('')
 
+    trackEvent('contact_form_submitted', {
+      outcome: Object.keys(nextErrors).length === 0 ? 'accepted' : 'validation_error'
+    })
+
     if (Object.keys(nextErrors).length > 0) {
       return
     }
@@ -110,11 +115,13 @@ export function CareAtlasContactForm() {
       ).unwrap()
 
       setSubmitted(true)
+      trackEvent('contact_form_success')
       form.reset()
       setRegions([])
       setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
+      trackEvent('contact_form_error')
       setSubmitted(false)
       if (error instanceof Error && error.message.includes('reCAPTCHA')) {
         setSecurityError(error.message)

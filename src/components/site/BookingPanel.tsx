@@ -9,6 +9,7 @@ import {
   getBookingEventTypes
 } from '@/lib/api/bookings'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
+import { trackEvent } from '@/components/analytics/trackEvent'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
 import { Button } from './ui'
@@ -135,6 +136,11 @@ export function BookingPanel() {
     setMessage('')
     setHandoffUrl(null)
 
+    trackEvent('booking_submitted', {
+      booking_type: selectedEventSlug,
+      outcome: Object.keys(nextErrors).length === 0 ? 'accepted' : 'validation_error'
+    })
+
     if (Object.keys(nextErrors).length > 0 || !selectedSlot) return
 
     try {
@@ -168,6 +174,7 @@ export function BookingPanel() {
       })
 
       setStatus('success')
+      trackEvent('booking_success', { booking_type: selectedEventSlug })
       setHandoffUrl(response.data.handoff?.url ?? null)
       setMessage(
         response.data.handoff?.url
@@ -180,6 +187,7 @@ export function BookingPanel() {
       setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
+      trackEvent('booking_error', { booking_type: selectedEventSlug })
       setStatus('error')
       setMessage(error instanceof Error ? error.message : 'The booking could not be confirmed.')
     }
@@ -214,6 +222,7 @@ export function BookingPanel() {
             <div className='mt-3 grid gap-2 sm:grid-cols-2'>
               <a
                 href={handoffUrl}
+                onClick={() => trackEvent('care_atlas_handoff_started', { flow: 'booking' })}
                 className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white'
               >
                 Continue to Orbit Mirai
@@ -240,7 +249,11 @@ export function BookingPanel() {
           <select
             id='eventType'
             value={selectedEventSlug}
-            onChange={event => setSelectedEventSlug(event.target.value)}
+            onChange={event => {
+              const eventTypeSlug = event.target.value
+              setSelectedEventSlug(eventTypeSlug)
+              trackEvent('booking_type_selected', { booking_type: eventTypeSlug })
+            }}
             className={fieldClass()}
             disabled={status === 'loading' || eventTypes.length === 0}
           >
@@ -265,7 +278,10 @@ export function BookingPanel() {
             slotGroups={slotGroups}
             selectedSlot={selectedSlot}
             loading={status === 'loading'}
-            onSelectSlot={setSelectedSlot}
+            onSelectSlot={slot => {
+              setSelectedSlot(slot)
+              trackEvent('booking_slot_selected', { booking_type: selectedEventSlug })
+            }}
             onClearSlot={() => setSelectedSlot(null)}
           />
           {errors.slot && <p className='text-error-600 mt-1.5 text-xs font-medium'>{errors.slot}</p>}

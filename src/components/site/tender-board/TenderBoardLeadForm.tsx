@@ -4,6 +4,7 @@ import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import type { FormikProps } from 'formik'
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 import type { TenderLeadKind } from '@/lib/api/tenders'
+import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from '../SiteIcon'
 import { StandaloneTextInput, StandaloneEmailInput, StandaloneTextArea, StandaloneDropDown } from '../standalone-inputs'
@@ -64,6 +65,7 @@ export function TenderBoardLeadForm({
 }: TenderBoardLeadFormProps) {
   const handleSubmit = async (_event: FormEvent<HTMLFormElement>) => {
     _event.preventDefault()
+    trackEvent('tender_lead_submitted', { lead_kind: leadKind })
     const touched: Partial<Record<keyof TenderBoardForm, boolean>> = {}
     ;(Object.keys(formik.values) as Array<keyof TenderBoardForm>).forEach(key => {
       touched[key] = true
@@ -75,7 +77,14 @@ export function TenderBoardLeadForm({
 
   return (
     <>
-      <TenderBoardLeadKindSelector value={leadKind} onChange={setLeadKind} />
+      <TenderBoardLeadKindSelector
+        value={leadKind}
+        onChange={nextLeadKind => {
+          if (typeof nextLeadKind === 'function') return
+          setLeadKind(nextLeadKind)
+          trackEvent('tender_lead_kind_selected', { lead_kind: nextLeadKind })
+        }}
+      />
 
       <form className='mt-5 space-y-5' onSubmit={handleSubmit}>
         <input
@@ -186,6 +195,7 @@ export function TenderBoardLeadForm({
               <div className='mt-3'>
                 <a
                   href={handoffUrl}
+                  onClick={() => trackEvent('care_atlas_handoff_started', { flow: 'tender' })}
                   className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 text-sm font-semibold text-white'
                 >
                   Continue to Orbit Mirai

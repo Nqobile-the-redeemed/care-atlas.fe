@@ -4,6 +4,7 @@ import { FormEvent, useMemo, useRef, useState } from 'react'
 import type { ServiceFormVariant } from '@/data/site'
 import { services } from '@/data/site'
 import { careAtlasEnquiryRecaptchaAction, getRecaptchaToken } from '@/lib/recaptcha'
+import { trackEvent } from '@/components/analytics/trackEvent'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -435,6 +436,11 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
 
     setErrors(nextErrors)
 
+    trackEvent('lead_form_submitted', {
+      form_variant: variant,
+      outcome: Object.keys(nextErrors).length === 0 ? 'accepted' : 'validation_error'
+    })
+
     if (Object.keys(nextErrors).length === 0) {
       const baseEntries = fields
         .filter(field => field.type !== 'file')
@@ -480,11 +486,13 @@ export function LeadForm({ variant, title, intro }: LeadFormProps) {
         ).unwrap()
 
         setSubmitted(true)
+        trackEvent('lead_form_success', { form_variant: variant })
         form.reset()
         setRegions([])
         setCounties([])
         formStartedAt.current = Math.floor(Date.now() / 1000)
       } catch (error) {
+        trackEvent('lead_form_error', { form_variant: variant })
         if (error instanceof Error && error.message.includes('reCAPTCHA')) {
           setSecurityError(error.message)
         }

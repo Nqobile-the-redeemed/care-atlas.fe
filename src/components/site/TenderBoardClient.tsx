@@ -13,6 +13,7 @@ import {
   type TenderPagination
 } from '@/lib/api/tenders'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
+import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
 import { Button } from './ui'
@@ -337,6 +338,7 @@ export function TenderBoardClient() {
       }
 
       setActiveTenderId(tender.id)
+      trackEvent('tender_opened', { has_lead_form: Boolean(initialLeadKind) })
       openModal(modalData, tenderBoardTemplate, {
         width: 'min(100vw, 760px)',
         headerConfig: {
@@ -365,14 +367,23 @@ export function TenderBoardClient() {
   }, [activeTenderId, loading, openTenderWorkspace, tenders])
 
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
-    setPage(1)
-    setFilters({
+    const nextFilters = {
       keyword: keyword.trim(),
       category,
       region,
       subcategory,
       sort,
       ...next
+    }
+
+    setPage(1)
+    setFilters(nextFilters)
+    trackEvent('tender_search', {
+      has_keyword: Boolean(nextFilters.keyword),
+      category_count: nextFilters.category.length,
+      region_count: nextFilters.region.length,
+      subcategory_count: nextFilters.subcategory.length,
+      sort: nextFilters.sort
     })
   }
 
@@ -384,6 +395,7 @@ export function TenderBoardClient() {
     setSort(DEFAULT_SORT)
     setPage(1)
     setFilters({ keyword: '', category: [], region: [], subcategory: [], sort: DEFAULT_SORT })
+    trackEvent('tender_filters_cleared')
   }
 
   function removeFilter(key: 'keyword' | 'category' | 'region' | 'subcategory', label?: string) {
@@ -419,6 +431,7 @@ export function TenderBoardClient() {
         next.add(tender.id)
         setSaveNotice('Saved on this device. Sign in to OrbitMirai when you need a permanent shortlist across devices.')
       }
+      trackEvent(next.has(tender.id) ? 'tender_saved' : 'tender_unsaved')
       localStorage.setItem('care-atlas:saved-tenders', JSON.stringify([...next]))
       return next
     })
@@ -492,7 +505,10 @@ export function TenderBoardClient() {
             setSort(value)
             applyCurrentFilters({ sort: value })
           }}
-          onViewModeChange={setViewMode}
+          onViewModeChange={mode => {
+            setViewMode(mode)
+            trackEvent('tender_view_changed', { view_mode: mode })
+          }}
           onClear={clearFilters}
           onOpenMobileFilters={() => setMobileFiltersOpen(true)}
           onSubmit={() => applyCurrentFilters()}

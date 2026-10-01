@@ -6,6 +6,7 @@ import { getBillingLabel } from '@/data/products'
 import type { Product } from '@/data/products'
 import type { Service } from '@/data/site'
 import { createCheckoutSession, getCheckoutUrls } from '@/lib/commerce'
+import { trackEvent } from '@/components/analytics/trackEvent'
 import { CheckoutSummary } from './CommerceBlocks'
 import { Button, ButtonLink } from './ui'
 
@@ -63,10 +64,12 @@ export function CheckoutClient({ product, service, popularProducts }: CheckoutCl
     setError(null)
 
     if (!customer.name.trim() || !customer.email.trim()) {
+      trackEvent('checkout_submitted', { product_slug: product.slug, outcome: 'validation_error' })
       setError('Enter your name and email address before continuing to payment.')
       return
     }
 
+    trackEvent('checkout_submitted', { product_slug: product.slug, outcome: 'accepted' })
     setIsSubmitting(true)
 
     try {
@@ -83,8 +86,10 @@ export function CheckoutClient({ product, service, popularProducts }: CheckoutCl
         }
       })
 
+      trackEvent('checkout_started', { product_slug: product.slug })
       window.location.assign(session.checkoutUrl)
     } catch (checkoutError) {
+      trackEvent('checkout_error', { product_slug: product.slug })
       setError(checkoutError instanceof Error ? checkoutError.message : 'Checkout could not be started.')
     } finally {
       setIsSubmitting(false)

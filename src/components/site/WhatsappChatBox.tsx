@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
+import { trackEvent } from '@/components/analytics/trackEvent'
 import { Button } from './ui'
 
 const whatsappNumber = process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_NUMBER ?? ''
@@ -84,8 +85,10 @@ export function WhatsappChatBox() {
       })
 
       window.open(buildWhatsappUrl(message), '_blank', 'noopener,noreferrer')
+      trackEvent('whatsapp_chat_started', { intent })
       setOpen(false)
     } catch (err) {
+      trackEvent('whatsapp_chat_error', { intent })
       setError(err instanceof ApiError ? err.message : 'WhatsApp chat could not be verified. Please try again.')
     } finally {
       setLoadingIntent(null)
@@ -125,7 +128,13 @@ export function WhatsappChatBox() {
       )}
       <Button
         aria-expanded={open}
-        onClick={() => setOpen(value => !value)}
+        onClick={() => {
+          setOpen(value => {
+            const nextOpen = !value
+            if (nextOpen) trackEvent('whatsapp_chat_opened')
+            return nextOpen
+          })
+        }}
         className='min-h-14 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-xl hover:bg-[#1EAE56] focus:ring-[#25D366]/25'
         leftIcon={
           <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-[#128C4A]'>

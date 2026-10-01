@@ -5,6 +5,7 @@ import { FormEvent, useRef, useState } from 'react'
 import { ApiError } from '@/lib/api/client'
 import { sendEnquiry } from '@/lib/api/enquiries'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
+import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { Button } from './ui'
 
@@ -52,6 +53,7 @@ export function FooterNewsletterForm() {
 
     setStatus('submitting')
     setMessage('')
+    trackEvent('newsletter_submitted')
 
     try {
       const recaptchaAction = CARE_ATLAS_RECAPTCHA_ACTIONS.newsletter
@@ -78,8 +80,10 @@ export function FooterNewsletterForm() {
       form.reset()
       formStartedAt.current = Math.floor(Date.now() / 1000)
       setStatus('success')
+      trackEvent('newsletter_success')
       setMessage('You are subscribed. Please check your inbox for confirmation.')
     } catch (error) {
+      trackEvent('newsletter_error')
       setStatus('error')
       setMessage(errorMessage(error))
     }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { PublicTender } from '@/lib/api/tenders'
+import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from '../SiteIcon'
 
@@ -29,17 +30,23 @@ export function TenderShareButton({ tender }: { tender: PublicTender }) {
     if (navigator.share) {
       try {
         await navigator.share({ title: tender.title, text, url })
+        trackEvent('tender_shared', { share_method: 'native' })
         return
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return
       }
     }
 
-    setOpen(current => !current)
+    setOpen(current => {
+      const nextOpen = !current
+      if (nextOpen) trackEvent('tender_share_menu_opened')
+      return nextOpen
+    })
   }
 
   async function copyLink() {
     await navigator.clipboard.writeText(url)
+    trackEvent('tender_shared', { share_method: 'copy_link' })
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
   }
