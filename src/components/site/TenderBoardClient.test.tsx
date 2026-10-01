@@ -1,9 +1,10 @@
 import React from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { HalfScreenModalProvider } from '@/context/HalfScreenModalContext'
+import { getPublicTenderFilters, getPublicTenders } from '@/lib/api/tenders'
 
 import { HalfScreenModal } from './HalfScreenModal'
 import { TenderBoardClient } from './TenderBoardClient'
@@ -68,6 +69,18 @@ vi.mock('@/lib/api/tenders', () => ({
       regions: ['London', 'North West'],
       industries: ['Health and Social Care'],
       subcategories: [],
+      taxonomy: [
+        {
+          slug: 'health-and-social-care',
+          label: 'Health and social care',
+          level: 'industry',
+          parentSlug: null,
+          cpvCode: null
+        }
+      ],
+      ranges: {
+        value: { minMinor: 0, maxMinor: 100000000, currency: 'GBP' }
+      },
       sources: ['find_a_tender', 'proactis_due_north']
     }
   })),
@@ -192,6 +205,36 @@ vi.mock('@/lib/api/bookings', () => ({
 }))
 
 describe('TenderBoardClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('loads the complete care catalogue newest-first without exposing source filters', async () => {
+    render(
+      React.createElement(
+        HalfScreenModalProvider,
+        null,
+        React.createElement(TenderBoardClient),
+        React.createElement(HalfScreenModal)
+      )
+    )
+
+    expect(await screen.findByText('Supported Living Tender')).toBeInTheDocument()
+    expect(getPublicTenderFilters).toHaveBeenCalledWith()
+    expect(getPublicTenderFilters).toHaveBeenCalledTimes(1)
+    expect(getPublicTenders).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: 'newest',
+        page: 1,
+        perPage: 15
+      })
+    )
+
+    const request = vi.mocked(getPublicTenders).mock.calls[0]?.[0]
+    expect(request).not.toHaveProperty('industry')
+    expect(request).not.toHaveProperty('source')
+  })
+
   it('keeps sidebar filter categories compact until expanded', async () => {
     const user = userEvent.setup()
 
@@ -204,18 +247,40 @@ describe('TenderBoardClient', () => {
       )
     )
 
-    const categoryGroup = await screen.findByRole('button', { name: /Tender category.*2 options/i })
+    const categoryGroup = await screen.findByRole('button', { name: /Care service hierarchy.*1 options/i })
     const regionGroup = screen.getByRole('button', { name: /Region or location.*2 options/i })
 
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'false')
     expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.queryByRole('radio', { name: 'Care' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Health and social care' })).not.toBeInTheDocument()
 
     await user.click(categoryGroup)
 
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('radio', { name: 'Care' })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Health and social care' })).toBeInTheDocument()
     expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('shows compact contract value controls with labelled jump points', async () => {
+    const user = userEvent.setup()
+
+    render(
+      React.createElement(
+        HalfScreenModalProvider,
+        null,
+        React.createElement(TenderBoardClient),
+        React.createElement(HalfScreenModal)
+      )
+    )
+
+    await screen.findByText('Supported Living Tender')
+    await user.click(screen.getByRole('button', { name: /Advanced filters/i }))
+
+    expect(screen.getByRole('slider', { name: 'Minimum contract value' })).toBeInTheDocument()
+    expect(screen.getByRole('slider', { name: 'Maximum contract value' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set nearest contract value to £500k' })).toBeInTheDocument()
+    expect(screen.getByText('Minimum')).toBeInTheDocument()
+    expect(screen.getByText('Maximum')).toBeInTheDocument()
   })
 
   it('opens the tender drawer and renders migrated detail and workflow content', async () => {

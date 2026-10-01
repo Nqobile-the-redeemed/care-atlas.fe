@@ -9,18 +9,15 @@ export type TenderBoardViewMode = 'list' | 'grid'
 
 type TenderBoardFiltersProps = {
   keyword: string
-  categoriesSelected: string[]
   regionsSelected: string[]
   subcategoriesSelected: string[]
   sort: 'deadline' | 'newest'
   viewMode: TenderBoardViewMode
-  categories: string[]
   regions: string[]
   subcategories: string[]
   activeFilterCount: number
   loading?: boolean
   onKeywordChange: (value: string) => void
-  onCategoryToggle: (value: string) => void
   onRegionToggle: (value: string) => void
   onSubcategoryToggle: (value: string) => void
   onSortChange: (value: 'deadline' | 'newest') => void
@@ -32,18 +29,15 @@ type TenderBoardFiltersProps = {
 
 export function TenderBoardFilters({
   keyword,
-  categoriesSelected,
   regionsSelected,
   subcategoriesSelected,
   sort,
   viewMode,
-  categories,
   regions,
   subcategories,
   activeFilterCount,
   loading = false,
   onKeywordChange,
-  onCategoryToggle,
   onRegionToggle,
   onSubcategoryToggle,
   onSortChange,
@@ -102,17 +96,6 @@ export function TenderBoardFilters({
           </select>
           <select
             value=''
-            onChange={event => event.target.value && onCategoryToggle(event.target.value)}
-            aria-label='Tender category'
-            className={`${inputClass} w-56`}
-          >
-            <option value=''>All tender categories</option>
-            {categories.map(item => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-          <select
-            value=''
             onChange={event => event.target.value && onRegionToggle(event.target.value)}
             aria-label='Region'
             className={`${inputClass} w-52`}
@@ -122,7 +105,7 @@ export function TenderBoardFilters({
               <option key={item}>{item}</option>
             ))}
           </select>
-          {subcategoriesSelected.length + categoriesSelected.length + regionsSelected.length > 0 && (
+          {subcategoriesSelected.length + regionsSelected.length > 0 && (
             <span className='text-xs font-semibold text-gray-500'>Selections appear below</span>
           )}
           {hasActiveFilters && (

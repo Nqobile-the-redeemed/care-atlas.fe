@@ -195,15 +195,17 @@ export function TenderBoardLeadForm({
           </div>
         )}
         {error && <p className='bg-error-50 text-error-700 rounded-lg p-3 text-sm font-medium'>{error}</p>}
-        <Button
-          type='submit'
-          disabled={submitting || !selectedTender}
-          loading={submitting}
-          fullWidth
-          leftIcon={<SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />}
-        >
-          {leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
-        </Button>
+        <div className='sticky bottom-0 z-10 -mx-4 border-t border-gray-200 bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none'>
+          <Button
+            type='submit'
+            disabled={submitting || !selectedTender}
+            loading={submitting}
+            fullWidth
+            leftIcon={<SiteIcon name={leadKind === 'booking' ? 'calendar' : 'mail'} className='h-4 w-4' />}
+          >
+            {leadKind === 'booking' ? 'Book meeting' : 'Send enquiry'}
+          </Button>
+        </div>
       </form>
     </>
   )
