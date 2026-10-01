@@ -1,6 +1,26 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'careatlas.co.uk'
+          }
+        ],
+        destination: 'https://www.careatlas.co.uk/:path*',
+        permanent: true
+      },
+      {
+        source: '/:malformed(\\$|&)',
+        destination: '/',
+        permanent: true
+      }
+    ]
+  },
   images: {
     remotePatterns: [
       {

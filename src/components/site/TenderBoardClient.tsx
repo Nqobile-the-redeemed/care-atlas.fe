@@ -22,7 +22,6 @@ import {
   type TenderPagination,
   type TenderTaxonomyNode
 } from '@/lib/api/tenders'
-import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 
 import { SiteIcon } from './SiteIcon'

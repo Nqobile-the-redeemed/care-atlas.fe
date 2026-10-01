@@ -1,10 +1,10 @@
 'use client'
 
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { FormEvent, useRef, useState } from 'react'
 
 import { ApiError } from '@/lib/api/client'
 import { sendEnquiry } from '@/lib/api/enquiries'
-import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 
 import { Button } from './ui'
 
@@ -22,10 +22,6 @@ export function FooterNewsletterForm() {
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
   const [status, setStatus] = useState<SubmissionStatus>('idle')
   const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    preloadRecaptcha()
-  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

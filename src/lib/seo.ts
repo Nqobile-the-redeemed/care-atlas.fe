@@ -12,7 +12,7 @@ export const defaultOgImage = {
 }
 
 export function absoluteUrl(path = '/') {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  const normalizedPath = (path.startsWith('/') ? path : `/${path}`).split('#')[0]?.split('?')[0] || '/'
 
   return new URL(normalizedPath, CARE_ATLAS_ORIGIN).toString()
 }
