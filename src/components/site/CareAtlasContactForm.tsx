@@ -1,7 +1,7 @@
 'use client'
 
-import { FormEvent, useEffect, useRef, useState } from 'react'
-import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { FormEvent, useRef, useState } from 'react'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -59,10 +59,6 @@ export function CareAtlasContactForm() {
   const [securityError, setSecurityError] = useState('')
   const [regions, setRegions] = useState<string[]>([])
   const [counties, setCounties] = useState<string[]>([])
-
-  useEffect(() => {
-    preloadRecaptcha()
-  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

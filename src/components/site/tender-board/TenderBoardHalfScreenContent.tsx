@@ -10,12 +10,7 @@ import {
   type BookingEventType,
   type BookingSlot
 } from '@/lib/api/bookings'
-import {
-  CARE_ATLAS_RECAPTCHA_ACTIONS,
-  careAtlasEnquiryRecaptchaAction,
-  getRecaptchaToken,
-  preloadRecaptcha
-} from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, careAtlasEnquiryRecaptchaAction, getRecaptchaToken } from '@/lib/recaptcha'
 import { getPublicTender, sendTenderLead, type TenderLeadKind } from '@/lib/api/tenders'
 
 import { TenderBoardFormYup, emptyTenderBoardFormValues } from './tenderLeadFormSchema'
@@ -93,10 +88,6 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
-
-  useEffect(() => {
-    preloadRecaptcha()
-  }, [])
 
   useEffect(() => {
     if (hasTenderDetails(selectedTender)) return

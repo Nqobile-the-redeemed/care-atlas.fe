@@ -8,7 +8,7 @@ import {
   getBookingAvailability,
   getBookingEventTypes
 } from '@/lib/api/bookings'
-import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
 import { Button } from './ui'
@@ -69,10 +69,6 @@ export function BookingPanel() {
     return () => {
       alive = false
     }
-  }, [])
-
-  useEffect(() => {
-    preloadRecaptcha()
   }, [])
 
   useEffect(() => {

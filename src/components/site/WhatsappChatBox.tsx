@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken, preloadRecaptcha } from '@/lib/recaptcha'
+import { useMemo, useState } from 'react'
+import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
 import { Button } from './ui'
@@ -58,12 +58,6 @@ export function WhatsappChatBox() {
   const [error, setError] = useState<string | null>(null)
 
   const enabled = useMemo(() => whatsappNumber.replace(/\D/g, '').length >= 10, [])
-
-  useEffect(() => {
-    if (enabled) {
-      preloadRecaptcha()
-    }
-  }, [enabled])
 
   if (!enabled) {
     return null

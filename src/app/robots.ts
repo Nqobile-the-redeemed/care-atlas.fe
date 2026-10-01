@@ -27,10 +27,6 @@ export default function robots(): MetadataRoute.Robots {
           '/signin',
           '/signup',
           '/reset-password',
-          '/checkout',
-          '/checkout/success',
-          '/checkout/cancelled',
-          '/checkout/failed',
           '/unsubscribe',
           '/api'
         ]

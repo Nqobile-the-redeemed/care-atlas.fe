@@ -12,7 +12,6 @@ import {
   type TenderLeadKind,
   type TenderPagination
 } from '@/lib/api/tenders'
-import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 
 import { SiteIcon } from './SiteIcon'
@@ -300,10 +299,6 @@ export function TenderBoardClient() {
   useEffect(() => {
     void load()
   }, [load])
-
-  useEffect(() => {
-    preloadRecaptcha()
-  }, [])
 
   useEffect(() => {
     void getPublicTenderFilters()
