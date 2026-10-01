@@ -139,12 +139,19 @@ export type TenderFilters = {
   taxonomy?: TenderTaxonomyNode[]
   cpvCodes?: Array<{ code: string; label: string; slug: string; parentSlug: string | null }>
   keywords?: string[]
+  keywordGroups?: TenderKeywordGroup[]
   stages?: string[]
   procedureTypes?: string[]
   procurementTypes?: string[]
   total?: number
   ranges?: {
-    value?: { minMinor: number | null; maxMinor: number | null; currency: string }
+    value?: {
+      minMinor: number | null
+      maxMinor: number | null
+      currency: string
+      knownCount?: number
+      unspecifiedCount?: number
+    }
   }
   facets?: Partial<
     Record<
@@ -176,6 +183,7 @@ export type PublicTenderQuery = {
   keywords?: string | string[]
   valueMinMinor?: number
   valueMaxMinor?: number
+  includeValueUnspecified?: boolean
   publishedFrom?: string
   publishedTo?: string
   deadlineFrom?: string
@@ -241,6 +249,9 @@ export async function getPublicTenderFilters(filters: Omit<PublicTenderQuery, 'p
 function appendAdvancedTenderFilters(params: URLSearchParams, filters: PublicTenderQuery) {
   if (filters.valueMinMinor !== undefined) params.set('value_min_minor', String(filters.valueMinMinor))
   if (filters.valueMaxMinor !== undefined) params.set('value_max_minor', String(filters.valueMaxMinor))
+  if (filters.includeValueUnspecified !== undefined) {
+    params.set('include_value_unspecified', filters.includeValueUnspecified ? '1' : '0')
+  }
   if (filters.publishedFrom) params.set('published_from', filters.publishedFrom)
   if (filters.publishedTo) params.set('published_to', filters.publishedTo)
   if (filters.deadlineFrom) params.set('deadline_from', filters.deadlineFrom)
@@ -259,6 +270,12 @@ export type TenderTaxonomyNode = {
   level: 'industry' | 'service_category' | 'cpv_code'
   parentSlug: string | null
   cpvCode?: string | null
+}
+
+export type TenderKeywordGroup = {
+  slug: string
+  label: string
+  options: string[]
 }
 
 function appendMany(params: URLSearchParams, key: string, values?: string | string[]) {

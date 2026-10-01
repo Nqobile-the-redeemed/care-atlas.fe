@@ -34,6 +34,7 @@ export type TenderFilters = {
   categories: string[]
   regions: string[]
   keywords?: string[]
+  keywordGroups?: Array<{ slug: string; label: string; options: string[] }>
   stages?: string[]
   procedureTypes?: string[]
   procurementTypes?: string[]

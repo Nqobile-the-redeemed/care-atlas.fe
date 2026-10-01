@@ -1,0 +1,46 @@
+# Dependencies and generated output
+node_modules
+.next
+out
+build
+dist
+coverage
+.turbo
+.vercel
+*.tsbuildinfo
+
+# Version control and editor state
+.git
+.github
+.idea
+.vscode
+.trae
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Tests, documentation, reports, and debug artifacts
+tests
+__tests__
+**/*.test.*
+**/*.spec.*
+docs
+*.md
+.dbg
+eslint-report.*
+files-with-eslint-errors.txt
+tsc-report.txt
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Temporary and operating-system files
+tmp
+temp
+.DS_Store
+Thumbs.db

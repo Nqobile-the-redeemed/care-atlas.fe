@@ -18,6 +18,7 @@ import {
   getPublicTenders,
   type PublicTender,
   type TenderFilters,
+  type TenderKeywordGroup,
   type TenderLeadKind,
   type TenderPagination,
   type TenderTaxonomyNode
@@ -57,6 +58,7 @@ type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
   smeSuitable?: boolean
   valueMinMinor?: number
   valueMaxMinor?: number
+  includeValueUnspecified: boolean
   sort: 'deadline' | 'newest'
 }
 
@@ -72,6 +74,7 @@ type FilterPanelProps = {
   subcategories: string[]
   taxonomyNodes: TenderTaxonomyNode[]
   keywordOptions: string[]
+  keywordGroups: TenderKeywordGroup[]
   stages: string[]
   procedureTypes: string[]
   procurementTypes: string[]
@@ -84,7 +87,14 @@ type FilterPanelProps = {
   smeSuitable: boolean
   valueMinMinor?: number
   valueMaxMinor?: number
-  valueBounds?: { minMinor: number | null; maxMinor: number | null; currency: string }
+  valueBounds?: {
+    minMinor: number | null
+    maxMinor: number | null
+    currency: string
+    knownCount?: number
+    unspecifiedCount?: number
+  }
+  includeValueUnspecified: boolean
   resultCount?: number
   facets?: TenderFilters['facets']
   activeFilterCount: number
@@ -98,6 +108,7 @@ type FilterPanelProps = {
   onDateChange: (field: 'publishedFrom' | 'publishedTo' | 'deadlineFrom' | 'deadlineTo', value: string) => void
   onBooleanChange: (field: 'framework' | 'dynamicMarket' | 'smeSuitable', value: boolean) => void
   onValueChange: (field: 'valueMinMinor' | 'valueMaxMinor', value: number) => void
+  onIncludeValueUnspecifiedChange: (value: boolean) => void
   onClear: () => void
 }
 
@@ -316,6 +327,46 @@ function FilterCheckboxList({
   )
 }
 
+function KeywordGroupList({
+  groups,
+  selected,
+  counts,
+  onToggle
+}: {
+  groups: TenderKeywordGroup[]
+  selected: string[]
+  counts?: Array<{ value: string | boolean; count: number }>
+  onToggle: (value: string) => void
+}) {
+  return (
+    <div className='space-y-2'>
+      {groups.map(group => {
+        const selectedCount = group.options.filter(option => selected.includes(option)).length
+
+        return (
+          <details key={group.slug} className='rounded-lg border border-gray-200 bg-gray-50'>
+            <summary className='flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-semibold text-gray-800'>
+              <span>{group.label}</span>
+              <span className='text-xs font-normal text-gray-500'>
+                {selectedCount ? `${selectedCount} selected` : `${group.options.length} options`}
+              </span>
+            </summary>
+            <div className='border-t border-gray-200 bg-white p-1'>
+              <FilterCheckboxList
+                name={`keywords-${group.slug}`}
+                value={selected}
+                options={group.options}
+                onToggle={onToggle}
+                counts={counts}
+              />
+            </div>
+          </details>
+        )
+      })}
+    </div>
+  )
+}
+
 function TaxonomyFilterTree({
   nodes,
   selected,
@@ -381,6 +432,7 @@ function FilterPanel({
   subcategories,
   taxonomyNodes,
   keywordOptions,
+  keywordGroups,
   stages,
   procedureTypes,
   procurementTypes,
@@ -394,6 +446,7 @@ function FilterPanel({
   valueMinMinor,
   valueMaxMinor,
   valueBounds,
+  includeValueUnspecified,
   resultCount,
   facets,
   activeFilterCount,
@@ -407,6 +460,7 @@ function FilterPanel({
   onDateChange,
   onBooleanChange,
   onValueChange,
+  onIncludeValueUnspecifiedChange,
   onClear
 }: FilterPanelProps) {
   const minimum = valueBounds?.minMinor ?? 0
@@ -476,13 +530,22 @@ function FilterPanel({
           selectedLabel={keywords.length ? `${keywords.length} selected` : undefined}
           optionCount={keywordOptions.length}
         >
-          <FilterCheckboxList
-            name='keywords'
-            value={keywords}
-            options={keywordOptions}
-            onToggle={onKeywordToggle}
-            counts={facets?.keywords}
-          />
+          {keywordGroups.length > 0 ? (
+            <KeywordGroupList
+              groups={keywordGroups}
+              selected={keywords}
+              onToggle={onKeywordToggle}
+              counts={facets?.keywords}
+            />
+          ) : (
+            <FilterCheckboxList
+              name='keywords'
+              value={keywords}
+              options={keywordOptions}
+              onToggle={onKeywordToggle}
+              counts={facets?.keywords}
+            />
+          )}
         </FilterGroup>
         <FilterGroup title='Advanced filters' selectedLabel={activeFilterCount ? 'Review active filters' : undefined}>
           <div className='space-y-4 pb-4'>
@@ -536,6 +599,18 @@ function FilterPanel({
                   step={rangeStep}
                   onChange={onValueChange}
                 />
+                {(valueBounds?.unspecifiedCount ?? 0) > 0 && (
+                  <label className='mt-2 flex cursor-pointer items-start gap-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-700'>
+                    <input
+                      type='checkbox'
+                      checked={includeValueUnspecified}
+                      onChange={event => onIncludeValueUnspecifiedChange(event.target.checked)}
+                      className='text-brand-600 mt-0.5 h-4 w-4 border-gray-300'
+                    />
+                    Include {valueBounds?.unspecifiedCount?.toLocaleString('en-GB')} opportunities where the value is
+                    not stated
+                  </label>
+                )}
               </div>
             )}
 
@@ -612,6 +687,9 @@ export function TenderBoardClient() {
   const [valueMaxMinor, setValueMaxMinor] = useState<number | undefined>(() =>
     optionalNumber(searchParams.get('valueMaxMinor'))
   )
+  const [includeValueUnspecified, setIncludeValueUnspecified] = useState(
+    () => searchParams.get('includeValueUnspecified') !== 'false'
+  )
   const [sort, setSort] = useState<'deadline' | 'newest'>(() =>
     searchParams.get('sort') === 'newest' ? 'newest' : DEFAULT_SORT
   )
@@ -634,6 +712,7 @@ export function TenderBoardClient() {
     smeSuitable: searchParams.get('smeSuitable') === 'true' || undefined,
     valueMinMinor: optionalNumber(searchParams.get('valueMinMinor')),
     valueMaxMinor: optionalNumber(searchParams.get('valueMaxMinor')),
+    includeValueUnspecified: searchParams.get('includeValueUnspecified') !== 'false',
     sort: searchParams.get('sort') === 'newest' ? 'newest' : DEFAULT_SORT
   }))
   const [page, setPage] = useState(() => Math.max(1, Number(searchParams.get('page') ?? 1) || 1))
@@ -657,6 +736,7 @@ export function TenderBoardClient() {
   const subcategories = useMemo(() => [...(filterOptions.subcategories ?? [])].sort(), [filterOptions.subcategories])
   const taxonomyNodes = useMemo(() => filterOptions.taxonomy ?? [], [filterOptions.taxonomy])
   const keywordOptions = useMemo(() => [...(filterOptions.keywords ?? [])].sort(), [filterOptions.keywords])
+  const keywordGroups = useMemo(() => filterOptions.keywordGroups ?? [], [filterOptions.keywordGroups])
   const stages = useMemo(() => [...(filterOptions.stages ?? [])].sort(), [filterOptions.stages])
   const procedureTypes = useMemo(() => [...(filterOptions.procedureTypes ?? [])].sort(), [filterOptions.procedureTypes])
   const procurementTypes = useMemo(
@@ -680,7 +760,10 @@ export function TenderBoardClient() {
     Number(Boolean(filters.framework)) +
     Number(Boolean(filters.dynamicMarket)) +
     Number(Boolean(filters.smeSuitable)) +
-    Number(filters.valueMinMinor !== undefined || filters.valueMaxMinor !== undefined)
+    Number(filters.valueMinMinor !== undefined || filters.valueMaxMinor !== undefined) +
+    Number(
+      (filters.valueMinMinor !== undefined || filters.valueMaxMinor !== undefined) && !filters.includeValueUnspecified
+    )
 
   const activeFilterLabels = [
     filters.keyword ? { key: 'keyword', label: `Search: ${filters.keyword}` } : null,
@@ -796,6 +879,7 @@ export function TenderBoardClient() {
     if (filters.smeSuitable) next.set('smeSuitable', 'true')
     if (filters.valueMinMinor !== undefined) next.set('valueMinMinor', String(filters.valueMinMinor))
     if (filters.valueMaxMinor !== undefined) next.set('valueMaxMinor', String(filters.valueMaxMinor))
+    if (!filters.includeValueUnspecified) next.set('includeValueUnspecified', 'false')
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
@@ -861,6 +945,7 @@ export function TenderBoardClient() {
       smeSuitable: smeSuitable || undefined,
       valueMinMinor,
       valueMaxMinor,
+      includeValueUnspecified,
       sort,
       ...next
     })
@@ -885,6 +970,7 @@ export function TenderBoardClient() {
     setSmeSuitable(false)
     setValueMinMinor(undefined)
     setValueMaxMinor(undefined)
+    setIncludeValueUnspecified(true)
     setSort(DEFAULT_SORT)
     setPage(1)
     setFilters({
@@ -897,6 +983,7 @@ export function TenderBoardClient() {
       stage: [],
       procedureType: [],
       procurementType: [],
+      includeValueUnspecified: true,
       sort: DEFAULT_SORT
     })
   }
@@ -980,15 +1067,29 @@ export function TenderBoardClient() {
   }
 
   function changeValue(field: 'valueMinMinor' | 'valueMaxMinor', value: number) {
-    if (field === 'valueMinMinor') setValueMinMinor(value)
-    else setValueMaxMinor(value)
+    const maximum = filterOptions.ranges?.value?.maxMinor
+    const normalized =
+      field === 'valueMinMinor' && value <= 0
+        ? undefined
+        : field === 'valueMaxMinor' && maximum !== null && maximum !== undefined && value >= maximum
+          ? undefined
+          : value
+
+    if (field === 'valueMinMinor') setValueMinMinor(normalized)
+    else setValueMaxMinor(normalized)
 
     if (valueFilterTimerRef.current !== null) window.clearTimeout(valueFilterTimerRef.current)
     valueFilterTimerRef.current = window.setTimeout(() => {
       setPage(1)
-      setFilters(current => ({ ...current, [field]: value }))
+      setFilters(current => ({ ...current, [field]: normalized }))
       valueFilterTimerRef.current = null
     }, 350)
+  }
+
+  function changeIncludeValueUnspecified(value: boolean) {
+    setIncludeValueUnspecified(value)
+    setPage(1)
+    setFilters(current => ({ ...current, includeValueUnspecified: value }))
   }
 
   function toggleSaved(tender: PublicTender) {
@@ -1111,6 +1212,7 @@ export function TenderBoardClient() {
               subcategories={subcategories}
               taxonomyNodes={taxonomyNodes}
               keywordOptions={keywordOptions}
+              keywordGroups={keywordGroups}
               stages={stages}
               procedureTypes={procedureTypes}
               procurementTypes={procurementTypes}
@@ -1124,6 +1226,7 @@ export function TenderBoardClient() {
               valueMinMinor={valueMinMinor}
               valueMaxMinor={valueMaxMinor}
               valueBounds={filterOptions.ranges?.value}
+              includeValueUnspecified={includeValueUnspecified}
               resultCount={contextualFilters.total}
               facets={contextualFilters.facets}
               activeFilterCount={activeFilterCount}
@@ -1137,6 +1240,7 @@ export function TenderBoardClient() {
               onDateChange={changeDate}
               onBooleanChange={changeBoolean}
               onValueChange={changeValue}
+              onIncludeValueUnspecifiedChange={changeIncludeValueUnspecified}
               onClear={clearFilters}
             />
           </aside>
@@ -1197,6 +1301,7 @@ export function TenderBoardClient() {
                 subcategories={subcategories}
                 taxonomyNodes={taxonomyNodes}
                 keywordOptions={keywordOptions}
+                keywordGroups={keywordGroups}
                 stages={stages}
                 procedureTypes={procedureTypes}
                 procurementTypes={procurementTypes}
@@ -1210,6 +1315,7 @@ export function TenderBoardClient() {
                 valueMinMinor={valueMinMinor}
                 valueMaxMinor={valueMaxMinor}
                 valueBounds={filterOptions.ranges?.value}
+                includeValueUnspecified={includeValueUnspecified}
                 resultCount={contextualFilters.total}
                 facets={contextualFilters.facets}
                 activeFilterCount={activeFilterCount}
@@ -1225,6 +1331,7 @@ export function TenderBoardClient() {
                 onDateChange={changeDate}
                 onBooleanChange={changeBoolean}
                 onValueChange={changeValue}
+                onIncludeValueUnspecifiedChange={changeIncludeValueUnspecified}
                 onClear={clearFilters}
               />
             </div>
