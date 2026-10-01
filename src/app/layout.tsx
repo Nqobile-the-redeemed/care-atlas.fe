@@ -6,10 +6,12 @@ import { SidebarProvider } from '@/context/SidebarContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { CARE_ATLAS_ORIGIN, defaultOgImage } from '@/lib/seo'
 import { StoreProvider } from './providers'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? '1472745578238114'
 const MICROSOFT_CLARITY_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID ?? 'yqkn5f5bcz'
 const GOOGLE_TAG_MANAGER_ID = process.env.NEXT_PUBLIC_GTM_ID ?? 'GTM-M8JC8PBH'
+const GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? 'G-0MEHHXF3CY'
 
 const googleTagManagerScript = GOOGLE_TAG_MANAGER_ID
   ? `
@@ -107,6 +109,7 @@ export default function RootLayout({
         )}
       </head>
       <body className='bg-white dark:bg-gray-900'>
+        <GoogleAnalytics measurementId={GOOGLE_ANALYTICS_ID} />
         {GOOGLE_TAG_MANAGER_ID && (
           <noscript>
             <iframe
