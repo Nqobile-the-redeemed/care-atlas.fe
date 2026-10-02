@@ -196,9 +196,9 @@ export function HalfScreenModal() {
             aria-labelledby={titleId}
             aria-describedby={describedByIds}
             aria-hidden={!isOpen}
-            className={`pointer-events-auto absolute right-0 bottom-0 left-0 flex max-h-[85dvh] w-full flex-col overflow-hidden border-t border-gray-200 bg-white shadow-2xl transition-transform motion-reduce:!duration-0 ${mobileTranslateClass}`}
+            className={`pointer-events-auto absolute right-0 bottom-0 left-0 flex max-h-[92dvh] w-full flex-col overflow-hidden border-t border-gray-200 bg-white shadow-2xl transition-transform motion-reduce:!duration-0 ${mobileTranslateClass}`}
             style={{
-              height: '85dvh',
+              height: '92dvh',
               transitionDuration:
                 sheetSnap === 'closed'
                   ? '250ms'
@@ -246,7 +246,8 @@ export function HalfScreenModal() {
                   onClick={toggleMobileSnap}
                   variant='secondary'
                   size='sm'
-                  className='min-w-[92px] border-gray-200 text-gray-800 hover:border-gray-200 hover:bg-gray-100'
+                  className='h-10 w-10 border-gray-200 p-0 text-gray-800 hover:border-gray-200 hover:bg-gray-100'
+                  title={sheetSnap === 'minimized' ? 'Expand sheet' : 'Minimize sheet'}
                   aria-label={sheetSnap === 'minimized' ? 'Expand sheet' : 'Minimize sheet'}
                   leftIcon={
                     sheetSnap === 'minimized' ? (
@@ -255,25 +256,22 @@ export function HalfScreenModal() {
                       <SiteIcon name='contract' className='h-4 w-4' />
                     )
                   }
-                >
-                  {sheetSnap === 'minimized' ? 'Expand' : 'Minimize'}
-                </Button>
+                />
                 <Button
                   type='button'
                   onClick={closeModal}
                   variant='tertiary'
                   size='sm'
-                  className='min-w-[76px] bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  className='h-10 w-10 bg-gray-100 p-0 text-gray-900 hover:bg-gray-200'
                   aria-label='Exit and close tender details'
+                  title='Close tender details'
                   leftIcon={<SiteIcon name='close' className='h-4 w-4' />}
-                >
-                  Exit
-                </Button>
+                />
               </div>
             </header>
 
             {sheetSnap !== 'minimized' && (
-              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain'>
+              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]'>
                 <TemplateComponent data={data} onClose={closeModal} />
               </div>
             )}

@@ -69,6 +69,19 @@ vi.mock('@/lib/api/tenders', () => ({
       regions: ['London', 'North West'],
       industries: ['Health and Social Care'],
       subcategories: [],
+      keywords: ['Supported living', 'Learning disability'],
+      keywordGroups: [
+        {
+          slug: 'accommodation-living',
+          label: 'Accommodation and living',
+          options: ['Supported living']
+        },
+        {
+          slug: 'additional-needs',
+          label: 'Additional needs',
+          options: ['Learning disability']
+        }
+      ],
       taxonomy: [
         {
           slug: 'health-and-social-care',
@@ -281,6 +294,28 @@ describe('TenderBoardClient', () => {
     expect(screen.getByRole('button', { name: 'Set nearest contract value to £500k' })).toBeInTheDocument()
     expect(screen.getByText('Minimum')).toBeInTheDocument()
     expect(screen.getByText('Maximum')).toBeInTheDocument()
+    expect(screen.getByLabelText('Published from')).toHaveClass('max-w-full')
+    expect(screen.getByLabelText('Closing to')).toHaveClass('max-w-full')
+  })
+
+  it('groups familiar care terms under Care categories', async () => {
+    const user = userEvent.setup()
+
+    render(
+      React.createElement(
+        HalfScreenModalProvider,
+        null,
+        React.createElement(TenderBoardClient),
+        React.createElement(HalfScreenModal)
+      )
+    )
+
+    await screen.findByText('Supported Living Tender')
+    const careCategories = screen.getByRole('button', { name: /Care categories.*2 options/i })
+    await user.click(careCategories)
+
+    expect(screen.getByText('Accommodation and living')).toBeInTheDocument()
+    expect(screen.getByText('Additional needs')).toBeInTheDocument()
   })
 
   it('opens the tender drawer and renders migrated detail and workflow content', async () => {

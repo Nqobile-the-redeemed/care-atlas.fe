@@ -540,7 +540,7 @@ function FilterPanel({
           />
         </FilterGroup>
         <FilterGroup
-          title='Care topics'
+          title='Care categories'
           selectedLabel={keywords.length ? `${keywords.length} selected` : undefined}
           optionCount={keywordOptions.length}
         >
@@ -567,41 +567,45 @@ function FilterPanel({
           contentClassName='overflow-visible'
         >
           <div className='space-y-4 pb-4'>
-            <div className='grid grid-cols-2 gap-2'>
-              <label className='text-xs font-medium text-gray-700'>
+            <div className='grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2'>
+              <label className='min-w-0 text-xs font-medium text-gray-700'>
                 Published from
                 <input
                   type='date'
                   value={publishedFrom}
                   onChange={event => onDateChange('publishedFrom', event.target.value)}
-                  className='mt-1 h-10 w-full rounded-lg border border-gray-300 px-2 text-xs'
+                  max={publishedTo || undefined}
+                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
                 />
               </label>
-              <label className='text-xs font-medium text-gray-700'>
+              <label className='min-w-0 text-xs font-medium text-gray-700'>
                 Published to
                 <input
                   type='date'
                   value={publishedTo}
                   onChange={event => onDateChange('publishedTo', event.target.value)}
-                  className='mt-1 h-10 w-full rounded-lg border border-gray-300 px-2 text-xs'
+                  min={publishedFrom || undefined}
+                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
                 />
               </label>
-              <label className='text-xs font-medium text-gray-700'>
+              <label className='min-w-0 text-xs font-medium text-gray-700'>
                 Closing from
                 <input
                   type='date'
                   value={deadlineFrom}
                   onChange={event => onDateChange('deadlineFrom', event.target.value)}
-                  className='mt-1 h-10 w-full rounded-lg border border-gray-300 px-2 text-xs'
+                  max={deadlineTo || undefined}
+                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
                 />
               </label>
-              <label className='text-xs font-medium text-gray-700'>
+              <label className='min-w-0 text-xs font-medium text-gray-700'>
                 Closing to
                 <input
                   type='date'
                   value={deadlineTo}
                   onChange={event => onDateChange('deadlineTo', event.target.value)}
-                  className='mt-1 h-10 w-full rounded-lg border border-gray-300 px-2 text-xs'
+                  min={deadlineFrom || undefined}
+                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
                 />
               </label>
             </div>
@@ -1260,7 +1264,7 @@ export function TenderBoardClient() {
             role='dialog'
             aria-modal='true'
             aria-labelledby='mobile-tender-filters-title'
-            className='absolute top-0 right-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl'
+            className='absolute top-0 right-0 flex h-[100dvh] w-full max-w-sm flex-col overflow-hidden bg-white shadow-2xl'
           >
             <div className='flex items-center justify-between border-b border-gray-200 p-4'>
               <h2 id='mobile-tender-filters-title' className='font-semibold text-gray-950'>
@@ -1275,7 +1279,7 @@ export function TenderBoardClient() {
                 <SiteIcon name='close' className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 overflow-y-auto p-4'>
+            <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4'>
               <FilterPanel
                 region={region}
                 subcategory={subcategory}
@@ -1322,7 +1326,7 @@ export function TenderBoardClient() {
                 onClear={clearFilters}
               />
             </div>
-            <div className='border-t border-gray-200 p-4'>
+            <div className='shrink-0 border-t border-gray-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]'>
               <Button
                 fullWidth
                 onClick={() => {
