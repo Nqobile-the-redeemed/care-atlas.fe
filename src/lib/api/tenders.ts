@@ -148,6 +148,8 @@ export type TenderFilters = {
     value?: {
       minMinor: number | null
       maxMinor: number | null
+      suggestedMaxMinor?: number | null
+      stepsMinor?: number[]
       currency: string
       knownCount?: number
       unspecifiedCount?: number

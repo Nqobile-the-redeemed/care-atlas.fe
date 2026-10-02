@@ -224,8 +224,8 @@ export default function HomePage() {
             <div>
               <h2 className='text-xl font-semibold text-gray-950'>Care Atlas Tender Navigator</h2>
               <p className='mt-1 max-w-3xl text-sm leading-6 text-gray-600'>
-                Browse current UK care, housing and cleaning opportunities, then unlock the full catalogue and bid
-                support workflow.
+                Browse current UK care, supported-living and housing opportunities, then unlock the full catalogue and
+                bid support workflow.
               </p>
             </div>
           </div>

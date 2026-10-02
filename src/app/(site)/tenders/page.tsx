@@ -6,7 +6,7 @@ import { publicPageMetadata } from '@/lib/seo'
 export const metadata = publicPageMetadata({
   title: 'Tender Navigator | Care Atlas',
   description:
-    'Browse current UK care, supported living, housing and cleaning tenders for free, then book a Care Atlas bid-support meeting.',
+    'Browse current UK care, supported living and housing tenders for free, then book a Care Atlas bid-support meeting.',
   path: '/tenders'
 })
 
@@ -21,7 +21,7 @@ export default function TendersPage() {
             </p>
             <h1 className='text-4xl font-semibold text-gray-950 sm:text-5xl'>Care sector tender opportunities.</h1>
             <p className='mt-5 text-lg leading-8 text-gray-600'>
-              Browse the full public board for current UK care, housing, cleaning and supported-living tenders. Open an
+              Browse the full public board for current UK care, housing and supported-living tenders. Open an
               opportunity to review the detail, then book a bid-support meeting when you want help submitting.
             </p>
           </div>

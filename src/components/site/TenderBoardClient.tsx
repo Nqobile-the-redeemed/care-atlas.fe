@@ -90,6 +90,8 @@ type FilterPanelProps = {
   valueBounds?: {
     minMinor: number | null
     maxMinor: number | null
+    suggestedMaxMinor?: number | null
+    stepsMinor?: number[]
     currency: string
     knownCount?: number
     unspecifiedCount?: number
@@ -145,28 +147,35 @@ function compactMoneyMinor(value: number) {
 function valueStops(minimum: number, maximum: number) {
   if (maximum <= minimum) return [minimum]
 
-  return Array.from({ length: 5 }, (_, index) => Math.round(minimum + ((maximum - minimum) * index) / 4))
+  const cappedMaximum = Math.min(maximum, 5_000_000_000)
+  const candidates = [0, 10_000_000, 50_000_000, 100_000_000, 500_000_000, cappedMaximum]
+
+  return Array.from(new Set(candidates.filter(value => value >= minimum && value <= cappedMaximum))).sort(
+    (left, right) => left - right
+  )
 }
 
 function TenderValueRange({
-  minimum,
-  maximum,
+  stops,
   selectedMinimum,
   selectedMaximum,
-  step,
   onChange
 }: {
-  minimum: number
-  maximum: number
+  stops: number[]
   selectedMinimum: number
   selectedMaximum: number
-  step: number
   onChange: (field: 'valueMinMinor' | 'valueMaxMinor', value: number) => void
 }) {
-  const stops = valueStops(minimum, maximum)
-  const span = Math.max(1, maximum - minimum)
-  const minimumPercent = ((selectedMinimum - minimum) / span) * 100
-  const maximumPercent = ((selectedMaximum - minimum) / span) * 100
+  const lastIndex = Math.max(0, stops.length - 1)
+  const nearestIndex = (value: number) =>
+    stops.reduce(
+      (nearest, stop, index) => (Math.abs(stop - value) < Math.abs(stops[nearest] - value) ? index : nearest),
+      0
+    )
+  const minimumIndex = nearestIndex(selectedMinimum)
+  const maximumIndex = nearestIndex(selectedMaximum)
+  const minimumPercent = lastIndex === 0 ? 0 : (minimumIndex / lastIndex) * 100
+  const maximumPercent = lastIndex === 0 ? 100 : (maximumIndex / lastIndex) * 100
 
   const jumpTo = (value: number) => {
     if (Math.abs(value - selectedMinimum) <= Math.abs(value - selectedMaximum)) {
@@ -189,51 +198,61 @@ function TenderValueRange({
         <div className='text-right'>
           <span className='block text-[11px] font-semibold tracking-wide text-gray-500 uppercase'>Maximum</span>
           <strong className='mt-0.5 block text-sm text-gray-950 tabular-nums'>
-            {compactMoneyMinor(selectedMaximum)}
+            {maximumIndex === lastIndex ? 'Any value' : compactMoneyMinor(selectedMaximum)}
           </strong>
         </div>
       </div>
 
-      <div className='relative mt-3 h-2 rounded-full bg-gray-200' aria-hidden='true'>
-        <span
-          className='bg-brand-600 absolute h-2 rounded-full'
-          style={{ left: `${minimumPercent}%`, right: `${100 - maximumPercent}%` }}
-        />
-      </div>
-
-      <div className='mt-2 grid gap-1.5'>
+      <div className='relative mt-3 h-7'>
+        <div className='absolute top-2.5 right-2 left-2 h-1.5 rounded-full bg-gray-200' aria-hidden='true'>
+          <span
+            className='bg-brand-600 absolute h-1.5 rounded-full'
+            style={{ left: `${minimumPercent}%`, right: `${100 - maximumPercent}%` }}
+          />
+        </div>
         <input
           type='range'
-          min={minimum}
-          max={maximum}
-          step={step}
-          value={selectedMinimum}
-          onChange={event => onChange('valueMinMinor', Math.min(Number(event.target.value), selectedMaximum))}
+          min={0}
+          max={lastIndex}
+          step={1}
+          value={minimumIndex}
+          onChange={event => {
+            const index = Math.min(Number(event.target.value), maximumIndex)
+            onChange('valueMinMinor', stops[index])
+          }}
           aria-label='Minimum contract value'
-          className='accent-brand-600 w-full'
+          className='pointer-events-none absolute inset-0 z-20 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
         />
         <input
           type='range'
-          min={minimum}
-          max={maximum}
-          step={step}
-          value={selectedMaximum}
-          onChange={event => onChange('valueMaxMinor', Math.max(Number(event.target.value), selectedMinimum))}
+          min={0}
+          max={lastIndex}
+          step={1}
+          value={maximumIndex}
+          onChange={event => {
+            const index = Math.max(Number(event.target.value), minimumIndex)
+            onChange('valueMaxMinor', stops[index])
+          }}
           aria-label='Maximum contract value'
-          className='accent-brand-600 w-full'
+          className='pointer-events-none absolute inset-0 z-10 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
         />
       </div>
 
-      <div className='mt-2 grid grid-cols-5 gap-1' aria-label='Contract value shortcuts'>
+      <div
+        className='mt-1 grid gap-1'
+        style={{ gridTemplateColumns: `repeat(${stops.length}, minmax(0, 1fr))` }}
+        aria-label='Contract value shortcuts'
+      >
         {stops.map((value, index) => (
           <button
             key={`${value}-${index}`}
             type='button'
             onClick={() => jumpTo(value)}
-            className='focus:ring-brand-500/20 min-w-0 rounded-md px-0.5 py-1 text-[10px] font-medium text-gray-500 tabular-nums hover:bg-white hover:text-gray-950 focus:ring-4 focus:outline-hidden sm:text-xs'
+            className='focus:ring-brand-500/20 min-w-0 rounded-md px-0 py-1 text-[10px] font-medium text-gray-500 tabular-nums hover:bg-white hover:text-gray-950 focus:ring-4 focus:outline-hidden'
             aria-label={`Set nearest contract value to ${compactMoneyMinor(value)}`}
           >
             {compactMoneyMinor(value)}
+            {index === lastIndex ? '+' : ''}
           </button>
         ))}
       </div>
@@ -245,11 +264,13 @@ function FilterGroup({
   title,
   selectedLabel,
   optionCount,
+  contentClassName,
   children
 }: {
   title: string
   selectedLabel?: string
   optionCount?: number
+  contentClassName?: string
   children: ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(Boolean(selectedLabel))
@@ -277,7 +298,9 @@ function FilterGroup({
           className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
-      {isOpen && <div className='max-h-64 space-y-2 overflow-y-auto pr-1 pb-3'>{children}</div>}
+      {isOpen && (
+        <div className={`space-y-2 pr-1 pb-3 ${contentClassName ?? 'max-h-64 overflow-y-auto'}`}>{children}</div>
+      )}
     </section>
   )
 }
@@ -425,23 +448,15 @@ function FilterPanel({
   subcategory,
   taxonomy,
   keywords,
-  stage,
-  procedureType,
-  procurementType,
   regions,
   subcategories,
   taxonomyNodes,
   keywordOptions,
   keywordGroups,
-  stages,
-  procedureTypes,
-  procurementTypes,
   publishedFrom,
   publishedTo,
   deadlineFrom,
   deadlineTo,
-  framework,
-  dynamicMarket,
   smeSuitable,
   valueMinMinor,
   valueMaxMinor,
@@ -454,18 +469,17 @@ function FilterPanel({
   onSubcategoryToggle,
   onTaxonomyToggle,
   onKeywordToggle,
-  onStageToggle,
-  onProcedureTypeToggle,
-  onProcurementTypeToggle,
   onDateChange,
   onBooleanChange,
   onValueChange,
   onIncludeValueUnspecifiedChange,
   onClear
 }: FilterPanelProps) {
-  const minimum = valueBounds?.minMinor ?? 0
-  const maximum = Math.max(valueBounds?.maxMinor ?? minimum, minimum)
-  const rangeStep = Math.max(10_000, Math.round((maximum - minimum) / 100) || 10_000)
+  const rawMinimum = valueBounds?.minMinor ?? 0
+  const rawMaximum = Math.max(valueBounds?.suggestedMaxMinor ?? valueBounds?.maxMinor ?? rawMinimum, rawMinimum)
+  const rangeStops = valueBounds?.stepsMinor?.length ? valueBounds.stepsMinor : valueStops(rawMinimum, rawMaximum)
+  const minimum = rangeStops[0] ?? 0
+  const maximum = rangeStops.at(-1) ?? minimum
 
   return (
     <div className='rounded-lg border border-gray-200 bg-white'>
@@ -526,7 +540,7 @@ function FilterPanel({
           />
         </FilterGroup>
         <FilterGroup
-          title='Keywords'
+          title='Care topics'
           selectedLabel={keywords.length ? `${keywords.length} selected` : undefined}
           optionCount={keywordOptions.length}
         >
@@ -547,7 +561,11 @@ function FilterPanel({
             />
           )}
         </FilterGroup>
-        <FilterGroup title='Advanced filters' selectedLabel={activeFilterCount ? 'Review active filters' : undefined}>
+        <FilterGroup
+          title='Advanced filters'
+          selectedLabel={activeFilterCount ? 'Review active filters' : undefined}
+          contentClassName='overflow-visible'
+        >
           <div className='space-y-4 pb-4'>
             <div className='grid grid-cols-2 gap-2'>
               <label className='text-xs font-medium text-gray-700'>
@@ -592,11 +610,9 @@ function FilterPanel({
               <div>
                 <p className='mb-2 text-xs font-semibold text-gray-700'>Contract value</p>
                 <TenderValueRange
-                  minimum={minimum}
-                  maximum={maximum}
+                  stops={rangeStops}
                   selectedMinimum={valueMinMinor ?? minimum}
                   selectedMaximum={valueMaxMinor ?? maximum}
-                  step={rangeStep}
                   onChange={onValueChange}
                 />
                 {(valueBounds?.unspecifiedCount ?? 0) > 0 && (
@@ -614,45 +630,16 @@ function FilterPanel({
               </div>
             )}
 
-            <FilterCheckboxList
-              name='stage'
-              value={stage}
-              options={stages}
-              onToggle={onStageToggle}
-              counts={facets?.stages}
-            />
-            <FilterCheckboxList
-              name='procedure-type'
-              value={procedureType}
-              options={procedureTypes}
-              onToggle={onProcedureTypeToggle}
-              counts={facets?.procedureTypes}
-            />
-            <FilterCheckboxList
-              name='procurement-type'
-              value={procurementType}
-              options={procurementTypes}
-              onToggle={onProcurementTypeToggle}
-              counts={facets?.procurementTypes}
-            />
             <div className='space-y-2'>
-              {(
-                [
-                  ['framework', 'Framework', framework],
-                  ['dynamicMarket', 'Dynamic market / DPS', dynamicMarket],
-                  ['smeSuitable', 'SME suitable', smeSuitable]
-                ] as const
-              ).map(([field, label, checked]) => (
-                <label key={field} className='flex cursor-pointer items-center gap-2 text-sm text-gray-700'>
-                  <input
-                    type='checkbox'
-                    checked={checked}
-                    onChange={event => onBooleanChange(field, event.target.checked)}
-                    className='text-brand-600 h-4 w-4 border-gray-300'
-                  />
-                  {label}
-                </label>
-              ))}
+              <label className='flex cursor-pointer items-center gap-2 text-sm text-gray-700'>
+                <input
+                  type='checkbox'
+                  checked={smeSuitable}
+                  onChange={event => onBooleanChange('smeSuitable', event.target.checked)}
+                  className='text-brand-600 h-4 w-4 border-gray-300'
+                />
+                Suitable for SMEs
+              </label>
             </div>
           </div>
         </FilterGroup>
