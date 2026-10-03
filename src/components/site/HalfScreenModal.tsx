@@ -81,6 +81,20 @@ export function HalfScreenModal() {
     }
   }, [closeModal, isOpen])
 
+  useEffect(() => {
+    if (!isOpen || isDesktop) return
+
+    const previousOverflow = document.body.style.overflow
+    const previousOverscrollBehavior = document.body.style.overscrollBehavior
+    document.body.style.overflow = 'hidden'
+    document.body.style.overscrollBehavior = 'none'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.body.style.overscrollBehavior = previousOverscrollBehavior
+    }
+  }, [isDesktop, isOpen])
+
   const TemplateComponent = useMemo(() => template?.component ?? null, [template])
   const modalWidth = isExpanded ? EXPANDED_WIDTH : width
   const titleId = template ? `${template.id}-half-screen-title` : undefined
@@ -106,7 +120,7 @@ export function HalfScreenModal() {
   const mobileTranslateClass = (() => {
     if (!isOpen || sheetSnap === 'closed') return 'translate-y-full'
     if (sheetSnap === 'minimized') return 'translate-y-[calc(100%-8dvh)]'
-    return 'translate-y-[15%]'
+    return 'translate-y-0'
   })()
 
   const describedByIds = [subtitleId].filter(Boolean).join(' ') || undefined
@@ -196,9 +210,10 @@ export function HalfScreenModal() {
             aria-labelledby={titleId}
             aria-describedby={describedByIds}
             aria-hidden={!isOpen}
-            className={`pointer-events-auto absolute right-0 bottom-0 left-0 flex max-h-[92dvh] w-full flex-col overflow-hidden border-t border-gray-200 bg-white shadow-2xl transition-transform motion-reduce:!duration-0 ${mobileTranslateClass}`}
+            className={`pointer-events-auto absolute right-0 bottom-0 left-0 flex w-full flex-col overflow-hidden border-t border-gray-200 bg-white shadow-2xl transition-transform motion-reduce:!duration-0 ${mobileTranslateClass}`}
             style={{
-              height: '92dvh',
+              height: 'calc(100dvh - max(12px, env(safe-area-inset-top)))',
+              maxHeight: 'calc(100dvh - max(12px, env(safe-area-inset-top)))',
               transitionDuration:
                 sheetSnap === 'closed'
                   ? '250ms'
@@ -206,7 +221,7 @@ export function HalfScreenModal() {
                     ? '300ms'
                     : '350ms',
               transitionTimingFunction: sheetSnap === 'closed' ? 'ease-in' : 'cubic-bezier(0.22, 1, 0.36, 1)',
-              borderRadius: '1rem 1rem 0 0'
+              borderRadius: '0.75rem 0.75rem 0 0'
             }}
           >
             <header
@@ -271,7 +286,7 @@ export function HalfScreenModal() {
             </header>
 
             {sheetSnap !== 'minimized' && (
-              <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]'>
+              <div className='min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain pb-[max(0.75rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]'>
                 <TemplateComponent data={data} onClose={closeModal} />
               </div>
             )}

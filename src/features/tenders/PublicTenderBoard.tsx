@@ -102,9 +102,9 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
         role='dialog'
         aria-modal='true'
         aria-labelledby='tender-preview-title'
-        className='fixed top-0 right-0 z-9999 flex h-full w-full max-w-2xl flex-col border-l border-gray-200 bg-white shadow-2xl'
+        className='fixed inset-0 z-9999 flex h-dvh w-full flex-col bg-white shadow-2xl sm:inset-y-0 sm:right-0 sm:left-auto sm:max-w-2xl sm:border-l sm:border-gray-200'
       >
-        <header className='flex items-start justify-between gap-4 border-b border-gray-200 p-5'>
+        <header className='flex shrink-0 items-start justify-between gap-3 border-b border-gray-200 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:gap-4 sm:p-5'>
           <div>
             <p className='text-brand-700 text-xs font-semibold tracking-[0.08em] uppercase'>Locked tender preview</p>
             <h2 id='tender-preview-title' className='mt-1 text-xl font-semibold text-gray-950'>
@@ -123,7 +123,7 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
           </button>
         </header>
 
-        <div className='flex-1 overflow-y-auto p-5 sm:p-6'>
+        <div className='min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch] sm:p-6'>
           <StateBadges states={tender.states} />
           <dl className='mt-6 grid gap-4 sm:grid-cols-2'>
             {[

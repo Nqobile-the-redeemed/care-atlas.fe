@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { PublicTender } from '@/lib/api/tenders'
 
 import { SiteIcon } from '../SiteIcon'
+import { Button } from '../ui'
 
-export function TenderShareButton({ tender }: { tender: PublicTender }) {
+export function TenderShareButton({ tender, fullWidth = false }: { tender: PublicTender; fullWidth?: boolean }) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -48,18 +49,20 @@ export function TenderShareButton({ tender }: { tender: PublicTender }) {
   const encodedText = encodeURIComponent(text)
 
   return (
-    <div ref={rootRef} className='relative'>
-      <button
+    <div ref={rootRef} className={`relative ${fullWidth ? 'w-full' : 'w-full sm:w-auto'}`}>
+      <Button
         type='button'
         onClick={() => void share()}
         aria-expanded={open}
         aria-haspopup='menu'
         title='Share tender'
-        className='focus:ring-brand-500/20 flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus:ring-4 focus:outline-hidden'
+        variant='secondary'
+        fullWidth
+        className='border-gray-300 text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+        leftIcon={<SiteIcon name='share' className='h-4 w-4' />}
       >
-        <SiteIcon name='share' className='h-4 w-4' />
         Share
-      </button>
+      </Button>
 
       {open && (
         <div

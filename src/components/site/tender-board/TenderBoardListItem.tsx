@@ -111,7 +111,7 @@ export function TenderBoardListItem({
           >
             Open details
           </Button>
-          <TenderShareButton tender={tender} />
+          <TenderShareButton tender={tender} fullWidth />
           {onToggleSaved && (
             <Button variant='secondary' onClick={() => onToggleSaved(tender)} fullWidth>
               {isSaved ? 'Saved' : 'Save tender'}
