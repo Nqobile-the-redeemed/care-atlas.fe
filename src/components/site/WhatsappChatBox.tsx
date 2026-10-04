@@ -1,15 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
 import { trackEvent } from '@/components/analytics/trackEvent'
+import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
+import { SiteIcon } from './SiteIcon'
 import { Button } from './ui'
 
 const whatsappNumber = process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_NUMBER ?? ''
 const defaultMessage =
   process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_MESSAGE ?? 'Hello Care Atlas, I would like to make an enquiry.'
+const DISMISSED_STORAGE_KEY = 'care-atlas:whatsapp-hidden'
 
 const options = [
   {
@@ -53,15 +56,31 @@ function wait(ms: number) {
 }
 
 export function WhatsappChatBox() {
+  const { isOpen: isModalOpen } = useHalfScreenModal()
   const [open, setOpen] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
   const [startedAt] = useState(() => Math.floor(Date.now() / 1000))
   const [loadingIntent, setLoadingIntent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const enabled = useMemo(() => whatsappNumber.replace(/\D/g, '').length >= 10, [])
 
-  if (!enabled) {
+  useEffect(() => {
+    setDismissed(window.sessionStorage.getItem(DISMISSED_STORAGE_KEY) === 'true')
+  }, [])
+
+  useEffect(() => {
+    if (isModalOpen) setOpen(false)
+  }, [isModalOpen])
+
+  if (!enabled || dismissed || isModalOpen) {
     return null
+  }
+
+  function dismiss() {
+    window.sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true')
+    setOpen(false)
+    setDismissed(true)
   }
 
   async function startChat(intent: string, message: string) {
@@ -96,7 +115,7 @@ export function WhatsappChatBox() {
   }
 
   return (
-    <div className='fixed right-4 bottom-4 z-9999 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6'>
+    <div className='fixed right-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-3 sm:right-6 sm:bottom-6'>
       {open && (
         <div className='border-brand-100 w-[min(92vw,380px)] overflow-hidden rounded-lg border bg-white shadow-2xl'>
           <div className='bg-brand-700 px-4 py-3 text-white'>
@@ -126,24 +145,31 @@ export function WhatsappChatBox() {
           </div>
         </div>
       )}
-      <Button
-        aria-expanded={open}
-        onClick={() => {
-          setOpen(value => {
-            const nextOpen = !value
-            if (nextOpen) trackEvent('whatsapp_chat_opened')
-            return nextOpen
-          })
-        }}
-        className='min-h-14 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-xl hover:bg-[#1EAE56] focus:ring-[#25D366]/25'
-        leftIcon={
-          <span className='flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-[#128C4A]'>
-            WA
-          </span>
-        }
-      >
-        {open ? 'Close chat' : 'WhatsApp chat'}
-      </Button>
+      <div className='relative'>
+        <Button
+          aria-expanded={open}
+          aria-label={open ? 'Close WhatsApp chat options' : 'Open WhatsApp chat options'}
+          title={open ? 'Close WhatsApp chat' : 'Chat on WhatsApp'}
+          onClick={() => {
+            setOpen(value => {
+              const nextOpen = !value
+              if (nextOpen) trackEvent('whatsapp_chat_opened')
+              return nextOpen
+            })
+          }}
+          className='h-13 min-h-13 w-13 rounded-full bg-[#25D366] p-0 text-white shadow-xl hover:bg-[#1EAE56] focus:ring-[#25D366]/25'
+          leftIcon={<SiteIcon name={open ? 'close' : 'message'} className='h-6 w-6' />}
+        />
+        <button
+          type='button'
+          onClick={dismiss}
+          aria-label='Hide WhatsApp chat button'
+          title='Hide WhatsApp chat button'
+          className='focus:ring-brand-500/20 absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-md hover:bg-gray-50 focus:ring-4 focus:outline-hidden'
+        >
+          <SiteIcon name='close' className='h-3.5 w-3.5' />
+        </button>
+      </div>
     </div>
   )
 }

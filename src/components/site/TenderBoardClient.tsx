@@ -28,7 +28,7 @@ import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
-import { Button } from './ui'
+import { Button, ButtonLink } from './ui'
 import {
   TenderBoardFilters,
   TenderBoardHalfScreenContent,
@@ -40,6 +40,7 @@ import {
 
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'newest'
+const SAVE_SIGNUP_PROMPTED_KEY = 'care-atlas:save-signup-prompted'
 
 type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
   category: string[]
@@ -136,6 +137,16 @@ function optionalNumber(value: string | null) {
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
+function savedTenderSignupHref(tenderId: string) {
+  const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://app.orbitmirai.com/sign-up'
+  const target = new URL(configured, window.location.origin)
+  target.searchParams.set('package', 'tender_basics')
+  target.searchParams.set('source', 'care_atlas')
+  target.searchParams.set('returnTo', '/saved-tenders')
+  target.searchParams.set('tender', tenderId)
+  return target.toString()
+}
+
 function compactMoneyMinor(value: number) {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
@@ -146,12 +157,23 @@ function compactMoneyMinor(value: number) {
 }
 
 function valueStops(minimum: number, maximum: number) {
-  if (maximum <= minimum) return [minimum]
+  const floor = Math.min(0, minimum)
+  if (maximum <= floor) return [floor]
 
   const cappedMaximum = Math.min(maximum, 5_000_000_000)
   const candidates = [0, 10_000_000, 50_000_000, 100_000_000, 500_000_000, cappedMaximum]
 
-  return Array.from(new Set(candidates.filter(value => value >= minimum && value <= cappedMaximum))).sort(
+  return Array.from(new Set(candidates.filter(value => value >= floor && value <= cappedMaximum))).sort(
+    (left, right) => left - right
+  )
+}
+
+function normalizedValueStops(valueBounds?: FilterPanelProps['valueBounds']) {
+  const maximum = Math.max(valueBounds?.suggestedMaxMinor ?? valueBounds?.maxMinor ?? 0, 0)
+  const suppliedStops = valueBounds?.stepsMinor ?? []
+  const candidates = suppliedStops.length > 0 ? [0, ...suppliedStops, maximum] : valueStops(0, maximum)
+
+  return Array.from(new Set(candidates.filter(value => Number.isFinite(value) && value >= 0 && value <= maximum))).sort(
     (left, right) => left - right
   )
 }
@@ -160,11 +182,13 @@ function TenderValueRange({
   stops,
   selectedMinimum,
   selectedMaximum,
+  resultCount,
   onChange
 }: {
   stops: number[]
   selectedMinimum: number
   selectedMaximum: number
+  resultCount?: number
   onChange: (field: 'valueMinMinor' | 'valueMaxMinor', value: number) => void
 }) {
   const lastIndex = Math.max(0, stops.length - 1)
@@ -204,8 +228,22 @@ function TenderValueRange({
         </div>
       </div>
 
-      <div className='relative mt-3 h-7'>
-        <div className='absolute top-2.5 right-2 left-2 h-1.5 rounded-full bg-gray-200' aria-hidden='true'>
+      {resultCount !== undefined && (
+        <p className='mt-2 text-xs font-medium text-gray-600' aria-live='polite'>
+          {resultCount.toLocaleString('en-GB')} matching {resultCount === 1 ? 'opportunity' : 'opportunities'}
+        </p>
+      )}
+
+      <div className='relative mt-3 h-9 touch-none'>
+        <div
+          className='absolute top-2.5 right-2 left-2 h-1.5 cursor-pointer rounded-full bg-gray-200'
+          aria-hidden='true'
+          onPointerDown={event => {
+            const bounds = event.currentTarget.getBoundingClientRect()
+            const percent = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width))
+            jumpTo(stops[Math.round(percent * lastIndex)])
+          }}
+        >
           <span
             className='bg-brand-600 absolute h-1.5 rounded-full'
             style={{ left: `${minimumPercent}%`, right: `${100 - maximumPercent}%` }}
@@ -222,7 +260,7 @@ function TenderValueRange({
             onChange('valueMinMinor', stops[index])
           }}
           aria-label='Minimum contract value'
-          className='pointer-events-none absolute inset-0 z-20 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
+          className={`pointer-events-none absolute inset-0 h-8 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-11px] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md ${minimumIndex >= maximumIndex - 1 ? 'z-30' : 'z-20'}`}
         />
         <input
           type='range'
@@ -235,7 +273,7 @@ function TenderValueRange({
             onChange('valueMaxMinor', stops[index])
           }}
           aria-label='Maximum contract value'
-          className='pointer-events-none absolute inset-0 z-10 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
+          className='pointer-events-none absolute inset-0 z-20 h-8 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-11px] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
         />
       </div>
 
@@ -476,9 +514,7 @@ function FilterPanel({
   onIncludeValueUnspecifiedChange,
   onClear
 }: FilterPanelProps) {
-  const rawMinimum = valueBounds?.minMinor ?? 0
-  const rawMaximum = Math.max(valueBounds?.suggestedMaxMinor ?? valueBounds?.maxMinor ?? rawMinimum, rawMinimum)
-  const rangeStops = valueBounds?.stepsMinor?.length ? valueBounds.stepsMinor : valueStops(rawMinimum, rawMaximum)
+  const rangeStops = normalizedValueStops(valueBounds)
   const minimum = rangeStops[0] ?? 0
   const maximum = rangeStops.at(-1) ?? minimum
 
@@ -576,7 +612,7 @@ function FilterPanel({
                   value={publishedFrom}
                   onChange={event => onDateChange('publishedFrom', event.target.value)}
                   max={publishedTo || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -586,7 +622,7 @@ function FilterPanel({
                   value={publishedTo}
                   onChange={event => onDateChange('publishedTo', event.target.value)}
                   min={publishedFrom || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -596,7 +632,7 @@ function FilterPanel({
                   value={deadlineFrom}
                   onChange={event => onDateChange('deadlineFrom', event.target.value)}
                   max={deadlineTo || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -606,7 +642,7 @@ function FilterPanel({
                   value={deadlineTo}
                   onChange={event => onDateChange('deadlineTo', event.target.value)}
                   min={deadlineFrom || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
             </div>
@@ -618,6 +654,7 @@ function FilterPanel({
                   stops={rangeStops}
                   selectedMinimum={valueMinMinor ?? minimum}
                   selectedMaximum={valueMaxMinor ?? maximum}
+                  resultCount={resultCount}
                   onChange={onValueChange}
                 />
                 {(valueBounds?.unspecifiedCount ?? 0) > 0 && (
@@ -679,6 +716,10 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   const [valueMaxMinor, setValueMaxMinor] = useState<number | undefined>(() =>
     optionalNumber(searchParams.get('valueMaxMinor'))
   )
+  const pendingValueFiltersRef = useRef<{ valueMinMinor?: number; valueMaxMinor?: number }>({
+    valueMinMinor,
+    valueMaxMinor
+  })
   const [includeValueUnspecified, setIncludeValueUnspecified] = useState(
     () => searchParams.get('includeValueUnspecified') !== 'false'
   )
@@ -722,6 +763,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saveNotice, setSaveNotice] = useState('')
+  const [savedTenderPrompt, setSavedTenderPrompt] = useState<PublicTender | null>(null)
   const [savedTenderIds, setSavedTenderIds] = useState<Set<string>>(new Set())
 
   const regions = useMemo(() => [...filterOptions.regions].sort(), [filterOptions.regions])
@@ -852,6 +894,16 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   }, [])
 
   useEffect(() => {
+    if (!savedTenderPrompt) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [savedTenderPrompt])
+
+  useEffect(() => {
     const next = new URLSearchParams()
     if (filters.keyword) next.set('keyword', filters.keyword)
     filters.category.forEach(value => next.append('category', value))
@@ -974,6 +1026,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     setSmeSuitable(false)
     setValueMinMinor(undefined)
     setValueMaxMinor(undefined)
+    pendingValueFiltersRef.current = { valueMinMinor: undefined, valueMaxMinor: undefined }
     setIncludeValueUnspecified(true)
     setSort(DEFAULT_SORT)
     setPage(1)
@@ -1059,9 +1112,32 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
       deadlineFrom: setDeadlineFrom,
       deadlineTo: setDeadlineTo
     }
+    const pairedField =
+      field === 'publishedFrom'
+        ? 'publishedTo'
+        : field === 'publishedTo'
+          ? 'publishedFrom'
+          : field === 'deadlineFrom'
+            ? 'deadlineTo'
+            : 'deadlineFrom'
+    const pairedValue = {
+      publishedFrom,
+      publishedTo,
+      deadlineFrom,
+      deadlineTo
+    }[pairedField]
+    const invalidPair = Boolean(
+      value && pairedValue && (field.endsWith('From') ? value > pairedValue : value < pairedValue)
+    )
+
     setters[field](value)
+    if (invalidPair) setters[pairedField]('')
     setPage(1)
-    setFilters(current => ({ ...current, [field]: value || undefined }))
+    setFilters(current => ({
+      ...current,
+      [field]: value || undefined,
+      ...(invalidPair ? { [pairedField]: undefined } : {})
+    }))
   }
 
   function changeBoolean(field: 'framework' | 'dynamicMarket' | 'smeSuitable', value: boolean) {
@@ -1072,7 +1148,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   }
 
   function changeValue(field: 'valueMinMinor' | 'valueMaxMinor', value: number) {
-    const maximum = filterOptions.ranges?.value?.maxMinor
+    const maximum = normalizedValueStops(filterOptions.ranges?.value).at(-1)
     const normalized =
       field === 'valueMinMinor' && value <= 0
         ? undefined
@@ -1082,11 +1158,12 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
 
     if (field === 'valueMinMinor') setValueMinMinor(normalized)
     else setValueMaxMinor(normalized)
+    pendingValueFiltersRef.current = { ...pendingValueFiltersRef.current, [field]: normalized }
 
     if (valueFilterTimerRef.current !== null) window.clearTimeout(valueFilterTimerRef.current)
     valueFilterTimerRef.current = window.setTimeout(() => {
       setPage(1)
-      setFilters(current => ({ ...current, [field]: normalized }))
+      setFilters(current => ({ ...current, ...pendingValueFiltersRef.current }))
       valueFilterTimerRef.current = null
     }, 350)
   }
@@ -1104,6 +1181,10 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
       else {
         next.add(tender.id)
         setSaveNotice('Saved on this device. Sign in to OrbitMirai when you need a permanent shortlist across devices.')
+        if (window.sessionStorage.getItem(SAVE_SIGNUP_PROMPTED_KEY) !== 'true') {
+          window.sessionStorage.setItem(SAVE_SIGNUP_PROMPTED_KEY, 'true')
+          setSavedTenderPrompt(tender)
+        }
       }
       trackEvent(next.has(tender.id) ? 'tender_saved' : 'tender_unsaved')
       localStorage.setItem('care-atlas:saved-tenders', JSON.stringify([...next]))
@@ -1156,6 +1237,58 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
           </a>
           .
         </p>
+      )}
+
+      {savedTenderPrompt && (
+        <div className='fixed inset-0 z-60 flex items-end justify-center sm:items-center sm:p-6'>
+          <button
+            type='button'
+            aria-label='Close saved tender signup prompt'
+            className='absolute inset-0 bg-gray-950/45'
+            onClick={() => setSavedTenderPrompt(null)}
+          />
+          <section
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='saved-tender-prompt-title'
+            className='relative z-10 w-full rounded-t-lg border border-b-0 border-gray-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl sm:max-w-md sm:rounded-lg sm:border sm:p-6'
+          >
+            <div className='flex items-start justify-between gap-4'>
+              <span className='bg-brand-50 text-brand-700 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg'>
+                <SiteIcon name='check' className='h-5 w-5' />
+              </span>
+              <button
+                type='button'
+                onClick={() => setSavedTenderPrompt(null)}
+                aria-label='Close signup prompt'
+                className='focus:ring-brand-500/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 focus:ring-4 focus:outline-hidden'
+              >
+                <SiteIcon name='close' className='h-5 w-5' />
+              </button>
+            </div>
+            <p className='text-brand-700 mt-4 text-xs font-semibold tracking-[0.08em] uppercase'>Tender saved</p>
+            <h2 id='saved-tender-prompt-title' className='mt-1 text-xl font-semibold text-gray-950'>
+              Keep your shortlist across devices
+            </h2>
+            <p className='mt-2 line-clamp-2 text-sm font-medium text-gray-800'>{savedTenderPrompt.title}</p>
+            <p className='mt-2 text-sm leading-6 text-gray-600'>
+              This tender is saved in this browser. Create your free Orbit Mirai account to keep it permanently, track
+              deadlines and receive relevant tender alerts.
+            </p>
+            <div className='mt-5 grid gap-2'>
+              <ButtonLink
+                href={savedTenderSignupHref(savedTenderPrompt.id)}
+                fullWidth
+                leftIcon={<SiteIcon name='user' className='h-4 w-4' />}
+              >
+                Create free account
+              </ButtonLink>
+              <Button variant='secondary' fullWidth onClick={() => setSavedTenderPrompt(null)}>
+                Continue browsing
+              </Button>
+            </div>
+          </section>
+        </div>
       )}
 
       <section className='min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white'>
