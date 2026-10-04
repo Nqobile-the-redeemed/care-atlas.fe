@@ -294,8 +294,8 @@ describe('TenderBoardClient', () => {
     expect(screen.getByRole('button', { name: 'Set nearest contract value to £500k' })).toBeInTheDocument()
     expect(screen.getByText('Minimum')).toBeInTheDocument()
     expect(screen.getByText('Maximum')).toBeInTheDocument()
-    expect(screen.getByLabelText('Published from')).toHaveClass('max-w-full')
-    expect(screen.getByLabelText('Closing to')).toHaveClass('max-w-full')
+    expect(screen.getByLabelText('Published from')).toHaveClass('min-w-0')
+    expect(screen.getByLabelText('Closing to')).toHaveClass('min-w-0')
   })
 
   it('groups familiar care terms under Care categories', async () => {
