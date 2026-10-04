@@ -45,8 +45,8 @@ function formatTerm(tender: TenderPreview) {
 function signupHref() {
   const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://portal.orbitmirai.com/sign-up'
   const target = new URL(configured, window.location.origin)
-  target.searchParams.set('plan', 'tender-navigator')
-  target.searchParams.set('source', 'care-atlas')
+  target.searchParams.set('package', 'tender_basics')
+  target.searchParams.set('source', 'care_atlas')
   target.searchParams.set('returnTo', '/tenders')
 
   const current = new URLSearchParams(window.location.search)

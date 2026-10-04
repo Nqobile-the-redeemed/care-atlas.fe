@@ -27,7 +27,7 @@ import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 
 import { SiteIcon } from './SiteIcon'
-import { Button } from './ui'
+import { Button, ButtonLink } from './ui'
 import {
   TenderBoardFilters,
   TenderBoardHalfScreenContent,
@@ -39,6 +39,7 @@ import {
 
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'newest'
+const SAVE_SIGNUP_PROMPTED_KEY = 'care-atlas:save-signup-prompted'
 
 type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
   category: string[]
@@ -133,6 +134,16 @@ function optionalNumber(value: string | null) {
   if (!value) return undefined
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function savedTenderSignupHref(tenderId: string) {
+  const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://app.orbitmirai.com/sign-up'
+  const target = new URL(configured, window.location.origin)
+  target.searchParams.set('package', 'tender_basics')
+  target.searchParams.set('source', 'care_atlas')
+  target.searchParams.set('returnTo', '/saved-tenders')
+  target.searchParams.set('tender', tenderId)
+  return target.toString()
 }
 
 function compactMoneyMinor(value: number) {
@@ -751,6 +762,7 @@ export function TenderBoardClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saveNotice, setSaveNotice] = useState('')
+  const [savedTenderPrompt, setSavedTenderPrompt] = useState<PublicTender | null>(null)
   const [savedTenderIds, setSavedTenderIds] = useState<Set<string>>(new Set())
 
   const regions = useMemo(() => [...filterOptions.regions].sort(), [filterOptions.regions])
@@ -879,6 +891,16 @@ export function TenderBoardClient() {
       setSavedTenderIds(new Set())
     }
   }, [])
+
+  useEffect(() => {
+    if (!savedTenderPrompt) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [savedTenderPrompt])
 
   useEffect(() => {
     const next = new URLSearchParams()
@@ -1145,6 +1167,10 @@ export function TenderBoardClient() {
       else {
         next.add(tender.id)
         setSaveNotice('Saved on this device. Sign in to OrbitMirai when you need a permanent shortlist across devices.')
+        if (window.sessionStorage.getItem(SAVE_SIGNUP_PROMPTED_KEY) !== 'true') {
+          window.sessionStorage.setItem(SAVE_SIGNUP_PROMPTED_KEY, 'true')
+          setSavedTenderPrompt(tender)
+        }
       }
       localStorage.setItem('care-atlas:saved-tenders', JSON.stringify([...next]))
       return next
@@ -1196,6 +1222,58 @@ export function TenderBoardClient() {
           </a>
           .
         </p>
+      )}
+
+      {savedTenderPrompt && (
+        <div className='fixed inset-0 z-60 flex items-end justify-center sm:items-center sm:p-6'>
+          <button
+            type='button'
+            aria-label='Close saved tender signup prompt'
+            className='absolute inset-0 bg-gray-950/45'
+            onClick={() => setSavedTenderPrompt(null)}
+          />
+          <section
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='saved-tender-prompt-title'
+            className='relative z-10 w-full rounded-t-lg border border-b-0 border-gray-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl sm:max-w-md sm:rounded-lg sm:border sm:p-6'
+          >
+            <div className='flex items-start justify-between gap-4'>
+              <span className='bg-brand-50 text-brand-700 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg'>
+                <SiteIcon name='check' className='h-5 w-5' />
+              </span>
+              <button
+                type='button'
+                onClick={() => setSavedTenderPrompt(null)}
+                aria-label='Close signup prompt'
+                className='focus:ring-brand-500/20 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 focus:ring-4 focus:outline-hidden'
+              >
+                <SiteIcon name='close' className='h-5 w-5' />
+              </button>
+            </div>
+            <p className='text-brand-700 mt-4 text-xs font-semibold tracking-[0.08em] uppercase'>Tender saved</p>
+            <h2 id='saved-tender-prompt-title' className='mt-1 text-xl font-semibold text-gray-950'>
+              Keep your shortlist across devices
+            </h2>
+            <p className='mt-2 line-clamp-2 text-sm font-medium text-gray-800'>{savedTenderPrompt.title}</p>
+            <p className='mt-2 text-sm leading-6 text-gray-600'>
+              This tender is saved in this browser. Create your free Orbit Mirai account to keep it permanently, track
+              deadlines and receive relevant tender alerts.
+            </p>
+            <div className='mt-5 grid gap-2'>
+              <ButtonLink
+                href={savedTenderSignupHref(savedTenderPrompt.id)}
+                fullWidth
+                leftIcon={<SiteIcon name='user' className='h-4 w-4' />}
+              >
+                Create free account
+              </ButtonLink>
+              <Button variant='secondary' fullWidth onClick={() => setSavedTenderPrompt(null)}>
+                Continue browsing
+              </Button>
+            </div>
+          </section>
+        </div>
       )}
 
       <section className='min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white'>
