@@ -6,10 +6,10 @@ export type PublicTender = {
   title: string
   buyer: string | null
   sourceReference: string | null
-  sourceKey?: string | null
-  sourceName?: string | null
   category: string
   categories: string[]
+  keywords?: string[]
+  taxonomy?: TenderTaxonomyNode[]
   region: string
   regions: string[]
   summary: string
@@ -136,11 +136,41 @@ export type TenderFilters = {
   regions: string[]
   industries?: string[]
   subcategories?: string[]
-  sources?: string[]
+  taxonomy?: TenderTaxonomyNode[]
+  cpvCodes?: Array<{ code: string; label: string; slug: string; parentSlug: string | null }>
+  keywords?: string[]
+  keywordGroups?: TenderKeywordGroup[]
+  stages?: string[]
+  procedureTypes?: string[]
+  procurementTypes?: string[]
+  total?: number
+  ranges?: {
+    value?: {
+      minMinor: number | null
+      maxMinor: number | null
+      suggestedMaxMinor?: number | null
+      stepsMinor?: number[]
+      currency: string
+      knownCount?: number
+      unspecifiedCount?: number
+    }
+  }
   facets?: Partial<
     Record<
-      'categories' | 'regions' | 'industries' | 'subcategories' | 'sources',
-      Array<{ value: string; count: number }>
+      | 'categories'
+      | 'regions'
+      | 'industries'
+      | 'subcategories'
+      | 'taxonomy'
+      | 'cpvCodes'
+      | 'keywords'
+      | 'stages'
+      | 'procedureTypes'
+      | 'procurementTypes'
+      | 'framework'
+      | 'dynamicMarket'
+      | 'smeSuitable',
+      Array<{ value: string | boolean; count: number }>
     >
   >
 }
@@ -151,7 +181,21 @@ export type PublicTenderQuery = {
   region?: string | string[]
   industry?: string | string[]
   subcategory?: string | string[]
-  source?: string | string[]
+  taxonomy?: string | string[]
+  keywords?: string | string[]
+  valueMinMinor?: number
+  valueMaxMinor?: number
+  includeValueUnspecified?: boolean
+  publishedFrom?: string
+  publishedTo?: string
+  deadlineFrom?: string
+  deadlineTo?: string
+  stage?: string | string[]
+  procedureType?: string | string[]
+  procurementType?: string | string[]
+  framework?: boolean
+  dynamicMarket?: boolean
+  smeSuitable?: boolean
   page?: number
   perPage?: number
   sort?: 'deadline' | 'newest'
@@ -165,7 +209,9 @@ export async function getPublicTenders(filters: PublicTenderQuery) {
   appendMany(params, 'region', filters.region)
   appendMany(params, 'industry', filters.industry)
   appendMany(params, 'subcategory', filters.subcategory)
-  appendMany(params, 'source', filters.source)
+  appendMany(params, 'taxonomy', filters.taxonomy)
+  appendMany(params, 'keywords', filters.keywords)
+  appendAdvancedTenderFilters(params, filters)
   if (filters.page && filters.page > 1) params.set('page', String(filters.page))
   if (filters.perPage) params.set('per_page', String(filters.perPage))
   if (filters.sort) params.set('sort', filters.sort)
@@ -183,20 +229,55 @@ export async function getPublicTender(tenderId: string) {
   })
 }
 
-export async function getPublicTenderFilters(
-  filters: Partial<Pick<PublicTenderQuery, 'industry' | 'subcategory' | 'source'>> = {}
-) {
+export async function getPublicTenderFilters(filters: Omit<PublicTenderQuery, 'page' | 'perPage' | 'sort'> = {}) {
   const params = new URLSearchParams()
 
+  if (filters.keyword) params.set('keyword', filters.keyword)
+  appendMany(params, 'category', filters.category)
+  appendMany(params, 'region', filters.region)
   appendMany(params, 'industry', filters.industry)
   appendMany(params, 'subcategory', filters.subcategory)
-  appendMany(params, 'source', filters.source)
+  appendMany(params, 'taxonomy', filters.taxonomy)
+  appendMany(params, 'keywords', filters.keywords)
+  appendAdvancedTenderFilters(params, filters)
 
   const suffix = params.toString()
 
   return apiRequest<TenderFilters>(`/v1/public/tender-filters${suffix ? `?${suffix}` : ''}`, {
     cache: 'no-store'
   })
+}
+
+function appendAdvancedTenderFilters(params: URLSearchParams, filters: PublicTenderQuery) {
+  if (filters.valueMinMinor !== undefined) params.set('value_min_minor', String(filters.valueMinMinor))
+  if (filters.valueMaxMinor !== undefined) params.set('value_max_minor', String(filters.valueMaxMinor))
+  if (filters.includeValueUnspecified !== undefined) {
+    params.set('include_value_unspecified', filters.includeValueUnspecified ? '1' : '0')
+  }
+  if (filters.publishedFrom) params.set('published_from', filters.publishedFrom)
+  if (filters.publishedTo) params.set('published_to', filters.publishedTo)
+  if (filters.deadlineFrom) params.set('deadline_from', filters.deadlineFrom)
+  if (filters.deadlineTo) params.set('deadline_to', filters.deadlineTo)
+  appendMany(params, 'stage', filters.stage)
+  appendMany(params, 'procedure_type', filters.procedureType)
+  appendMany(params, 'procurement_type', filters.procurementType)
+  if (filters.framework !== undefined) params.set('framework', filters.framework ? '1' : '0')
+  if (filters.dynamicMarket !== undefined) params.set('dynamic_market', filters.dynamicMarket ? '1' : '0')
+  if (filters.smeSuitable !== undefined) params.set('sme_suitable', filters.smeSuitable ? '1' : '0')
+}
+
+export type TenderTaxonomyNode = {
+  slug: string
+  label: string
+  level: 'industry' | 'service_category' | 'cpv_code'
+  parentSlug: string | null
+  cpvCode?: string | null
+}
+
+export type TenderKeywordGroup = {
+  slug: string
+  label: string
+  options: string[]
 }
 
 function appendMany(params: URLSearchParams, key: string, values?: string | string[]) {

@@ -3,10 +3,9 @@ export type TenderPreview = {
   title: string
   buyer: string | null
   sourceReference: string | null
-  sourceKey?: string | null
-  sourceName?: string | null
   category: string
   categories: string[]
+  keywords?: string[]
   region: string
   regions: string[]
   summary: string
@@ -34,4 +33,10 @@ export type TenderPreview = {
 export type TenderFilters = {
   categories: string[]
   regions: string[]
+  keywords?: string[]
+  keywordGroups?: Array<{ slug: string; label: string; options: string[] }>
+  stages?: string[]
+  procedureTypes?: string[]
+  procurementTypes?: string[]
+  total?: number
 }

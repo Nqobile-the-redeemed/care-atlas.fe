@@ -42,13 +42,6 @@ function formatTerm(tender: TenderPreview) {
   return `${formatDate(tender.contractStartDate)} - ${formatDate(tender.contractEndDate)}`
 }
 
-function sourceLabel(tender: TenderPreview) {
-  if (tender.sourceKey === 'proactis_due_north') return 'Proactis'
-  if (tender.sourceKey === 'find_a_tender') return 'GOV.UK'
-
-  return tender.sourceName ?? 'Source'
-}
-
 function signupHref() {
   const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://portal.orbitmirai.com/sign-up'
   const target = new URL(configured, window.location.origin)
@@ -109,20 +102,15 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
         role='dialog'
         aria-modal='true'
         aria-labelledby='tender-preview-title'
-        className='fixed top-0 right-0 z-9999 flex h-full w-full max-w-2xl flex-col border-l border-gray-200 bg-white shadow-2xl'
+        className='fixed inset-0 z-9999 flex h-dvh w-full flex-col bg-white shadow-2xl sm:inset-y-0 sm:right-0 sm:left-auto sm:max-w-2xl sm:border-l sm:border-gray-200'
       >
-        <header className='flex items-start justify-between gap-4 border-b border-gray-200 p-5'>
+        <header className='flex shrink-0 items-start justify-between gap-3 border-b border-gray-200 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 sm:gap-4 sm:p-5'>
           <div>
             <p className='text-brand-700 text-xs font-semibold tracking-[0.08em] uppercase'>Locked tender preview</p>
             <h2 id='tender-preview-title' className='mt-1 text-xl font-semibold text-gray-950'>
               {tender.title}
             </h2>
             <p className='mt-1 text-sm text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
-            <p className='mt-2'>
-              <span className='border-brand-100 bg-brand-25 text-brand-800 rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
-                {sourceLabel(tender)}
-              </span>
-            </p>
           </div>
           <button
             type='button'
@@ -135,7 +123,7 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
           </button>
         </header>
 
-        <div className='flex-1 overflow-y-auto p-5 sm:p-6'>
+        <div className='min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch] sm:p-6'>
           <StateBadges states={tender.states} />
           <dl className='mt-6 grid gap-4 sm:grid-cols-2'>
             {[
@@ -407,12 +395,7 @@ export function PublicTenderBoard() {
                         <p className='font-semibold text-gray-950'>{tender.title}</p>
                         <p className='mt-1 text-xs text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
                         <div className='mt-2'>
-                          <div className='flex flex-wrap gap-1.5'>
-                            <span className='border-brand-100 bg-brand-25 text-brand-800 rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
-                              {sourceLabel(tender)}
-                            </span>
-                            <StateBadges states={tender.states} />
-                          </div>
+                          <StateBadges states={tender.states} />
                         </div>
                       </td>
                       <td className='w-44 px-4 py-4 text-gray-700'>{tender.category}</td>
@@ -463,9 +446,6 @@ export function PublicTenderBoard() {
                     className='focus:ring-brand-500/20 w-full text-left focus:ring-4 focus:outline-hidden'
                   >
                     <StateBadges states={tender.states} />
-                    <span className='border-brand-100 bg-brand-25 text-brand-800 mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
-                      {sourceLabel(tender)}
-                    </span>
                     <h3 className='mt-3 text-base font-semibold text-gray-950'>{tender.title}</h3>
                     <p className='mt-1 text-xs text-gray-500'>{tender.buyer ?? 'Buyer not stated'}</p>
                     <dl className='mt-4 grid grid-cols-2 gap-3 text-sm'>

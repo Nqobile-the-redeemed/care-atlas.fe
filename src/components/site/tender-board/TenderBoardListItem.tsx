@@ -18,14 +18,6 @@ type TenderBoardListItemProps = {
   onToggleSaved?: (tender: PublicTender) => void
 }
 
-function sourceLabel(tender: PublicTender) {
-  if (tender.sourceKey === 'proactis_due_north') return 'Proactis'
-  if (tender.sourceKey === 'find_a_tender') return 'GOV.UK'
-  if (tender.sourceKey === 'contracts_finder') return 'Contracts Finder'
-
-  return tender.sourceName ?? 'Source'
-}
-
 function TenderMeta({ tender, compact = false }: { tender: PublicTender; compact?: boolean }) {
   const regionLabel = tender.regions.length
     ? `${tender.regions.slice(0, 2).join(', ')}${tender.regions.length > 2 ? ` +${tender.regions.length - 2}` : ''}`
@@ -56,9 +48,6 @@ function TenderMeta({ tender, compact = false }: { tender: PublicTender; compact
 function TenderBadges({ tender }: { tender: PublicTender }) {
   return (
     <div className='mt-3 flex flex-wrap gap-1.5'>
-      <span className='border-brand-100 bg-brand-25 text-brand-800 rounded-full border px-2 py-0.5 text-[11px] font-semibold'>
-        {sourceLabel(tender)}
-      </span>
       <span className='rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-600'>
         {tender.category}
       </span>
@@ -122,7 +111,7 @@ export function TenderBoardListItem({
           >
             Open details
           </Button>
-          <TenderShareButton tender={tender} />
+          <TenderShareButton tender={tender} fullWidth />
           {onToggleSaved && (
             <Button variant='secondary' onClick={() => onToggleSaved(tender)} fullWidth>
               {isSaved ? 'Saved' : 'Save tender'}

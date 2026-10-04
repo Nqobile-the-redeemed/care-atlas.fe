@@ -27,10 +27,16 @@ describe('getPublicTenders', () => {
 
     const { getPublicTenders } = await import('./tenders')
 
-    await getPublicTenders({ keyword: 'care', category: ['services', 'supported living'], region: ['London'] })
+    await getPublicTenders({
+      keyword: 'care',
+      keywords: ['Domiciliary care', 'Supported living'],
+      category: ['services', 'supported living'],
+      taxonomy: ['health-and-social-care', 'cpv-85311000'],
+      region: ['London']
+    })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/v1/public/tenders?keyword=care&category%5B%5D=services&category%5B%5D=supported+living&region=London',
+      'http://localhost:8000/v1/public/tenders?keyword=care&category%5B%5D=services&category%5B%5D=supported+living&region=London&taxonomy%5B%5D=health-and-social-care&taxonomy%5B%5D=cpv-85311000&keywords%5B%5D=Domiciliary+care&keywords%5B%5D=Supported+living',
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({
