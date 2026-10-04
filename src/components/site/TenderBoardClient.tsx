@@ -145,12 +145,23 @@ function compactMoneyMinor(value: number) {
 }
 
 function valueStops(minimum: number, maximum: number) {
-  if (maximum <= minimum) return [minimum]
+  const floor = Math.min(0, minimum)
+  if (maximum <= floor) return [floor]
 
   const cappedMaximum = Math.min(maximum, 5_000_000_000)
   const candidates = [0, 10_000_000, 50_000_000, 100_000_000, 500_000_000, cappedMaximum]
 
-  return Array.from(new Set(candidates.filter(value => value >= minimum && value <= cappedMaximum))).sort(
+  return Array.from(new Set(candidates.filter(value => value >= floor && value <= cappedMaximum))).sort(
+    (left, right) => left - right
+  )
+}
+
+function normalizedValueStops(valueBounds?: FilterPanelProps['valueBounds']) {
+  const maximum = Math.max(valueBounds?.suggestedMaxMinor ?? valueBounds?.maxMinor ?? 0, 0)
+  const suppliedStops = valueBounds?.stepsMinor ?? []
+  const candidates = suppliedStops.length > 0 ? [0, ...suppliedStops, maximum] : valueStops(0, maximum)
+
+  return Array.from(new Set(candidates.filter(value => Number.isFinite(value) && value >= 0 && value <= maximum))).sort(
     (left, right) => left - right
   )
 }
@@ -159,11 +170,13 @@ function TenderValueRange({
   stops,
   selectedMinimum,
   selectedMaximum,
+  resultCount,
   onChange
 }: {
   stops: number[]
   selectedMinimum: number
   selectedMaximum: number
+  resultCount?: number
   onChange: (field: 'valueMinMinor' | 'valueMaxMinor', value: number) => void
 }) {
   const lastIndex = Math.max(0, stops.length - 1)
@@ -203,8 +216,22 @@ function TenderValueRange({
         </div>
       </div>
 
-      <div className='relative mt-3 h-7'>
-        <div className='absolute top-2.5 right-2 left-2 h-1.5 rounded-full bg-gray-200' aria-hidden='true'>
+      {resultCount !== undefined && (
+        <p className='mt-2 text-xs font-medium text-gray-600' aria-live='polite'>
+          {resultCount.toLocaleString('en-GB')} matching {resultCount === 1 ? 'opportunity' : 'opportunities'}
+        </p>
+      )}
+
+      <div className='relative mt-3 h-9 touch-none'>
+        <div
+          className='absolute top-2.5 right-2 left-2 h-1.5 cursor-pointer rounded-full bg-gray-200'
+          aria-hidden='true'
+          onPointerDown={event => {
+            const bounds = event.currentTarget.getBoundingClientRect()
+            const percent = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width))
+            jumpTo(stops[Math.round(percent * lastIndex)])
+          }}
+        >
           <span
             className='bg-brand-600 absolute h-1.5 rounded-full'
             style={{ left: `${minimumPercent}%`, right: `${100 - maximumPercent}%` }}
@@ -221,7 +248,7 @@ function TenderValueRange({
             onChange('valueMinMinor', stops[index])
           }}
           aria-label='Minimum contract value'
-          className='pointer-events-none absolute inset-0 z-20 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
+          className={`pointer-events-none absolute inset-0 h-8 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-11px] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md ${minimumIndex >= maximumIndex - 1 ? 'z-30' : 'z-20'}`}
         />
         <input
           type='range'
@@ -234,7 +261,7 @@ function TenderValueRange({
             onChange('valueMaxMinor', stops[index])
           }}
           aria-label='Maximum contract value'
-          className='pointer-events-none absolute inset-0 z-10 h-6 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
+          className='pointer-events-none absolute inset-0 z-20 h-8 w-full appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:mt-[-11px] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow-md'
         />
       </div>
 
@@ -475,9 +502,7 @@ function FilterPanel({
   onIncludeValueUnspecifiedChange,
   onClear
 }: FilterPanelProps) {
-  const rawMinimum = valueBounds?.minMinor ?? 0
-  const rawMaximum = Math.max(valueBounds?.suggestedMaxMinor ?? valueBounds?.maxMinor ?? rawMinimum, rawMinimum)
-  const rangeStops = valueBounds?.stepsMinor?.length ? valueBounds.stepsMinor : valueStops(rawMinimum, rawMaximum)
+  const rangeStops = normalizedValueStops(valueBounds)
   const minimum = rangeStops[0] ?? 0
   const maximum = rangeStops.at(-1) ?? minimum
 
@@ -575,7 +600,7 @@ function FilterPanel({
                   value={publishedFrom}
                   onChange={event => onDateChange('publishedFrom', event.target.value)}
                   max={publishedTo || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -585,7 +610,7 @@ function FilterPanel({
                   value={publishedTo}
                   onChange={event => onDateChange('publishedTo', event.target.value)}
                   min={publishedFrom || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -595,7 +620,7 @@ function FilterPanel({
                   value={deadlineFrom}
                   onChange={event => onDateChange('deadlineFrom', event.target.value)}
                   max={deadlineTo || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
@@ -605,7 +630,7 @@ function FilterPanel({
                   value={deadlineTo}
                   onChange={event => onDateChange('deadlineTo', event.target.value)}
                   min={deadlineFrom || undefined}
-                  className='mt-1 block h-11 max-w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-sm'
+                  className='mt-1 block h-11 w-full min-w-0 appearance-none rounded-lg border border-gray-300 bg-white px-3 text-base sm:text-sm'
                 />
               </label>
             </div>
@@ -617,6 +642,7 @@ function FilterPanel({
                   stops={rangeStops}
                   selectedMinimum={valueMinMinor ?? minimum}
                   selectedMaximum={valueMaxMinor ?? maximum}
+                  resultCount={resultCount}
                   onChange={onValueChange}
                 />
                 {(valueBounds?.unspecifiedCount ?? 0) > 0 && (
@@ -678,6 +704,10 @@ export function TenderBoardClient() {
   const [valueMaxMinor, setValueMaxMinor] = useState<number | undefined>(() =>
     optionalNumber(searchParams.get('valueMaxMinor'))
   )
+  const pendingValueFiltersRef = useRef<{ valueMinMinor?: number; valueMaxMinor?: number }>({
+    valueMinMinor,
+    valueMaxMinor
+  })
   const [includeValueUnspecified, setIncludeValueUnspecified] = useState(
     () => searchParams.get('includeValueUnspecified') !== 'false'
   )
@@ -961,6 +991,7 @@ export function TenderBoardClient() {
     setSmeSuitable(false)
     setValueMinMinor(undefined)
     setValueMaxMinor(undefined)
+    pendingValueFiltersRef.current = { valueMinMinor: undefined, valueMaxMinor: undefined }
     setIncludeValueUnspecified(true)
     setSort(DEFAULT_SORT)
     setPage(1)
@@ -1045,9 +1076,32 @@ export function TenderBoardClient() {
       deadlineFrom: setDeadlineFrom,
       deadlineTo: setDeadlineTo
     }
+    const pairedField =
+      field === 'publishedFrom'
+        ? 'publishedTo'
+        : field === 'publishedTo'
+          ? 'publishedFrom'
+          : field === 'deadlineFrom'
+            ? 'deadlineTo'
+            : 'deadlineFrom'
+    const pairedValue = {
+      publishedFrom,
+      publishedTo,
+      deadlineFrom,
+      deadlineTo
+    }[pairedField]
+    const invalidPair = Boolean(
+      value && pairedValue && (field.endsWith('From') ? value > pairedValue : value < pairedValue)
+    )
+
     setters[field](value)
+    if (invalidPair) setters[pairedField]('')
     setPage(1)
-    setFilters(current => ({ ...current, [field]: value || undefined }))
+    setFilters(current => ({
+      ...current,
+      [field]: value || undefined,
+      ...(invalidPair ? { [pairedField]: undefined } : {})
+    }))
   }
 
   function changeBoolean(field: 'framework' | 'dynamicMarket' | 'smeSuitable', value: boolean) {
@@ -1058,7 +1112,7 @@ export function TenderBoardClient() {
   }
 
   function changeValue(field: 'valueMinMinor' | 'valueMaxMinor', value: number) {
-    const maximum = filterOptions.ranges?.value?.maxMinor
+    const maximum = normalizedValueStops(filterOptions.ranges?.value).at(-1)
     const normalized =
       field === 'valueMinMinor' && value <= 0
         ? undefined
@@ -1068,11 +1122,12 @@ export function TenderBoardClient() {
 
     if (field === 'valueMinMinor') setValueMinMinor(normalized)
     else setValueMaxMinor(normalized)
+    pendingValueFiltersRef.current = { ...pendingValueFiltersRef.current, [field]: normalized }
 
     if (valueFilterTimerRef.current !== null) window.clearTimeout(valueFilterTimerRef.current)
     valueFilterTimerRef.current = window.setTimeout(() => {
       setPage(1)
-      setFilters(current => ({ ...current, [field]: normalized }))
+      setFilters(current => ({ ...current, ...pendingValueFiltersRef.current }))
       valueFilterTimerRef.current = null
     }, 350)
   }
