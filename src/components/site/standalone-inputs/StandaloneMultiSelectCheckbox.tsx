@@ -56,7 +56,7 @@ export function StandaloneMultiSelectCheckbox({
     <div className={`flex flex-grow flex-col gap-2 ${className || ''}`}>
       <label
         htmlFor={name}
-        className='font-neue text-gray-mediumGray text-xs font-semibold uppercase dark:text-slate-300'
+        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
       >
         {label || name}
       </label>

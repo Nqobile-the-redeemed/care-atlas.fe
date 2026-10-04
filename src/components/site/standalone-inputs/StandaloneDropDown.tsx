@@ -205,7 +205,7 @@ export function StandaloneDropDown({
   return (
     <div ref={dropdownRef} className={`relative flex w-full flex-col gap-2 ${className || ''}`}>
       <label
-        className='font-neue text-gray-mediumGray text-xs font-semibold uppercase dark:text-slate-300'
+        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
         htmlFor={name}
       >
         {label || name}

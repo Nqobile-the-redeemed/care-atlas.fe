@@ -144,7 +144,7 @@ export function RegionCountiesFormSection({
         {selectedRegions.length === 0 ? (
           <div className='flex flex-col gap-2'>
             {countyLabel && (
-              <label className='font-neue text-gray-mediumGray text-xs font-semibold uppercase dark:text-slate-300'>
+              <label className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
                 {countyLabel}
               </label>
             )}
