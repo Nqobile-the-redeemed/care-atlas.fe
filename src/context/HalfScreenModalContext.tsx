@@ -2,9 +2,10 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
-type ModalHeaderConfig = {
+export type ModalHeaderConfig = {
   title?: string
   subtitle?: string
+  closeLabel?: string
 }
 
 export interface ModalTemplate<TData = unknown> {

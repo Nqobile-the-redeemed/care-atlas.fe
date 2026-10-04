@@ -6,6 +6,7 @@ import { SiteIcon } from '../SiteIcon'
 import { Button } from '../ui'
 
 import { dateLabel, hasTenderDetails, money, plainText, valueLabel, yesNo } from './utils'
+import { TenderShareButton } from './TenderShareButton'
 
 type TenderBoardSelectedTenderPanelProps = {
   selectedTender: TenderBoardSelectedTender | null
@@ -69,6 +70,7 @@ export function TenderBoardSelectedTenderPanel({
         >
           Send enquiry
         </Button>
+        <TenderShareButton tender={selectedTender} fullWidth />
       </div>
 
       <section className='mt-5 border-t border-gray-200 pt-5'>

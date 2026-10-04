@@ -7,6 +7,8 @@ export { TenderBoardLeadForm } from './TenderBoardLeadForm'
 export { TenderBoardList } from './TenderBoardList'
 export { TenderBoardListItem } from './TenderBoardListItem'
 export { TenderBoardSelectedTenderPanel } from './TenderBoardSelectedTenderPanel'
+export { TenderShareButton } from './TenderShareButton'
+export { TenderShareModalContent } from './TenderShareModalContent'
 export {
   dateLabel,
   formatSlotDate,

@@ -653,7 +653,7 @@ function FilterPanel({
   )
 }
 
-export function TenderBoardClient() {
+export function TenderBoardClient({ initialTender }: { initialTender?: PublicTender }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { openModal } = useHalfScreenModal()
@@ -711,7 +711,7 @@ export function TenderBoardClient() {
   const [viewMode, setViewMode] = useState<TenderBoardViewMode>(() =>
     searchParams.get('view') === 'grid' ? 'grid' : 'list'
   )
-  const [activeTenderId, setActiveTenderId] = useState(() => searchParams.get('tender') ?? '')
+  const [activeTenderId, setActiveTenderId] = useState(() => initialTender?.id ?? searchParams.get('tender') ?? '')
   const initialTenderOpenedRef = useRef(false)
   const valueFilterTimerRef = useRef<number | null>(null)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -875,11 +875,12 @@ export function TenderBoardClient() {
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
-    if (activeTenderId) next.set('tender', activeTenderId)
+    if (activeTenderId && !initialTender) next.set('tender', activeTenderId)
 
     const query = next.toString()
-    router.replace(query ? `/tenders?${query}` : '/tenders', { scroll: false })
-  }, [activeTenderId, filters, page, router, viewMode])
+    const routePath = initialTender ? `/tenders/${encodeURIComponent(initialTender.id)}` : '/tenders'
+    router.replace(query ? `${routePath}?${query}` : routePath, { scroll: false })
+  }, [activeTenderId, filters, initialTender, page, router, viewMode])
 
   const openTenderWorkspace = useCallback(
     (tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
@@ -906,7 +907,8 @@ export function TenderBoardClient() {
     if (loading) return
 
     initialTenderOpenedRef.current = true
-    const listedTender = tenders.find(tender => tender.id === activeTenderId)
+    const listedTender =
+      initialTender?.id === activeTenderId ? initialTender : tenders.find(tender => tender.id === activeTenderId)
     if (listedTender) {
       openTenderWorkspace(listedTender)
       return
@@ -915,7 +917,7 @@ export function TenderBoardClient() {
     void getPublicTender(activeTenderId)
       .then(response => openTenderWorkspace(response.data))
       .catch(() => setError('The tender link could not be opened. It may no longer be available.'))
-  }, [activeTenderId, loading, openTenderWorkspace, tenders])
+  }, [activeTenderId, initialTender, loading, openTenderWorkspace, tenders])
 
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
     const nextFilters = {

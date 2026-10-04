@@ -191,7 +191,7 @@ export function HalfScreenModal() {
                   variant='tertiary'
                   size='sm'
                   className='h-10 w-10 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900'
-                  aria-label='Close tender details'
+                  aria-label={headerConfig?.closeLabel ?? 'Close tender details'}
                   leftIcon={<SiteIcon name='close' className='h-5 w-5' />}
                 />
               </div>
@@ -203,7 +203,7 @@ export function HalfScreenModal() {
           </section>
         </div>
       ) : (
-        <div className='pointer-events-none fixed inset-0 z-50' onMouseDown={handleBackdropMouseDown}>
+        <div className='pointer-events-none fixed inset-0 z-[10000]' onMouseDown={handleBackdropMouseDown}>
           <section
             role='dialog'
             aria-modal='true'
@@ -278,8 +278,8 @@ export function HalfScreenModal() {
                   variant='tertiary'
                   size='sm'
                   className='h-10 w-10 bg-gray-100 p-0 text-gray-900 hover:bg-gray-200'
-                  aria-label='Exit and close tender details'
-                  title='Close tender details'
+                  aria-label={headerConfig?.closeLabel ?? 'Close tender details'}
+                  title={headerConfig?.closeLabel ?? 'Close tender details'}
                   leftIcon={<SiteIcon name='close' className='h-4 w-4' />}
                 />
               </div>

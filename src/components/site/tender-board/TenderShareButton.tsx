@@ -1,117 +1,53 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useMemo } from 'react'
 
-import type { PublicTender } from '@/lib/api/tenders'
 import { trackEvent } from '@/components/analytics/trackEvent'
+import { useHalfScreenModal, type ModalTemplate } from '@/context/HalfScreenModalContext'
+import type { PublicTender } from '@/lib/api/tenders'
+import { toTenderShareData, type TenderShareData } from '@/lib/tenders/tenderShare'
 
 import { SiteIcon } from '../SiteIcon'
 import { Button } from '../ui'
+import { TenderShareModalContent } from './TenderShareModalContent'
+
+const tenderShareTemplate: ModalTemplate<TenderShareData> = {
+  id: 'tender-share',
+  component: TenderShareModalContent,
+  headerConfig: {
+    title: 'Share tender',
+    closeLabel: 'Close share tender'
+  }
+}
 
 export function TenderShareButton({ tender, fullWidth = false }: { tender: PublicTender; fullWidth?: boolean }) {
-  const [open, setOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
+  const { openModal } = useHalfScreenModal()
+  const shareData = useMemo(() => toTenderShareData(tender), [tender])
 
-  useEffect(() => {
-    if (!open) return
-
-    const close = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
-    }
-
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [open])
-
-  const url = typeof window === 'undefined' ? `/tenders/${tender.id}` : `${window.location.origin}/tenders/${tender.id}`
-  const text = `${tender.title}${tender.buyer ? ` — ${tender.buyer}` : ''}`
-
-  async function share() {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: tender.title, text, url })
-        trackEvent('tender_shared', { share_method: 'native' })
-        return
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return
+  function openShareModal() {
+    trackEvent('tender_share_modal_opened')
+    openModal(shareData, tenderShareTemplate, {
+      width: 'min(100vw, 680px)',
+      headerConfig: {
+        title: 'Share tender',
+        subtitle: shareData.title,
+        closeLabel: 'Close share tender'
       }
-    }
-
-    setOpen(current => {
-      const nextOpen = !current
-      if (nextOpen) trackEvent('tender_share_menu_opened')
-      return nextOpen
     })
   }
 
-  async function copyLink() {
-    await navigator.clipboard.writeText(url)
-    trackEvent('tender_shared', { share_method: 'copy_link' })
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 2000)
-  }
-
-  const encodedUrl = encodeURIComponent(url)
-  const encodedText = encodeURIComponent(text)
-
   return (
-    <div ref={rootRef} className={`relative ${fullWidth ? 'w-full' : 'w-full sm:w-auto'}`}>
-      <Button
-        type='button'
-        onClick={() => void share()}
-        aria-expanded={open}
-        aria-haspopup='menu'
-        title='Share tender'
-        variant='secondary'
-        fullWidth
-        className='border-gray-300 text-gray-800 hover:border-gray-300 hover:bg-gray-50'
-        leftIcon={<SiteIcon name='share' className='h-4 w-4' />}
-      >
-        Share
-      </Button>
-
-      {open && (
-        <div
-          role='menu'
-          className='absolute right-0 bottom-12 z-20 w-52 rounded-lg border border-gray-200 bg-white p-1.5 shadow-xl'
-        >
-          <button
-            type='button'
-            role='menuitem'
-            onClick={() => void copyLink()}
-            className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50'
-          >
-            <SiteIcon name={copied ? 'check' : 'link'} className='h-4 w-4' />
-            {copied ? 'Link copied' : 'Copy link'}
-          </button>
-          <a
-            role='menuitem'
-            href={`mailto:?subject=${encodeURIComponent(tender.title)}&body=${encodedText}%0A%0A${encodedUrl}`}
-            className='flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
-          >
-            <SiteIcon name='mail' className='h-4 w-4' /> Email
-          </a>
-          <a
-            role='menuitem'
-            href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`}
-            target='_blank'
-            rel='noreferrer'
-            className='flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
-          >
-            <SiteIcon name='message' className='h-4 w-4' /> WhatsApp
-          </a>
-          <a
-            role='menuitem'
-            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
-            target='_blank'
-            rel='noreferrer'
-            className='flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
-          >
-            <SiteIcon name='share' className='h-4 w-4' /> LinkedIn
-          </a>
-        </div>
-      )}
-    </div>
+    <Button
+      type='button'
+      onClick={openShareModal}
+      variant='secondary'
+      fullWidth
+      className={fullWidth ? undefined : 'sm:w-fit'}
+      aria-haspopup='dialog'
+      title='Share tender'
+      leftIcon={<SiteIcon name='share' className='h-4 w-4' />}
+    >
+      Share
+    </Button>
   )
 }
