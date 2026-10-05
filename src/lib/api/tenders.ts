@@ -177,6 +177,7 @@ export type TenderFilters = {
 
 export type PublicTenderQuery = {
   keyword?: string
+  audience?: string | string[]
   category?: string | string[]
   region?: string | string[]
   industry?: string | string[]
@@ -205,6 +206,7 @@ export async function getPublicTenders(filters: PublicTenderQuery) {
   const params = new URLSearchParams()
 
   if (filters.keyword) params.set('keyword', filters.keyword)
+  appendMany(params, 'audience', filters.audience)
   appendMany(params, 'category', filters.category)
   appendMany(params, 'region', filters.region)
   appendMany(params, 'industry', filters.industry)
@@ -233,6 +235,7 @@ export async function getPublicTenderFilters(filters: Omit<PublicTenderQuery, 'p
   const params = new URLSearchParams()
 
   if (filters.keyword) params.set('keyword', filters.keyword)
+  appendMany(params, 'audience', filters.audience)
   appendMany(params, 'category', filters.category)
   appendMany(params, 'region', filters.region)
   appendMany(params, 'industry', filters.industry)

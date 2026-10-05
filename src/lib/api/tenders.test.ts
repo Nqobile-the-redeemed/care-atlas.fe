@@ -29,6 +29,7 @@ describe('getPublicTenders', () => {
 
     await getPublicTenders({
       keyword: 'care',
+      audience: ['adults', 'children'],
       keywords: ['Domiciliary care', 'Supported living'],
       category: ['services', 'supported living'],
       taxonomy: ['health-and-social-care', 'cpv-85311000'],
@@ -36,7 +37,7 @@ describe('getPublicTenders', () => {
     })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/v1/public/tenders?keyword=care&category%5B%5D=services&category%5B%5D=supported+living&region=London&taxonomy%5B%5D=health-and-social-care&taxonomy%5B%5D=cpv-85311000&keywords%5B%5D=Domiciliary+care&keywords%5B%5D=Supported+living',
+      'http://localhost:8000/v1/public/tenders?keyword=care&audience%5B%5D=adults&audience%5B%5D=children&category%5B%5D=services&category%5B%5D=supported+living&region=London&taxonomy%5B%5D=health-and-social-care&taxonomy%5B%5D=cpv-85311000&keywords%5B%5D=Domiciliary+care&keywords%5B%5D=Supported+living',
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({

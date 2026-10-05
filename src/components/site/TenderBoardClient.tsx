@@ -41,8 +41,13 @@ import {
 const TENDERS_PER_PAGE = 15
 const DEFAULT_SORT: 'deadline' | 'newest' = 'newest'
 const SAVE_SIGNUP_PROMPTED_KEY = 'care-atlas:save-signup-prompted'
+const TENDER_AUDIENCES = [
+  { value: 'adults', label: 'Adults' },
+  { value: 'children', label: 'Children and families' }
+] as const
 
 type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
+  audience: string[]
   category: string[]
   region: string[]
   subcategory: string[]
@@ -65,6 +70,7 @@ type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
 }
 
 type FilterPanelProps = {
+  audience: string[]
   region: string[]
   subcategory: string[]
   taxonomy: string[]
@@ -102,6 +108,7 @@ type FilterPanelProps = {
   resultCount?: number
   facets?: TenderFilters['facets']
   activeFilterCount: number
+  onAudienceToggle: (value: string) => void
   onRegionToggle: (value: string) => void
   onSubcategoryToggle: (value: string) => void
   onTaxonomyToggle: (value: string) => void
@@ -304,15 +311,17 @@ function FilterGroup({
   selectedLabel,
   optionCount,
   contentClassName,
+  defaultOpen = false,
   children
 }: {
   title: string
   selectedLabel?: string
   optionCount?: number
   contentClassName?: string
+  defaultOpen?: boolean
   children: ReactNode
 }) {
-  const [isOpen, setIsOpen] = useState(Boolean(selectedLabel))
+  const [isOpen, setIsOpen] = useState(defaultOpen || Boolean(selectedLabel))
 
   useEffect(() => {
     if (selectedLabel) setIsOpen(true)
@@ -376,7 +385,10 @@ function FilterCheckboxList({
               onChange={() => onToggle(option)}
               className='text-brand-600 focus:ring-brand-500/20 h-4 w-4 border-gray-300'
             />
-            <span className='line-clamp-2 flex-1'>{option.replaceAll('_', ' ')}</span>
+            <span className='line-clamp-2 flex-1'>
+              {TENDER_AUDIENCES.find(audienceOption => audienceOption.value === option)?.label ??
+                option.replaceAll('_', ' ')}
+            </span>
             {counts && (
               <span className='rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 tabular-nums'>
                 {counts.find(item => item.value === option)?.count ?? 0}
@@ -483,6 +495,7 @@ function TaxonomyFilterTree({
 }
 
 function FilterPanel({
+  audience,
   region,
   subcategory,
   taxonomy,
@@ -504,6 +517,7 @@ function FilterPanel({
   resultCount,
   facets,
   activeFilterCount,
+  onAudienceToggle,
   onRegionToggle,
   onSubcategoryToggle,
   onTaxonomyToggle,
@@ -517,6 +531,15 @@ function FilterPanel({
   const rangeStops = normalizedValueStops(valueBounds)
   const minimum = rangeStops[0] ?? 0
   const maximum = rangeStops.at(-1) ?? minimum
+  const advancedFilterCount =
+    taxonomy.length +
+    subcategory.length +
+    Number(Boolean(publishedFrom)) +
+    Number(Boolean(publishedTo)) +
+    Number(Boolean(deadlineFrom)) +
+    Number(Boolean(deadlineTo)) +
+    Number(smeSuitable) +
+    Number(valueMinMinor !== undefined || valueMaxMinor !== undefined)
 
   return (
     <div className='rounded-lg border border-gray-200 bg-white'>
@@ -540,46 +563,11 @@ function FilterPanel({
       </div>
       <div className='px-4'>
         <FilterGroup
-          title='Care service hierarchy'
-          selectedLabel={taxonomy.length ? `${taxonomy.length} selected` : undefined}
-          optionCount={taxonomyNodes.length || subcategories.length}
-        >
-          {taxonomyNodes.length > 0 ? (
-            <TaxonomyFilterTree
-              nodes={taxonomyNodes}
-              selected={taxonomy}
-              counts={facets?.taxonomy}
-              onToggle={onTaxonomyToggle}
-            />
-          ) : subcategories.length > 0 ? (
-            <FilterCheckboxList
-              name='service-type'
-              value={subcategory}
-              options={subcategories}
-              onToggle={onSubcategoryToggle}
-              counts={facets?.subcategories}
-            />
-          ) : (
-            <p className='text-sm text-gray-500'>Service subcategories are not available from the API yet.</p>
-          )}
-        </FilterGroup>
-        <FilterGroup
-          title='Region or location'
-          selectedLabel={region.length ? `${region.length} selected` : undefined}
-          optionCount={regions.length}
-        >
-          <FilterCheckboxList
-            name='region'
-            value={region}
-            options={regions}
-            onToggle={onRegionToggle}
-            counts={facets?.regions}
-          />
-        </FilterGroup>
-        <FilterGroup
           title='Care categories'
           selectedLabel={keywords.length ? `${keywords.length} selected` : undefined}
           optionCount={keywordOptions.length}
+          contentClassName='overflow-visible'
+          defaultOpen
         >
           {keywordGroups.length > 0 ? (
             <KeywordGroupList
@@ -599,11 +587,64 @@ function FilterPanel({
           )}
         </FilterGroup>
         <FilterGroup
+          title='People supported'
+          selectedLabel={
+            audience.length === 2
+              ? 'Adults and children'
+              : TENDER_AUDIENCES.find(option => option.value === audience[0])?.label
+          }
+          optionCount={TENDER_AUDIENCES.length}
+          contentClassName='overflow-visible'
+        >
+          <FilterCheckboxList
+            name='audience'
+            value={audience}
+            options={TENDER_AUDIENCES.map(option => option.value)}
+            onToggle={onAudienceToggle}
+          />
+        </FilterGroup>
+        <FilterGroup
+          title='Region or location'
+          selectedLabel={region.length ? `${region.length} selected` : undefined}
+          optionCount={regions.length}
+        >
+          <FilterCheckboxList
+            name='region'
+            value={region}
+            options={regions}
+            onToggle={onRegionToggle}
+            counts={facets?.regions}
+          />
+        </FilterGroup>
+        <FilterGroup
           title='Advanced filters'
-          selectedLabel={activeFilterCount ? 'Review active filters' : undefined}
+          selectedLabel={advancedFilterCount ? `${advancedFilterCount} active` : undefined}
           contentClassName='overflow-visible'
         >
           <div className='space-y-4 pb-4'>
+            <div>
+              <p className='mb-2 text-xs font-semibold tracking-[0.06em] text-gray-700 uppercase'>
+                Care service hierarchy
+              </p>
+              {taxonomyNodes.length > 0 ? (
+                <TaxonomyFilterTree
+                  nodes={taxonomyNodes}
+                  selected={taxonomy}
+                  counts={facets?.taxonomy}
+                  onToggle={onTaxonomyToggle}
+                />
+              ) : subcategories.length > 0 ? (
+                <FilterCheckboxList
+                  name='service-type'
+                  value={subcategory}
+                  options={subcategories}
+                  onToggle={onSubcategoryToggle}
+                  counts={facets?.subcategories}
+                />
+              ) : (
+                <p className='text-sm text-gray-500'>Service subcategories are not available from the API yet.</p>
+              )}
+            </div>
             <div className='grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2'>
               <label className='min-w-0 text-xs font-medium text-gray-700'>
                 Published from
@@ -696,6 +737,9 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   const { openModal } = useHalfScreenModal()
   const [keyword, setKeyword] = useState(() => searchParams.get('keyword') ?? '')
   const [category, setCategory] = useState(() => searchParams.getAll('category'))
+  const [audience, setAudience] = useState(() =>
+    searchParams.getAll('audience').filter(value => TENDER_AUDIENCES.some(option => option.value === value))
+  )
   const [region, setRegion] = useState(() => searchParams.getAll('region'))
   const [subcategory, setSubcategory] = useState(() => searchParams.getAll('subcategory'))
   const [taxonomy, setTaxonomy] = useState(() => searchParams.getAll('taxonomy'))
@@ -728,6 +772,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   )
   const [filters, setFilters] = useState<AppliedTenderFilters>(() => ({
     keyword: searchParams.get('keyword')?.trim() ?? '',
+    audience: searchParams.getAll('audience').filter(value => TENDER_AUDIENCES.some(option => option.value === value)),
     category: searchParams.getAll('category'),
     region: searchParams.getAll('region'),
     subcategory: searchParams.getAll('subcategory'),
@@ -779,6 +824,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   )
   const activeFilterCount =
     Number(Boolean(filters.keyword)) +
+    filters.audience.length +
     filters.category.length +
     filters.region.length +
     filters.subcategory.length +
@@ -801,6 +847,11 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
 
   const activeFilterLabels = [
     filters.keyword ? { key: 'keyword', label: `Search: ${filters.keyword}` } : null,
+    ...filters.audience.map(value => ({
+      key: 'audience' as const,
+      label: TENDER_AUDIENCES.find(option => option.value === value)?.label ?? value
+    })),
+    ...filters.keywords.map(label => ({ key: 'keywords' as const, label })),
     ...filters.subcategory.map(label => ({ key: 'subcategory' as const, label })),
     ...filters.category.map(label => ({ key: 'category' as const, label })),
     ...filters.taxonomy.map(slug => ({
@@ -809,8 +860,12 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     })),
     ...filters.region.map(label => ({ key: 'region' as const, label }))
   ].filter(
-    (item): item is { key: 'keyword' | 'category' | 'region' | 'subcategory' | 'taxonomy'; label: string } =>
-      item !== null
+    (
+      item
+    ): item is {
+      key: 'keyword' | 'audience' | 'keywords' | 'category' | 'region' | 'subcategory' | 'taxonomy'
+      label: string
+    } => item !== null
   )
 
   const tenderBoardTemplate = useMemo(
@@ -906,6 +961,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   useEffect(() => {
     const next = new URLSearchParams()
     if (filters.keyword) next.set('keyword', filters.keyword)
+    filters.audience.forEach(value => next.append('audience', value))
     filters.category.forEach(value => next.append('category', value))
     filters.region.forEach(value => next.append('region', value))
     filters.subcategory.forEach(value => next.append('subcategory', value))
@@ -974,6 +1030,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
     const nextFilters = {
       keyword: keyword.trim(),
+      audience,
       category,
       region,
       subcategory,
@@ -1009,6 +1066,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
 
   function clearFilters() {
     setKeyword('')
+    setAudience([])
     setCategory([])
     setRegion([])
     setSubcategory([])
@@ -1032,6 +1090,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     setPage(1)
     setFilters({
       keyword: '',
+      audience: [],
       category: [],
       region: [],
       subcategory: [],
@@ -1046,8 +1105,19 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     trackEvent('tender_filters_cleared')
   }
 
-  function removeFilter(key: 'keyword' | 'category' | 'region' | 'subcategory' | 'taxonomy', label?: string) {
+  function removeFilter(
+    key: 'keyword' | 'audience' | 'keywords' | 'category' | 'region' | 'subcategory' | 'taxonomy',
+    label?: string
+  ) {
     if (key === 'keyword') setKeyword('')
+    if (key === 'audience') {
+      const value = TENDER_AUDIENCES.find(option => option.label === label)?.value ?? label
+      setAudience(current => current.filter(item => item !== value))
+      setPage(1)
+      setFilters(current => ({ ...current, audience: current.audience.filter(item => item !== value) }))
+      return
+    }
+    if (key === 'keywords') setKeywords(current => current.filter(value => value !== label))
     if (key === 'category') setCategory(current => current.filter(value => value !== label))
     if (key === 'region') setRegion(current => current.filter(value => value !== label))
     if (key === 'subcategory') setSubcategory(current => current.filter(value => value !== label))
@@ -1090,7 +1160,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   }
 
   function toggleAdvancedList(
-    key: 'keywords' | 'stage' | 'procedureType' | 'procurementType',
+    key: 'audience' | 'keywords' | 'stage' | 'procedureType' | 'procurementType',
     value: string,
     setter: Dispatch<SetStateAction<string[]>>,
     apply = true
@@ -1295,16 +1365,18 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
         <TenderBoardFilters
           keyword={keyword}
           regionsSelected={region}
-          subcategoriesSelected={subcategory}
+          keywordsSelected={keywords}
+          audienceSelected={audience}
           sort={sort}
           viewMode={viewMode}
           regions={regions}
-          subcategories={subcategories}
+          keywordOptions={keywordOptions}
           activeFilterCount={activeFilterCount}
           loading={loading}
           onKeywordChange={setKeyword}
           onRegionToggle={value => toggleFilter('region', value)}
-          onSubcategoryToggle={value => toggleFilter('subcategory', value)}
+          onKeywordToggle={value => toggleAdvancedList('keywords', value, setKeywords)}
+          onAudienceToggle={value => toggleAdvancedList('audience', value, setAudience)}
           onSortChange={value => {
             setSort(value)
             applyCurrentFilters({ sort: value })
@@ -1343,6 +1415,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
         <div className='grid lg:grid-cols-[300px_minmax(0,1fr)]'>
           <aside className='hidden border-r border-gray-200 bg-gray-50 p-4 lg:block'>
             <FilterPanel
+              audience={audience}
               region={region}
               subcategory={subcategory}
               taxonomy={taxonomy}
@@ -1372,6 +1445,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
               resultCount={contextualFilters.total}
               facets={contextualFilters.facets}
               activeFilterCount={activeFilterCount}
+              onAudienceToggle={value => toggleAdvancedList('audience', value, setAudience)}
               onRegionToggle={value => toggleFilter('region', value)}
               onSubcategoryToggle={value => toggleFilter('subcategory', value)}
               onTaxonomyToggle={value => toggleTaxonomy(value)}
@@ -1432,6 +1506,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
             </div>
             <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4'>
               <FilterPanel
+                audience={audience}
                 region={region}
                 subcategory={subcategory}
                 taxonomy={taxonomy}
@@ -1461,6 +1536,7 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
                 resultCount={contextualFilters.total}
                 facets={contextualFilters.facets}
                 activeFilterCount={activeFilterCount}
+                onAudienceToggle={value => toggleAdvancedList('audience', value, setAudience, false)}
                 onRegionToggle={value => toggleFilter('region', value, false)}
                 onSubcategoryToggle={value => toggleFilter('subcategory', value, false)}
                 onTaxonomyToggle={value => toggleTaxonomy(value, false)}

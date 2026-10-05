@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
+
 import { SiteIcon } from '../SiteIcon'
 import { Button } from '../ui'
 
@@ -10,16 +12,18 @@ export type TenderBoardViewMode = 'list' | 'grid'
 type TenderBoardFiltersProps = {
   keyword: string
   regionsSelected: string[]
-  subcategoriesSelected: string[]
+  keywordsSelected: string[]
+  audienceSelected: string[]
   sort: 'deadline' | 'newest'
   viewMode: TenderBoardViewMode
   regions: string[]
-  subcategories: string[]
+  keywordOptions: string[]
   activeFilterCount: number
   loading?: boolean
   onKeywordChange: (value: string) => void
   onRegionToggle: (value: string) => void
-  onSubcategoryToggle: (value: string) => void
+  onKeywordToggle: (value: string) => void
+  onAudienceToggle: (value: string) => void
   onSortChange: (value: 'deadline' | 'newest') => void
   onViewModeChange: (value: TenderBoardViewMode) => void
   onClear: () => void
@@ -27,19 +31,115 @@ type TenderBoardFiltersProps = {
   onOpenMobileFilters: () => void
 }
 
+type MultiSelectOption = {
+  value: string
+  label: string
+}
+
+function MultiSelectDropdown({
+  label,
+  allLabel,
+  options,
+  selected,
+  onToggle
+}: {
+  label: string
+  allLabel: string
+  options: MultiSelectOption[]
+  selected: string[]
+  onToggle: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [open])
+
+  const selectedLabels = options.filter(option => selected.includes(option.value)).map(option => option.label)
+  const summary =
+    selectedLabels.length === 0
+      ? allLabel
+      : selectedLabels.length === 1
+        ? selectedLabels[0]
+        : `${selectedLabels.length} selected`
+
+  return (
+    <div ref={rootRef} className='relative min-w-0'>
+      <button
+        type='button'
+        aria-haspopup='listbox'
+        aria-expanded={open}
+        onClick={() => setOpen(current => !current)}
+        className={`${inputClass} flex w-full min-w-0 items-center justify-between gap-3 text-left lg:w-56`}
+      >
+        <span className='min-w-0 truncate'>
+          <span className='sr-only'>{label}: </span>
+          {summary}
+        </span>
+        <SiteIcon name='chevron' className={`h-4 w-4 shrink-0 text-gray-400 transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div
+          role='listbox'
+          aria-label={label}
+          aria-multiselectable='true'
+          className='absolute top-full left-0 z-40 mt-2 grid w-[min(44rem,calc(100vw-2rem))] gap-1 rounded-lg border border-gray-200 bg-white p-2 shadow-xl sm:grid-cols-2 lg:grid-cols-3'
+        >
+          {options.map(option => {
+            const checked = selected.includes(option.value)
+            return (
+              <label
+                key={option.value}
+                className={`flex cursor-pointer items-start gap-2 rounded-lg px-3 py-2 text-sm transition ${
+                  checked ? 'bg-brand-50 text-brand-800' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type='checkbox'
+                  checked={checked}
+                  onChange={() => onToggle(option.value)}
+                  className='text-brand-600 focus:ring-brand-500/20 mt-0.5 h-4 w-4 border-gray-300'
+                />
+                <span>{option.label}</span>
+              </label>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function TenderBoardFilters({
   keyword,
   regionsSelected,
-  subcategoriesSelected,
+  keywordsSelected,
+  audienceSelected,
   sort,
   viewMode,
   regions,
-  subcategories,
+  keywordOptions,
   activeFilterCount,
   loading = false,
   onKeywordChange,
   onRegionToggle,
-  onSubcategoryToggle,
+  onKeywordToggle,
+  onAudienceToggle,
   onSortChange,
   onViewModeChange,
   onClear,
@@ -83,31 +183,30 @@ export function TenderBoardFilters({
 
       <div className='mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
         <div className='hidden flex-wrap items-center gap-2 lg:flex'>
-          <select
-            value=''
-            onChange={event => event.target.value && onSubcategoryToggle(event.target.value)}
-            aria-label='Service type'
-            className={`${inputClass} w-56`}
-          >
-            <option value=''>All care services</option>
-            {subcategories.map(item => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-          <select
-            value=''
-            onChange={event => event.target.value && onRegionToggle(event.target.value)}
-            aria-label='Region'
-            className={`${inputClass} w-52`}
-          >
-            <option value=''>All regions</option>
-            {regions.map(item => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-          {subcategoriesSelected.length + regionsSelected.length > 0 && (
-            <span className='text-xs font-semibold text-gray-500'>Selections appear below</span>
-          )}
+          <MultiSelectDropdown
+            label='Care categories'
+            allLabel='All care categories'
+            options={keywordOptions.map(value => ({ value, label: value }))}
+            selected={keywordsSelected}
+            onToggle={onKeywordToggle}
+          />
+          <MultiSelectDropdown
+            label='People supported'
+            allLabel='Adults, children or both'
+            options={[
+              { value: 'adults', label: 'Adults' },
+              { value: 'children', label: 'Children and families' }
+            ]}
+            selected={audienceSelected}
+            onToggle={onAudienceToggle}
+          />
+          <MultiSelectDropdown
+            label='Regions'
+            allLabel='All regions'
+            options={regions.map(value => ({ value, label: value }))}
+            selected={regionsSelected}
+            onToggle={onRegionToggle}
+          />
           {hasActiveFilters && (
             <button
               type='button'
