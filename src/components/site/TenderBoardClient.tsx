@@ -452,41 +452,91 @@ function TaxonomyFilterTree({
   counts?: Array<{ value: string | boolean; count: number }>
   onToggle: (slug: string) => void
 }) {
-  const children = new Map<string | null, TenderTaxonomyNode[]>()
-  nodes.forEach(node => {
-    const siblings = children.get(node.parentSlug) ?? []
-    siblings.push(node)
-    children.set(node.parentSlug, siblings)
-  })
-  children.forEach(items => items.sort((left, right) => left.label.localeCompare(right.label)))
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
+  const { children, nodesBySlug } = useMemo(() => {
+    const nextChildren = new Map<string | null, TenderTaxonomyNode[]>()
+    const nextNodesBySlug = new Map(nodes.map(node => [node.slug, node]))
+
+    nodes.forEach(node => {
+      const siblings = nextChildren.get(node.parentSlug) ?? []
+      siblings.push(node)
+      nextChildren.set(node.parentSlug, siblings)
+    })
+    nextChildren.forEach(items => items.sort((left, right) => left.label.localeCompare(right.label)))
+
+    return { children: nextChildren, nodesBySlug: nextNodesBySlug }
+  }, [nodes])
+
+  useEffect(() => {
+    if (selected.length === 0) return
+
+    setExpandedNodes(current => {
+      const next = new Set(current)
+      selected.forEach(slug => {
+        let node = nodesBySlug.get(slug)
+        if ((children.get(slug) ?? []).length > 0) next.add(slug)
+        while (node?.parentSlug) {
+          next.add(node.parentSlug)
+          node = nodesBySlug.get(node.parentSlug)
+        }
+      })
+      return next
+    })
+  }, [children, nodesBySlug, selected])
+
+  const toggleExpanded = (slug: string) => {
+    setExpandedNodes(current => {
+      const next = new Set(current)
+      if (next.has(slug)) next.delete(slug)
+      else next.add(slug)
+      return next
+    })
+  }
 
   const renderNodes = (parentSlug: string | null, depth = 0): ReactNode =>
     (children.get(parentSlug) ?? []).map(node => {
       const childNodes = children.get(node.slug) ?? []
+      const hasChildren = childNodes.length > 0
+      const isExpanded = expandedNodes.has(node.slug)
       const count = counts?.find(item => item.value === node.slug)?.count
       const label = node.level === 'cpv_code' && node.cpvCode ? `${node.cpvCode} · ${node.label}` : node.label
 
       return (
         <div key={node.slug} className={depth ? 'ml-4 border-l border-gray-200 pl-2' : undefined}>
-          <label
-            className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm transition ${
+          <div
+            className={`flex items-center gap-1 rounded-lg px-1 py-1 text-sm transition ${
               selected.includes(node.slug)
                 ? 'bg-brand-50 text-brand-800'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
             }`}
           >
-            <input
-              type='checkbox'
-              checked={selected.includes(node.slug)}
-              onChange={() => onToggle(node.slug)}
-              className='text-brand-600 focus:ring-brand-500/20 h-4 w-4 border-gray-300'
-            />
-            <span className='line-clamp-2 flex-1'>{label}</span>
+            {hasChildren ? (
+              <button
+                type='button'
+                aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${label}`}
+                aria-expanded={isExpanded}
+                onClick={() => toggleExpanded(node.slug)}
+                className='focus:ring-brand-500/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-white focus:ring-4 focus:outline-hidden'
+              >
+                <SiteIcon name='chevron' className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            ) : (
+              <span className='h-8 w-8 shrink-0' aria-hidden='true' />
+            )}
+            <label className='flex min-w-0 flex-1 cursor-pointer items-center gap-2 py-1.5'>
+              <input
+                type='checkbox'
+                checked={selected.includes(node.slug)}
+                onChange={() => onToggle(node.slug)}
+                className='text-brand-600 focus:ring-brand-500/20 h-4 w-4 shrink-0 border-gray-300'
+              />
+              <span className='line-clamp-2 flex-1'>{label}</span>
+            </label>
             {typeof count === 'number' && (
               <span className='rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 tabular-nums'>{count}</span>
             )}
-          </label>
-          {childNodes.length > 0 && <div>{renderNodes(node.slug, depth + 1)}</div>}
+          </div>
+          {hasChildren && isExpanded && <div>{renderNodes(node.slug, depth + 1)}</div>}
         </div>
       )
     })
