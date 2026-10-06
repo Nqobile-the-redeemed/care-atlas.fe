@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { PublicTender } from '@/lib/api/tenders'
+import type { PublicTender, PublicTenderDetail } from '@/lib/api/tenders'
 
 import {
   buildTenderShareText,
@@ -8,6 +8,7 @@ import {
   formatTenderDate,
   formatTenderValue,
   tenderHashtags,
+  toTenderAdvertData,
   toTenderShareData
 } from './tenderShare'
 
@@ -47,6 +48,42 @@ function tender(overrides: Partial<PublicTender> = {}): PublicTender {
     locked: false,
     lastSeenAt: '2026-10-01T10:00:00Z',
     publicPath: '/tenders/01a06121-5c09-731c-a0ff-e836b86ecd6c',
+    ...overrides
+  }
+}
+
+function detailedTender(overrides: Partial<PublicTenderDetail> = {}): PublicTenderDetail {
+  return {
+    ...tender(),
+    description: '<p>Detailed care and support service scope.</p>',
+    buyerType: 'local_authority',
+    stage: 'open',
+    procedureType: 'Open procedure',
+    procurementType: 'services',
+    clarificationDeadline: '2026-10-12T16:00:00Z',
+    deliveryLocations: ['Sefton', 'Liverpool City Region'],
+    cpvCodes: ['85000000'],
+    isFramework: true,
+    isDynamicMarket: false,
+    smeSuitable: true,
+    vcseSuitable: null,
+    sourceNoticeUrl: 'https://example.test/notice',
+    responsePortalUrl: 'https://example.test/portal',
+    sourceUpdatedAt: '2026-09-01T10:00:00Z',
+    lots: [
+      {
+        id: 'lot-1',
+        sourceLotId: '1',
+        title: 'Extra care housing support',
+        description: 'Care and support lot.',
+        valueMinor: 15000000,
+        currency: 'GBP',
+        regions: ['Sefton'],
+        categories: ['Extra Care'],
+        submissionDeadline: '2026-10-26T12:00:00Z',
+        isRelevant: true
+      }
+    ],
     ...overrides
   }
 }
@@ -173,5 +210,49 @@ describe('tender share content', () => {
     const data = toTenderShareData(tender())
 
     expect(buildTenderShareText(data, { includeUrl: false })).not.toContain(data.publicUrl)
+  })
+})
+
+describe('tender advert data', () => {
+  it('maps detailed records without inventing unsupported claims', () => {
+    const data = toTenderAdvertData(detailedTender())
+
+    expect(data.reference).toBe('DN-100')
+    expect(data.procedure).toBe('Open procedure')
+    expect(data.enquiryDeadline).toContain('12 October 2026')
+    expect(data.lots).toHaveLength(1)
+    expect(data.importantPoints).toContain('Framework opportunity')
+    expect(data.importantPoints).toContain('Marked SME suitable')
+    expect(data.importantPoints).not.toContain('CQC registration required')
+    expect(data.facts.map(fact => fact.label)).toContain('Submission deadline')
+  })
+
+  it('keeps sparse advert records clean and usable', () => {
+    const data = toTenderAdvertData(
+      tender({
+        buyer: null,
+        sourceReference: null,
+        summary: '',
+        category: '',
+        categories: [],
+        keywords: [],
+        taxonomy: [],
+        region: '',
+        regions: [],
+        value: { minMinor: null, maxMinor: null, currency: 'GBP' },
+        submissionDeadline: null,
+        contractStartDate: null,
+        contractEndDate: null,
+        states: []
+      })
+    )
+
+    expect(data.buyer).toBeNull()
+    expect(data.contractValue).toBeNull()
+    expect(data.deadline).toBeNull()
+    expect(data.duration).toBeNull()
+    expect(data.lots).toEqual([])
+    expect(data.importantPoints).toEqual([])
+    expect(data.facts).toEqual([])
   })
 })

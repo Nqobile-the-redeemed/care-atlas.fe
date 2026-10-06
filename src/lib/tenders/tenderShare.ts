@@ -1,4 +1,4 @@
-import type { PublicTender } from '@/lib/api/tenders'
+import type { PublicTender, PublicTenderDetail, PublicTenderLot } from '@/lib/api/tenders'
 import { absoluteUrl } from '@/lib/seo'
 
 const CORE_HASHTAGS = ['#TenderOpportunity', '#UKTenders', '#PublicSectorTenders', '#Procurement', '#CareProviders']
@@ -42,6 +42,38 @@ export type TenderShareData = {
   category: string | null
   hashtags: string[]
   publicUrl: string
+}
+
+export type TenderAdvertFact = {
+  label: string
+  value: string
+}
+
+export type TenderAdvertData = TenderShareData & {
+  reference: string | null
+  published: string | null
+  enquiryDeadline: string | null
+  outcomeDate: string | null
+  contractEnd: string | null
+  duration: string | null
+  procedure: string | null
+  procurementType: string | null
+  stage: string | null
+  status: string | null
+  approvedImageUrl: string | null
+  buyerLogoUrl: string | null
+  deliveryLocations: string[]
+  cpvCodes: string[]
+  serviceThemes: string[]
+  lots: Array<{
+    title: string
+    description: string | null
+    value: string | null
+    regions: string[]
+  }>
+  importantPoints: string[]
+  facts: TenderAdvertFact[]
+  hasDetailedScope: boolean
 }
 
 function decodeHtmlEntities(value: string) {
@@ -123,6 +155,103 @@ export function formatTenderDate(value: string | null | undefined, includeTime =
       : {}),
     timeZone: 'Europe/London'
   }).format(parsed)
+}
+
+function hasDetailedTenderFields(tender: PublicTender): tender is PublicTenderDetail {
+  return 'description' in tender
+}
+
+function cleanList(values: Array<string | null | undefined>, limit = 6) {
+  return [...new Set(values.map(value => cleanTenderText(value)).filter(Boolean))].slice(0, limit)
+}
+
+function lotToAdvertLot(lot: PublicTenderLot) {
+  return {
+    title: cleanTenderText(lot.title, 90) || 'Lot',
+    description: cleanTenderText(lot.description, 130) || null,
+    value: lot.valueMinor ? formatTenderMoney(lot.valueMinor, lot.currency || 'GBP') : null,
+    regions: cleanList(lot.regions, 3)
+  }
+}
+
+function statusLabel(tender: PublicTender) {
+  if (tender.daysRemaining !== null && tender.daysRemaining < 0) return 'Closed'
+  if (tender.daysRemaining === 0) return 'Closes today'
+  if (tender.daysRemaining !== null) return `${tender.daysRemaining} days remaining`
+  return tender.states[0] ? tender.states[0].replaceAll('_', ' ') : null
+}
+
+function serviceThemes(tender: PublicTender) {
+  return cleanList(
+    [
+      tender.category,
+      ...tender.categories,
+      ...(tender.taxonomy ?? []).map(node => node.label),
+      ...(tender.keywords ?? [])
+    ],
+    5
+  )
+}
+
+function importantTenderPoints(tender: PublicTender) {
+  const detailed = hasDetailedTenderFields(tender) ? tender : null
+  const points = [
+    detailed?.isFramework ? 'Framework opportunity' : '',
+    detailed?.isDynamicMarket ? 'Dynamic market opportunity' : '',
+    detailed?.smeSuitable === true ? 'Marked SME suitable' : '',
+    detailed?.vcseSuitable === true ? 'Marked VCSE suitable' : '',
+    detailed?.responsePortalUrl ? 'Response portal available from the source notice' : '',
+    detailed?.sourceNoticeUrl ? 'Original public notice available' : ''
+  ]
+
+  return cleanList(points, 3)
+}
+
+function buildAdvertFacts(tender: PublicTender, shareData: TenderShareData): TenderAdvertFact[] {
+  const detailed = hasDetailedTenderFields(tender) ? tender : null
+  const locations = detailed?.deliveryLocations?.length ? detailed.deliveryLocations.join(', ') : shareData.location
+  const facts: TenderAdvertFact[] = [
+    shareData.deadline ? { label: 'Submission deadline', value: shareData.deadline } : null,
+    shareData.contractValue ? { label: 'Contract value', value: shareData.contractValue } : null,
+    shareData.commencement ? { label: 'Commencement', value: shareData.commencement } : null,
+    detailed?.clarificationDeadline
+      ? { label: 'Enquiry deadline', value: formatTenderDate(detailed.clarificationDeadline, true) ?? '' }
+      : null,
+    locations ? { label: 'Location', value: cleanTenderText(locations, 90) } : null,
+    detailed?.procedureType ? { label: 'Procedure', value: cleanTenderText(detailed.procedureType, 90) } : null
+  ].filter((fact): fact is TenderAdvertFact => Boolean(fact && fact.value))
+
+  return facts.slice(0, 7)
+}
+
+export function toTenderAdvertData(tender: PublicTender): TenderAdvertData {
+  const shareData = toTenderShareData(tender)
+  const detailed = hasDetailedTenderFields(tender) ? tender : null
+  const lots = (detailed?.lots ?? []).map(lotToAdvertLot).slice(0, 4)
+  const deliveryLocations = cleanList(detailed?.deliveryLocations ?? tender.regions, 5)
+
+  return {
+    ...shareData,
+    reference: cleanTenderText(tender.sourceReference) || null,
+    published: formatTenderDate(tender.publishedAt),
+    enquiryDeadline: formatTenderDate(detailed?.clarificationDeadline, true),
+    outcomeDate: null,
+    contractEnd: formatTenderDate(tender.contractEndDate),
+    duration: null,
+    procedure: cleanTenderText(detailed?.procedureType) || null,
+    procurementType: cleanTenderText(detailed?.procurementType) || null,
+    stage: cleanTenderText(detailed?.stage) || null,
+    status: statusLabel(tender),
+    approvedImageUrl: null,
+    buyerLogoUrl: null,
+    deliveryLocations,
+    cpvCodes: cleanList(detailed?.cpvCodes ?? [], 5),
+    serviceThemes: serviceThemes(tender),
+    lots,
+    importantPoints: importantTenderPoints(tender),
+    facts: buildAdvertFacts(tender, shareData),
+    hasDetailedScope: Boolean(detailed?.description || lots.length > 0 || detailed?.cpvCodes?.length)
+  }
 }
 
 function locationHashtag(location: string | undefined) {

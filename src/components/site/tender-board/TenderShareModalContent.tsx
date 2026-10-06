@@ -3,13 +3,14 @@
 import { useState } from 'react'
 
 import { trackEvent } from '@/components/analytics/trackEvent'
-import { buildTenderShareText, type TenderShareData } from '@/lib/tenders/tenderShare'
+import { buildTenderShareText, type TenderAdvertData } from '@/lib/tenders/tenderShare'
 
 import { SiteIcon } from '../SiteIcon'
 import { Button, buttonStyles } from '../ui'
+import { TenderAdvertGenerator } from './TenderAdvertGenerator'
 
 type TenderShareModalContentProps = {
-  data: TenderShareData
+  data: TenderAdvertData
   onClose: () => void
 }
 
@@ -138,6 +139,12 @@ export function TenderShareModalContent({ data }: TenderShareModalContentProps) 
           </a>
         </div>
       </section>
+
+      <TenderAdvertGenerator
+        data={data}
+        caption={advert}
+        onCopyCaption={() => copy(advert, 'copy_advert', 'Tender advert caption copied.')}
+      />
     </div>
   )
 }

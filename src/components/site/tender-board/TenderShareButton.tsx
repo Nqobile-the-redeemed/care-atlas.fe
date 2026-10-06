@@ -5,13 +5,13 @@ import { useMemo } from 'react'
 import { trackEvent } from '@/components/analytics/trackEvent'
 import { useHalfScreenModal, type ModalTemplate } from '@/context/HalfScreenModalContext'
 import type { PublicTender } from '@/lib/api/tenders'
-import { toTenderShareData, type TenderShareData } from '@/lib/tenders/tenderShare'
+import { toTenderAdvertData, type TenderAdvertData } from '@/lib/tenders/tenderShare'
 
 import { SiteIcon } from '../SiteIcon'
 import { Button } from '../ui'
 import { TenderShareModalContent } from './TenderShareModalContent'
 
-const tenderShareTemplate: ModalTemplate<TenderShareData> = {
+const tenderShareTemplate: ModalTemplate<TenderAdvertData> = {
   id: 'tender-share',
   component: TenderShareModalContent,
   headerConfig: {
@@ -22,14 +22,14 @@ const tenderShareTemplate: ModalTemplate<TenderShareData> = {
 
 export function TenderShareButton({ tender, fullWidth = false }: { tender: PublicTender; fullWidth?: boolean }) {
   const { openModal } = useHalfScreenModal()
-  const shareData = useMemo(() => toTenderShareData(tender), [tender])
+  const shareData = useMemo(() => toTenderAdvertData(tender), [tender])
 
   function openShareModal() {
     trackEvent('tender_share_modal_opened')
     openModal(shareData, tenderShareTemplate, {
-      width: 'min(100vw, 680px)',
+      width: 'min(100vw, 1180px)',
       headerConfig: {
-        title: 'Share tender',
+        title: 'Share and generate advert',
         subtitle: shareData.title,
         closeLabel: 'Close share tender'
       }
