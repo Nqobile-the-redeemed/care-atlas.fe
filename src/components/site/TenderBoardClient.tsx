@@ -28,6 +28,7 @@ import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
+import { TenderPagination as TenderPageControls } from './tender-board/TenderPagination'
 import { Button, ButtonLink } from './ui'
 import {
   TenderBoardFilters,
@@ -1331,28 +1332,12 @@ export function TenderBoardClient({
       : 'Tender opportunities'
 
   const paginationControls = (
-    <div className='flex items-center gap-2'>
-      <button
-        type='button'
-        disabled={!pagination || pagination.currentPage <= 1 || loading}
-        onClick={() => setPage(current => Math.max(1, current - 1))}
-        aria-label='Previous tender page'
-        title='Previous tender page'
-        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-      >
-        <SiteIcon name='arrow' className='h-4 w-4 rotate-180' />
-      </button>
-      <button
-        type='button'
-        disabled={!pagination || pagination.currentPage >= pagination.lastPage || loading}
-        onClick={() => setPage(current => current + 1)}
-        aria-label='Next tender page'
-        title='Next tender page'
-        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-      >
-        <SiteIcon name='arrow' className='h-4 w-4' />
-      </button>
-    </div>
+    <TenderPageControls
+      currentPage={pagination?.currentPage ?? page}
+      totalPages={pagination?.lastPage ?? 1}
+      loading={loading || !pagination}
+      onPageChange={setPage}
+    />
   )
 
   return (
