@@ -5,7 +5,13 @@ import type { PublicTender } from '@/lib/api/tenders'
 import { TenderBoardClient } from './TenderBoardClient'
 import { Container, CtaBand } from './ui'
 
-export function TenderNavigatorPage({ initialTender }: { initialTender?: PublicTender }) {
+export function TenderNavigatorPage({
+  initialTender,
+  initialTenderId
+}: {
+  initialTender?: PublicTender
+  initialTenderId?: string
+}) {
   return (
     <>
       <section className='bg-white py-16 sm:py-20'>
@@ -32,7 +38,7 @@ export function TenderNavigatorPage({ initialTender }: { initialTender?: PublicT
               </div>
             }
           >
-            <TenderBoardClient initialTender={initialTender} />
+            <TenderBoardClient initialTender={initialTender} initialTenderId={initialTenderId} />
           </Suspense>
         </Container>
       </section>

@@ -28,6 +28,7 @@ import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
+import { TenderPagination as TenderPageControls } from './tender-board/TenderPagination'
 import { Button, ButtonLink } from './ui'
 import {
   TenderBoardFilters,
@@ -781,7 +782,13 @@ function FilterPanel({
   )
 }
 
-export function TenderBoardClient({ initialTender }: { initialTender?: PublicTender }) {
+export function TenderBoardClient({
+  initialTender,
+  initialTenderId
+}: {
+  initialTender?: PublicTender
+  initialTenderId?: string
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { openModal } = useHalfScreenModal()
@@ -847,7 +854,9 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   const [viewMode, setViewMode] = useState<TenderBoardViewMode>(() =>
     searchParams.get('view') === 'grid' ? 'grid' : 'list'
   )
-  const [activeTenderId, setActiveTenderId] = useState(() => initialTender?.id ?? searchParams.get('tender') ?? '')
+  const [activeTenderId, setActiveTenderId] = useState(
+    () => initialTender?.id ?? initialTenderId ?? searchParams.get('tender') ?? ''
+  )
   const initialTenderOpenedRef = useRef(false)
   const valueFilterTimerRef = useRef<number | null>(null)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -1033,12 +1042,13 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
-    if (activeTenderId && !initialTender) next.set('tender', activeTenderId)
+    if (activeTenderId && !initialTender && !initialTenderId) next.set('tender', activeTenderId)
 
     const query = next.toString()
-    const routePath = initialTender ? `/tenders/${encodeURIComponent(initialTender.id)}` : '/tenders'
+    const sharedTenderId = initialTender?.id ?? initialTenderId
+    const routePath = sharedTenderId ? `/tenders/${encodeURIComponent(sharedTenderId)}` : '/tenders'
     router.replace(query ? `${routePath}?${query}` : routePath, { scroll: false })
-  }, [activeTenderId, filters, initialTender, page, router, viewMode])
+  }, [activeTenderId, filters, initialTender, initialTenderId, page, router, viewMode])
 
   const openTenderWorkspace = useCallback(
     (tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
@@ -1064,16 +1074,19 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     if (!activeTenderId || initialTenderOpenedRef.current) return
     if (loading) return
 
-    initialTenderOpenedRef.current = true
     const listedTender =
       initialTender?.id === activeTenderId ? initialTender : tenders.find(tender => tender.id === activeTenderId)
     if (listedTender) {
+      initialTenderOpenedRef.current = true
       openTenderWorkspace(listedTender)
       return
     }
 
     void getPublicTender(activeTenderId)
-      .then(response => openTenderWorkspace(response.data))
+      .then(response => {
+        initialTenderOpenedRef.current = true
+        openTenderWorkspace(response.data)
+      })
       .catch(() => setError('The tender link could not be opened. It may no longer be available.'))
   }, [activeTenderId, initialTender, loading, openTenderWorkspace, tenders])
 
@@ -1319,28 +1332,12 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
       : 'Tender opportunities'
 
   const paginationControls = (
-    <div className='flex items-center gap-2'>
-      <button
-        type='button'
-        disabled={!pagination || pagination.currentPage <= 1 || loading}
-        onClick={() => setPage(current => Math.max(1, current - 1))}
-        aria-label='Previous tender page'
-        title='Previous tender page'
-        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-      >
-        <SiteIcon name='arrow' className='h-4 w-4 rotate-180' />
-      </button>
-      <button
-        type='button'
-        disabled={!pagination || pagination.currentPage >= pagination.lastPage || loading}
-        onClick={() => setPage(current => current + 1)}
-        aria-label='Next tender page'
-        title='Next tender page'
-        className='border-brand-200 text-brand-700 hover:bg-brand-50 focus:ring-brand-500/20 flex h-10 w-10 items-center justify-center rounded-lg border bg-white transition disabled:cursor-not-allowed disabled:opacity-45'
-      >
-        <SiteIcon name='arrow' className='h-4 w-4' />
-      </button>
-    </div>
+    <TenderPageControls
+      currentPage={pagination?.currentPage ?? page}
+      totalPages={pagination?.lastPage ?? 1}
+      loading={loading || !pagination}
+      onPageChange={setPage}
+    />
   )
 
   return (

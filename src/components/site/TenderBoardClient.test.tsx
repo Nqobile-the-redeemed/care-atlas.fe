@@ -4,7 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { HalfScreenModalProvider } from '@/context/HalfScreenModalContext'
-import { getPublicTenderFilters, getPublicTenders } from '@/lib/api/tenders'
+import { getPublicTender, getPublicTenderFilters, getPublicTenders } from '@/lib/api/tenders'
 
 import { HalfScreenModal } from './HalfScreenModal'
 import { TenderBoardClient } from './TenderBoardClient'
@@ -348,5 +348,78 @@ describe('TenderBoardClient', () => {
     await waitFor(() => {
       expect(screen.getByText('10:00')).toBeInTheDocument()
     })
+  })
+
+  it('recovers a shared tender route from its route id after server loading fails', async () => {
+    vi.mocked(getPublicTenders).mockResolvedValueOnce({
+      success: true,
+      message: 'Tenders retrieved.',
+      data: [],
+      meta: {
+        currentPage: 1,
+        lastPage: 1,
+        perPage: 15,
+        total: 0
+      }
+    })
+    vi.mocked(getPublicTender).mockResolvedValueOnce({
+      success: true,
+      message: 'Tender retrieved.',
+      data: {
+        id: 'shared-tender',
+        title: 'Recovered Shared Tender',
+        buyer: 'Example Council',
+        sourceReference: 'REF-SHARED',
+        category: 'Care',
+        categories: ['Care'],
+        region: 'London',
+        regions: ['London'],
+        summary: 'Recovered after a transient server request failure.',
+        value: { minMinor: null, maxMinor: null, currency: 'GBP' },
+        publishedAt: null,
+        submissionDeadline: '2026-10-10',
+        daysRemaining: 12,
+        contractStartDate: null,
+        contractEndDate: null,
+        states: [],
+        indicativePricing: {
+          upfrontFeeMinor: 0,
+          successFeeMinor: null,
+          currency: 'GBP',
+          reviewed: false
+        },
+        locked: false,
+        lastSeenAt: null,
+        description: 'Recovered tender details',
+        buyerType: 'Local authority',
+        stage: 'open',
+        procedureType: 'Open',
+        procurementType: 'Services',
+        clarificationDeadline: null,
+        deliveryLocations: ['London'],
+        cpvCodes: ['85000000'],
+        isFramework: false,
+        isDynamicMarket: false,
+        smeSuitable: true,
+        vcseSuitable: null,
+        sourceNoticeUrl: 'https://example.com/notice',
+        responsePortalUrl: 'https://example.com/portal',
+        sourceUpdatedAt: null,
+        lots: []
+      }
+    })
+
+    render(
+      React.createElement(
+        HalfScreenModalProvider,
+        null,
+        React.createElement(TenderBoardClient, { initialTenderId: 'shared-tender' }),
+        React.createElement(HalfScreenModal)
+      )
+    )
+
+    expect(await screen.findByRole('dialog', { name: 'Recovered Shared Tender' })).toBeInTheDocument()
+    expect(getPublicTender).toHaveBeenCalledWith('shared-tender')
+    expect(replaceMock).toHaveBeenCalledWith('/tenders/shared-tender', { scroll: false })
   })
 })
