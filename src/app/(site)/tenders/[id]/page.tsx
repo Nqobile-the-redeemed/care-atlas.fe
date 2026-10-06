@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
 import { TenderNavigatorPage } from '@/components/site/TenderNavigatorPage'
+import { ApiError } from '@/lib/api/client'
 import { getPublicTender } from '@/lib/api/tenders'
 import { noIndexMetadata, publicPageMetadata } from '@/lib/seo'
 import { cleanTenderText } from '@/lib/tenders/tenderShare'
@@ -37,7 +38,9 @@ export default async function SharedTenderPage({ params }: { params: Promise<{ i
   try {
     const response = await getSharedTender(id)
     return <TenderNavigatorPage initialTender={response.data} />
-  } catch {
-    notFound()
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) notFound()
+
+    return <TenderNavigatorPage initialTenderId={id} />
   }
 }

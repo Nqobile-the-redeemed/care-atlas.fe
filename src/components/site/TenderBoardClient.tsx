@@ -781,7 +781,13 @@ function FilterPanel({
   )
 }
 
-export function TenderBoardClient({ initialTender }: { initialTender?: PublicTender }) {
+export function TenderBoardClient({
+  initialTender,
+  initialTenderId
+}: {
+  initialTender?: PublicTender
+  initialTenderId?: string
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { openModal } = useHalfScreenModal()
@@ -847,7 +853,9 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
   const [viewMode, setViewMode] = useState<TenderBoardViewMode>(() =>
     searchParams.get('view') === 'grid' ? 'grid' : 'list'
   )
-  const [activeTenderId, setActiveTenderId] = useState(() => initialTender?.id ?? searchParams.get('tender') ?? '')
+  const [activeTenderId, setActiveTenderId] = useState(
+    () => initialTender?.id ?? initialTenderId ?? searchParams.get('tender') ?? ''
+  )
   const initialTenderOpenedRef = useRef(false)
   const valueFilterTimerRef = useRef<number | null>(null)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -1033,12 +1041,13 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     if (filters.sort !== DEFAULT_SORT) next.set('sort', filters.sort)
     if (page > 1) next.set('page', String(page))
     if (viewMode !== 'list') next.set('view', viewMode)
-    if (activeTenderId && !initialTender) next.set('tender', activeTenderId)
+    if (activeTenderId && !initialTender && !initialTenderId) next.set('tender', activeTenderId)
 
     const query = next.toString()
-    const routePath = initialTender ? `/tenders/${encodeURIComponent(initialTender.id)}` : '/tenders'
+    const sharedTenderId = initialTender?.id ?? initialTenderId
+    const routePath = sharedTenderId ? `/tenders/${encodeURIComponent(sharedTenderId)}` : '/tenders'
     router.replace(query ? `${routePath}?${query}` : routePath, { scroll: false })
-  }, [activeTenderId, filters, initialTender, page, router, viewMode])
+  }, [activeTenderId, filters, initialTender, initialTenderId, page, router, viewMode])
 
   const openTenderWorkspace = useCallback(
     (tender: PublicTender, initialLeadKind?: TenderLeadKind) => {
@@ -1064,16 +1073,19 @@ export function TenderBoardClient({ initialTender }: { initialTender?: PublicTen
     if (!activeTenderId || initialTenderOpenedRef.current) return
     if (loading) return
 
-    initialTenderOpenedRef.current = true
     const listedTender =
       initialTender?.id === activeTenderId ? initialTender : tenders.find(tender => tender.id === activeTenderId)
     if (listedTender) {
+      initialTenderOpenedRef.current = true
       openTenderWorkspace(listedTender)
       return
     }
 
     void getPublicTender(activeTenderId)
-      .then(response => openTenderWorkspace(response.data))
+      .then(response => {
+        initialTenderOpenedRef.current = true
+        openTenderWorkspace(response.data)
+      })
       .catch(() => setError('The tender link could not be opened. It may no longer be available.'))
   }, [activeTenderId, initialTender, loading, openTenderWorkspace, tenders])
 
