@@ -75,6 +75,38 @@ export type PublicTenderDetail = PublicTender & {
   pricingCaveat?: string
 }
 
+export type TenderAdvertPhoto = {
+  unsplashId: string
+  urls: {
+    raw?: string | null
+    full?: string | null
+    regular?: string | null
+    small?: string | null
+    thumb?: string | null
+  }
+  width?: number | null
+  height?: number | null
+  color?: string | null
+  blurHash?: string | null
+  alt?: string | null
+  description?: string | null
+  photographer?: {
+    name?: string | null
+    username?: string | null
+    url?: string | null
+  }
+  unsplashUrl?: string | null
+  downloadLocation?: string | null
+  source: 'unsplash'
+}
+
+export type TenderAdvertPhotoSearch = {
+  query: string
+  results: TenderAdvertPhoto[]
+  total: number
+  totalPages: number
+}
+
 export type TenderLeadKind = 'enquiry' | 'booking'
 
 export type TenderLeadPayload = {
@@ -229,6 +261,32 @@ export async function getPublicTender(tenderId: string) {
   return apiRequest<PublicTenderDetail>(`/v1/public/tenders/${tenderId}`, {
     cache: 'no-store'
   })
+}
+
+export async function searchTenderAdvertPhotos(
+  tenderId: string,
+  filters: { query?: string; orientation?: 'landscape' | 'portrait' | 'squarish'; page?: number; perPage?: number } = {}
+) {
+  const params = new URLSearchParams()
+
+  if (filters.query) params.set('query', filters.query)
+  if (filters.orientation) params.set('orientation', filters.orientation)
+  if (filters.page) params.set('page', String(filters.page))
+  if (filters.perPage) params.set('per_page', String(filters.perPage))
+
+  const suffix = params.toString()
+
+  return apiRequest<TenderAdvertPhotoSearch>(
+    `/v1/public/tenders/${encodeURIComponent(tenderId)}/advert-photos${suffix ? `?${suffix}` : ''}`,
+    { cache: 'no-store' }
+  )
+}
+
+export async function trackTenderAdvertPhotoDownload(tenderId: string, unsplashId: string) {
+  return apiRequest<unknown>(
+    `/v1/public/tenders/${encodeURIComponent(tenderId)}/advert-photos/${encodeURIComponent(unsplashId)}/track-download`,
+    { method: 'POST' }
+  )
 }
 
 export async function getPublicTenderFilters(filters: Omit<PublicTenderQuery, 'page' | 'perPage' | 'sort'> = {}) {

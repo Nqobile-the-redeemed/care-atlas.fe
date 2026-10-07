@@ -50,6 +50,7 @@ export type TenderAdvertFact = {
 }
 
 export type TenderAdvertData = TenderShareData & {
+  noticeType: string
   reference: string | null
   published: string | null
   enquiryDeadline: string | null
@@ -207,6 +208,16 @@ function importantTenderPoints(tender: PublicTender) {
   return cleanList(points, 3)
 }
 
+function noticeTypeLabel(tender: PublicTender, detailed: PublicTenderDetail | null) {
+  const source = [detailed?.stage, detailed?.procurementType, ...tender.states].filter(Boolean).join(' ')
+
+  if (/award/i.test(source)) return 'Award notice'
+  if (/market|engagement|planning|future|prior/i.test(source)) return 'Market engagement'
+  if (/tender|open|active|competition/i.test(source)) return 'Tender opportunity'
+
+  return 'Tender opportunity'
+}
+
 function buildAdvertFacts(tender: PublicTender, shareData: TenderShareData): TenderAdvertFact[] {
   const detailed = hasDetailedTenderFields(tender) ? tender : null
   const locations = detailed?.deliveryLocations?.length ? detailed.deliveryLocations.join(', ') : shareData.location
@@ -229,9 +240,12 @@ export function toTenderAdvertData(tender: PublicTender): TenderAdvertData {
   const detailed = hasDetailedTenderFields(tender) ? tender : null
   const lots = (detailed?.lots ?? []).map(lotToAdvertLot).slice(0, 4)
   const deliveryLocations = cleanList(detailed?.deliveryLocations ?? tender.regions, 5)
+  const verifiedLocation = deliveryLocations.length > 0 ? deliveryLocations.join(', ') : shareData.location
 
   return {
     ...shareData,
+    location: verifiedLocation || null,
+    noticeType: noticeTypeLabel(tender, detailed),
     reference: cleanTenderText(tender.sourceReference) || null,
     published: formatTenderDate(tender.publishedAt),
     enquiryDeadline: formatTenderDate(detailed?.clarificationDeadline, true),
@@ -249,7 +263,7 @@ export function toTenderAdvertData(tender: PublicTender): TenderAdvertData {
     serviceThemes: serviceThemes(tender),
     lots,
     importantPoints: importantTenderPoints(tender),
-    facts: buildAdvertFacts(tender, shareData),
+    facts: buildAdvertFacts(tender, { ...shareData, location: verifiedLocation || shareData.location }),
     hasDetailedScope: Boolean(detailed?.description || lots.length > 0 || detailed?.cpvCodes?.length)
   }
 }

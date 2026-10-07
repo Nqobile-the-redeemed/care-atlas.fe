@@ -143,7 +143,7 @@ export function TenderShareModalContent({ data }: TenderShareModalContentProps) 
       <TenderAdvertGenerator
         data={data}
         caption={advert}
-        onCopyCaption={() => copy(advert, 'copy_advert', 'Tender advert caption copied.')}
+        onCopyCaption={value => copy(value, 'copy_advert', 'Tender advert caption copied.')}
       />
     </div>
   )
