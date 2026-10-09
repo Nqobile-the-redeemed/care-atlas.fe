@@ -62,33 +62,32 @@ describe('TenderShareButton', () => {
     Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true })
   })
 
-  it('opens the established half-screen modal with the generated advert', async () => {
+  it('opens link sharing without public advert controls', async () => {
     const user = userEvent.setup()
     renderShareButton()
 
     await user.click(screen.getByRole('button', { name: 'Share' }))
 
     expect(await screen.findByRole('dialog', { name: 'Share tender' })).toBeInTheDocument()
-    expect(screen.getByText('Tender advert preview')).toBeInTheDocument()
-    expect(screen.getByText(/Buyer: Example Council/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Copy advert' })).toBeInTheDocument()
+    expect(screen.queryByText('Tender advert preview')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Copy advert' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument()
     expect(trackEventMock).toHaveBeenCalledWith('tender_share_modal_opened')
   })
 
-  it('copies the full advert and provides accessible feedback', async () => {
+  it('copies only the public link and provides accessible feedback', async () => {
     const user = userEvent.setup()
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: writeTextMock } })
     renderShareButton()
 
     await user.click(screen.getByRole('button', { name: 'Share' }))
-    await user.click(await screen.findByRole('button', { name: 'Copy advert' }))
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }))
 
-    expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('TENDER OPPORTUNITY'))
-    expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('https://www.careatlas.co.uk/tenders/tender-1'))
-    expect(await screen.findByRole('status')).toHaveTextContent('Tender advert copied.')
+    expect(writeTextMock).toHaveBeenCalledWith('https://www.careatlas.co.uk/tenders/tender-1')
+    expect(await screen.findByRole('status')).toHaveTextContent('Tender link copied.')
   })
 
-  it('sends text and URL separately to the native share sheet', async () => {
+  it('sends the tender title and link to the native share sheet', async () => {
     const user = userEvent.setup()
     renderShareButton()
 
@@ -105,6 +104,6 @@ describe('TenderShareButton', () => {
       )
     })
     const [payload] = shareMock.mock.calls[0]!
-    expect(payload.text).not.toContain('https://www.careatlas.co.uk/tenders/tender-1')
+    expect(payload).not.toHaveProperty('text')
   })
 })
