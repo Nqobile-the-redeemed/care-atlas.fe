@@ -75,38 +75,6 @@ export type PublicTenderDetail = PublicTender & {
   pricingCaveat?: string
 }
 
-export type TenderAdvertPhoto = {
-  unsplashId: string
-  urls: {
-    raw?: string | null
-    full?: string | null
-    regular?: string | null
-    small?: string | null
-    thumb?: string | null
-  }
-  width?: number | null
-  height?: number | null
-  color?: string | null
-  blurHash?: string | null
-  alt?: string | null
-  description?: string | null
-  photographer?: {
-    name?: string | null
-    username?: string | null
-    url?: string | null
-  }
-  unsplashUrl?: string | null
-  downloadLocation?: string | null
-  source: 'unsplash'
-}
-
-export type TenderAdvertPhotoSearch = {
-  query: string
-  results: TenderAdvertPhoto[]
-  total: number
-  totalPages: number
-}
-
 export type TenderLeadKind = 'enquiry' | 'booking'
 
 export type TenderLeadPayload = {
