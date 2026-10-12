@@ -1,6 +1,6 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { HalfScreenModalProvider } from '@/context/HalfScreenModalContext'
@@ -89,6 +89,13 @@ vi.mock('@/lib/api/tenders', () => ({
           level: 'industry',
           parentSlug: null,
           cpvCode: null
+        },
+        {
+          slug: 'cpv-85000000',
+          label: 'Health services',
+          level: 'cpv_code',
+          parentSlug: 'health-and-social-care',
+          cpvCode: '85000000'
         }
       ],
       ranges: {
@@ -260,7 +267,8 @@ describe('TenderBoardClient', () => {
       )
     )
 
-    const categoryGroup = await screen.findByRole('button', { name: /Care service hierarchy.*1 options/i })
+    await screen.findByText('Supported Living Tender')
+    const categoryGroup = screen.getByRole('button', { name: /Advanced filters/i })
     const regionGroup = screen.getByRole('button', { name: /Region or location.*2 options/i })
 
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'false')
@@ -272,6 +280,12 @@ describe('TenderBoardClient', () => {
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('checkbox', { name: 'Health and social care' })).toBeInTheDocument()
     expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(screen.getByRole('button', { name: 'Select all CPV codes' }))
+    expect(screen.getByRole('checkbox', { name: /85000000/ })).toBeChecked()
+    const bulkControls = screen.getByRole('button', { name: 'Select all CPV codes' }).parentElement!
+    await user.click(within(bulkControls).getByRole('button', { name: 'Clear all' }))
+    expect(screen.getByRole('checkbox', { name: /85000000/ })).not.toBeChecked()
   })
 
   it('shows compact contract value controls with labelled jump points', async () => {
@@ -299,8 +313,6 @@ describe('TenderBoardClient', () => {
   })
 
   it('groups familiar care terms under Care categories', async () => {
-    const user = userEvent.setup()
-
     render(
       React.createElement(
         HalfScreenModalProvider,
@@ -312,7 +324,7 @@ describe('TenderBoardClient', () => {
 
     await screen.findByText('Supported Living Tender')
     const careCategories = screen.getByRole('button', { name: /Care categories.*2 options/i })
-    await user.click(careCategories)
+    expect(careCategories).toHaveAttribute('aria-expanded', 'true')
 
     expect(screen.getByText('Accommodation and living')).toBeInTheDocument()
     expect(screen.getByText('Additional needs')).toBeInTheDocument()

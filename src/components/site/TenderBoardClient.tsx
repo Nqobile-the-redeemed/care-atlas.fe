@@ -113,6 +113,7 @@ type FilterPanelProps = {
   onRegionToggle: (value: string) => void
   onSubcategoryToggle: (value: string) => void
   onTaxonomyToggle: (value: string) => void
+  onTaxonomyChange: (values: string[]) => void
   onKeywordToggle: (value: string) => void
   onStageToggle: (value: string) => void
   onProcedureTypeToggle: (value: string) => void
@@ -446,12 +447,14 @@ function TaxonomyFilterTree({
   nodes,
   selected,
   counts,
-  onToggle
+  onToggle,
+  onChange
 }: {
   nodes: TenderTaxonomyNode[]
   selected: string[]
   counts?: Array<{ value: string | boolean; count: number }>
   onToggle: (slug: string) => void
+  onChange: (values: string[]) => void
 }) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const { children, nodesBySlug } = useMemo(() => {
@@ -542,7 +545,35 @@ function TaxonomyFilterTree({
       )
     })
 
-  return <div className='space-y-1'>{renderNodes(null)}</div>
+  return (
+    <div className='space-y-1'>
+      <div className='flex justify-between gap-2 border-b border-gray-200 py-2'>
+        <button
+          type='button'
+          className='text-brand-700 text-sm font-semibold'
+          disabled={!nodes.some(node => node.level === 'cpv_code')}
+          onClick={() =>
+            onChange(
+              Array.from(
+                new Set([...selected, ...nodes.filter(node => node.level === 'cpv_code').map(node => node.slug)])
+              )
+            )
+          }
+        >
+          Select all CPV codes
+        </button>
+        <button
+          type='button'
+          className='text-brand-700 text-sm font-semibold'
+          disabled={!selected.length}
+          onClick={() => onChange([])}
+        >
+          Clear all
+        </button>
+      </div>
+      {renderNodes(null)}
+    </div>
+  )
 }
 
 function FilterPanel({
@@ -572,6 +603,7 @@ function FilterPanel({
   onRegionToggle,
   onSubcategoryToggle,
   onTaxonomyToggle,
+  onTaxonomyChange,
   onKeywordToggle,
   onDateChange,
   onBooleanChange,
@@ -682,6 +714,7 @@ function FilterPanel({
                   nodes={taxonomyNodes}
                   selected={taxonomy}
                   counts={facets?.taxonomy}
+                  onChange={onTaxonomyChange}
                   onToggle={onTaxonomyToggle}
                 />
               ) : subcategories.length > 0 ? (
@@ -1222,6 +1255,14 @@ export function TenderBoardClient({
     })
   }
 
+  function changeTaxonomy(values: string[], apply = true) {
+    setTaxonomy(values)
+    if (apply) {
+      setPage(1)
+      setFilters(current => ({ ...current, taxonomy: values }))
+    }
+  }
+
   function toggleAdvancedList(
     key: 'audience' | 'keywords' | 'stage' | 'procedureType' | 'procurementType',
     value: string,
@@ -1496,6 +1537,7 @@ export function TenderBoardClient({
               onRegionToggle={value => toggleFilter('region', value)}
               onSubcategoryToggle={value => toggleFilter('subcategory', value)}
               onTaxonomyToggle={value => toggleTaxonomy(value)}
+              onTaxonomyChange={values => changeTaxonomy(values)}
               onKeywordToggle={value => toggleAdvancedList('keywords', value, setKeywords)}
               onStageToggle={value => toggleAdvancedList('stage', value, setStage)}
               onProcedureTypeToggle={value => toggleAdvancedList('procedureType', value, setProcedureType)}
@@ -1587,6 +1629,7 @@ export function TenderBoardClient({
                 onRegionToggle={value => toggleFilter('region', value, false)}
                 onSubcategoryToggle={value => toggleFilter('subcategory', value, false)}
                 onTaxonomyToggle={value => toggleTaxonomy(value, false)}
+                onTaxonomyChange={values => changeTaxonomy(values, false)}
                 onKeywordToggle={value => toggleAdvancedList('keywords', value, setKeywords, false)}
                 onStageToggle={value => toggleAdvancedList('stage', value, setStage, false)}
                 onProcedureTypeToggle={value => toggleAdvancedList('procedureType', value, setProcedureType, false)}
