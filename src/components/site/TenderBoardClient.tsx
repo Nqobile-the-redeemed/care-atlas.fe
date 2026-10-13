@@ -28,6 +28,11 @@ import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
+import {
+  TenderCareSpecificationFilters,
+  CARE_SPECIFICATION_KEYS,
+  readCareSpecifications
+} from './tender-board/TenderCareSpecificationFilters'
 import { TenderPagination as TenderPageControls } from './tender-board/TenderPagination'
 import { Button, ButtonLink } from './ui'
 import {
@@ -48,6 +53,7 @@ const TENDER_AUDIENCES = [
 ] as const
 
 type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
+  careSpecifications: Record<string, string[]>
   audience: string[]
   category: string[]
   region: string[]
@@ -71,6 +77,9 @@ type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
 }
 
 type FilterPanelProps = {
+  careSpecifications: Record<string, string[]>
+  careSpecificationGroups: NonNullable<TenderFilters['careSpecificationGroups']>
+  onCareSpecificationToggle: (key: string, value: string) => void
   audience: string[]
   region: string[]
   subcategory: string[]
@@ -577,6 +586,9 @@ function TaxonomyFilterTree({
 }
 
 function FilterPanel({
+  careSpecifications,
+  careSpecificationGroups,
+  onCareSpecificationToggle,
   audience,
   region,
   subcategory,
@@ -669,6 +681,11 @@ function FilterPanel({
             />
           )}
         </FilterGroup>
+        <TenderCareSpecificationFilters
+          groups={careSpecificationGroups}
+          selected={careSpecifications}
+          onToggle={onCareSpecificationToggle}
+        />
         <FilterGroup
           title='People supported'
           selectedLabel={
@@ -834,6 +851,7 @@ export function TenderBoardClient({
   const [subcategory, setSubcategory] = useState(() => searchParams.getAll('subcategory'))
   const [taxonomy, setTaxonomy] = useState(() => searchParams.getAll('taxonomy'))
   const [keywords, setKeywords] = useState(() => searchParams.getAll('keywords'))
+  const [careSpecifications, setCareSpecifications] = useState(() => readCareSpecifications(searchParams))
   const [stage, setStage] = useState(() => searchParams.getAll('stage'))
   const [procedureType, setProcedureType] = useState(() => searchParams.getAll('procedureType'))
   const [procurementType, setProcurementType] = useState(() => searchParams.getAll('procurementType'))
@@ -861,6 +879,7 @@ export function TenderBoardClient({
     searchParams.get('sort') === 'newest' ? 'newest' : DEFAULT_SORT
   )
   const [filters, setFilters] = useState<AppliedTenderFilters>(() => ({
+    careSpecifications: readCareSpecifications(searchParams),
     keyword: searchParams.get('keyword')?.trim() ?? '',
     audience: searchParams.getAll('audience').filter(value => TENDER_AUDIENCES.some(option => option.value === value)),
     category: searchParams.getAll('category'),
@@ -915,6 +934,7 @@ export function TenderBoardClient({
     [filterOptions.procurementTypes]
   )
   const activeFilterCount =
+    Object.values(filters.careSpecifications).reduce((count, values) => count + values.length, 0) +
     Number(Boolean(filters.keyword)) +
     filters.audience.length +
     filters.category.length +
@@ -1059,6 +1079,7 @@ export function TenderBoardClient({
     filters.subcategory.forEach(value => next.append('subcategory', value))
     filters.taxonomy.forEach(value => next.append('taxonomy', value))
     filters.keywords.forEach(value => next.append('keywords', value))
+    CARE_SPECIFICATION_KEYS.forEach(key => filters.careSpecifications[key]?.forEach(value => next.append(key, value)))
     filters.stage.forEach(value => next.append('stage', value))
     filters.procedureType.forEach(value => next.append('procedureType', value))
     filters.procurementType.forEach(value => next.append('procurementType', value))
@@ -1125,6 +1146,7 @@ export function TenderBoardClient({
 
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
     const nextFilters = {
+      careSpecifications,
       keyword: keyword.trim(),
       audience,
       category,
@@ -1161,6 +1183,7 @@ export function TenderBoardClient({
   }
 
   function clearFilters() {
+    setCareSpecifications({})
     setKeyword('')
     setAudience([])
     setCategory([])
@@ -1185,6 +1208,7 @@ export function TenderBoardClient({
     setSort(DEFAULT_SORT)
     setPage(1)
     setFilters({
+      careSpecifications: {},
       keyword: '',
       audience: [],
       category: [],
@@ -1199,6 +1223,17 @@ export function TenderBoardClient({
       sort: DEFAULT_SORT
     })
     trackEvent('tender_filters_cleared')
+  }
+
+  function toggleCareSpecification(key: string, value: string, apply = true) {
+    const next = {
+      ...careSpecifications,
+      [key]: careSpecifications[key]?.includes(value)
+        ? careSpecifications[key].filter(item => item !== value)
+        : [...(careSpecifications[key] ?? []), value]
+    }
+    setCareSpecifications(next)
+    if (apply) applyCurrentFilters({ careSpecifications: next })
   }
 
   function removeFilter(
@@ -1503,6 +1538,11 @@ export function TenderBoardClient({
         <div className='grid lg:grid-cols-[300px_minmax(0,1fr)]'>
           <aside className='hidden border-r border-gray-200 bg-gray-50 p-4 lg:block'>
             <FilterPanel
+              careSpecifications={careSpecifications}
+              careSpecificationGroups={
+                contextualFilters.careSpecificationGroups ?? filterOptions.careSpecificationGroups ?? []
+              }
+              onCareSpecificationToggle={toggleCareSpecification}
               audience={audience}
               region={region}
               subcategory={subcategory}
@@ -1595,6 +1635,11 @@ export function TenderBoardClient({
             </div>
             <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4'>
               <FilterPanel
+                careSpecifications={careSpecifications}
+                careSpecificationGroups={
+                  contextualFilters.careSpecificationGroups ?? filterOptions.careSpecificationGroups ?? []
+                }
+                onCareSpecificationToggle={(key, value) => toggleCareSpecification(key, value, false)}
                 audience={audience}
                 region={region}
                 subcategory={subcategory}

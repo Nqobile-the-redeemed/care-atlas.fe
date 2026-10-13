@@ -7,6 +7,7 @@ import { Button } from '../ui'
 
 import { dateLabel, hasTenderDetails, money, plainText, valueLabel, yesNo } from './utils'
 import { TenderShareButton } from './TenderShareButton'
+import { TenderCareSpecificationSummary } from './TenderCareSpecificationFilters'
 
 type TenderBoardSelectedTenderPanelProps = {
   selectedTender: TenderBoardSelectedTender | null
@@ -82,6 +83,8 @@ export function TenderBoardSelectedTenderPanel({
           {plainText(detailedTender?.description || selectedTender.summary)}
         </p>
       </section>
+
+      <TenderCareSpecificationSummary profile={selectedTender.careSpecification} />
 
       {detailedTender?.lots && detailedTender.lots.length > 0 && (
         <section className='mt-5 border-t border-gray-200 pt-5'>

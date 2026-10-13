@@ -33,11 +33,16 @@ describe('getPublicTenders', () => {
       keywords: ['Domiciliary care', 'Supported living'],
       category: ['services', 'supported living'],
       taxonomy: ['health-and-social-care', 'cpv-85311000'],
-      region: ['London']
+      region: ['London'],
+      careSpecifications: {
+        service_regulation: ['non_regulated', 'mixed'],
+        cqc_eligibility: ['not_required'],
+        support_type: ['enhanced_community_support']
+      }
     })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/v1/public/tenders?keyword=care&audience%5B%5D=adults&audience%5B%5D=children&category%5B%5D=services&category%5B%5D=supported+living&region=London&taxonomy%5B%5D=health-and-social-care&taxonomy%5B%5D=cpv-85311000&keywords%5B%5D=Domiciliary+care&keywords%5B%5D=Supported+living',
+      'http://localhost:8000/v1/public/tenders?keyword=care&audience%5B%5D=adults&audience%5B%5D=children&category%5B%5D=services&category%5B%5D=supported+living&region=London&taxonomy%5B%5D=health-and-social-care&taxonomy%5B%5D=cpv-85311000&keywords%5B%5D=Domiciliary+care&keywords%5B%5D=Supported+living&service_regulation%5B%5D=non_regulated&service_regulation%5B%5D=mixed&cqc_eligibility=not_required&support_type=enhanced_community_support',
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({

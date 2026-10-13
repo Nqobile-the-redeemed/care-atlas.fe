@@ -2,6 +2,7 @@ import { apiRequest } from './client'
 import { appendPublicFormMeta } from './publicForm'
 
 export type PublicTender = {
+  careSpecification?: import('@/components/site/tender-board/TenderCareSpecificationFilters').CareSpecification | null
   id: string
   title: string
   buyer: string | null
@@ -132,6 +133,7 @@ export type TenderNotificationUnsubscribeReceipt = {
 }
 
 export type TenderFilters = {
+  careSpecificationGroups?: import('@/components/site/tender-board/TenderCareSpecificationFilters').CareSpecificationGroup[]
   categories: string[]
   regions: string[]
   industries?: string[]
@@ -176,6 +178,7 @@ export type TenderFilters = {
 }
 
 export type PublicTenderQuery = {
+  careSpecifications?: Record<string, string[]>
   keyword?: string
   audience?: string | string[]
   category?: string | string[]
@@ -252,6 +255,9 @@ export async function getPublicTenderFilters(filters: Omit<PublicTenderQuery, 'p
 }
 
 function appendAdvancedTenderFilters(params: URLSearchParams, filters: PublicTenderQuery) {
+  for (const key of ['service_regulation', 'cqc_eligibility', 'support_type']) {
+    appendMany(params, key, filters.careSpecifications?.[key])
+  }
   if (filters.valueMinMinor !== undefined) params.set('value_min_minor', String(filters.valueMinMinor))
   if (filters.valueMaxMinor !== undefined) params.set('value_max_minor', String(filters.valueMaxMinor))
   if (filters.includeValueUnspecified !== undefined) {

@@ -66,6 +66,13 @@ vi.mock('@/lib/api/tenders', () => ({
   getPublicTenderFilters: vi.fn(async () => ({
     data: {
       categories: ['Care', 'Cleaning'],
+      careSpecificationGroups: [
+        {
+          key: 'service_regulation',
+          label: 'Service regulation',
+          options: [{ value: 'non_regulated', label: 'Includes non-regulated support', count: 1 }]
+        }
+      ],
       regions: ['London', 'North West'],
       industries: ['Health and Social Care'],
       subcategories: [],
@@ -227,6 +234,54 @@ vi.mock('@/lib/api/bookings', () => ({
 describe('TenderBoardClient', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it('applies care specification filters from the desktop sidebar and clears them', async () => {
+    const user = userEvent.setup()
+    render(
+      <HalfScreenModalProvider>
+        <TenderBoardClient />
+      </HalfScreenModalProvider>
+    )
+    await screen.findByText('Supported Living Tender')
+    await user.click(screen.getByText('Service regulation', { selector: 'summary' }))
+    await user.click(screen.getByRole('checkbox', { name: /Includes non-regulated support/ }))
+    await waitFor(() =>
+      expect(getPublicTenders).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          careSpecifications: expect.objectContaining({ service_regulation: ['non_regulated'] }),
+          page: 1
+        })
+      )
+    )
+    await user.click(screen.getAllByRole('button', { name: 'Clear all' })[0])
+    await waitFor(() =>
+      expect(getPublicTenders).toHaveBeenLastCalledWith(expect.objectContaining({ careSpecifications: {} }))
+    )
+  })
+
+  it('keeps mobile care selections as a draft until Apply filters is pressed', async () => {
+    const user = userEvent.setup()
+    render(
+      <HalfScreenModalProvider>
+        <TenderBoardClient />
+      </HalfScreenModalProvider>
+    )
+    await screen.findByText('Supported Living Tender')
+    await user.click(screen.getByRole('button', { name: /^Filters/ }))
+    const panel = screen.getByRole('dialog', { name: 'Tender filters' })
+    await user.click(within(panel).getByText('Service regulation', { selector: 'summary' }))
+    const calls = vi.mocked(getPublicTenders).mock.calls.length
+    await user.click(within(panel).getByRole('checkbox', { name: /Includes non-regulated support/ }))
+    expect(getPublicTenders).toHaveBeenCalledTimes(calls)
+    await user.click(within(panel).getByRole('button', { name: 'Apply filters' }))
+    await waitFor(() =>
+      expect(getPublicTenders).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          careSpecifications: expect.objectContaining({ service_regulation: ['non_regulated'] })
+        })
+      )
+    )
   })
 
   it('loads the complete care catalogue newest-first without exposing source filters', async () => {
