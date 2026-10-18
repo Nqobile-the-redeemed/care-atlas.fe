@@ -1,1 +1,14 @@
-npx lint-staged
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+NODE_VERSION_FILE="$ROOT_DIR/.node-version"
+FNM_NODE_ROOT="/c/Users/Windows/AppData/Roaming/fnm/node-versions"
+
+if [ -f "$NODE_VERSION_FILE" ]; then
+  NODE_VERSION="$(tr -d '\r\n' < "$NODE_VERSION_FILE")"
+  FNM_NODE_DIR="$FNM_NODE_ROOT/v$NODE_VERSION/installation"
+
+  if [ -x "$FNM_NODE_DIR/node.exe" ]; then
+    export PATH="$FNM_NODE_DIR:$PATH"
+  fi
+fi
+
+./node_modules/.bin/lint-staged
