@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 
 import { randomBlueShade, getContrastColor } from './utils/colorUtils'
 import { SiteIcon } from '../SiteIcon'
+import { formatInputLabel } from '@/lib/formatInputLabel'
 
 import type { Option } from './utils/types'
 import type { AddNewOptionProps, AddOptionRequest, CreatedOptionResponse } from './utils/types'
@@ -204,11 +205,8 @@ export function StandaloneDropDown({
 
   return (
     <div ref={dropdownRef} className={`relative flex w-full flex-col gap-2 ${className || ''}`}>
-      <label
-        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-        htmlFor={name}
-      >
-        {label || name}
+      <label className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300' htmlFor={name}>
+        {formatInputLabel(label || name)}
       </label>
 
       <div

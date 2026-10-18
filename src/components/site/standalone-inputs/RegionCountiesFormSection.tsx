@@ -3,6 +3,7 @@
 import React, { useMemo, useRef, useEffect } from 'react'
 
 import { StandaloneMultiSelect } from './StandaloneMultiSelect'
+import { formatInputLabel } from '@/lib/formatInputLabel'
 import {
   ALL_REGIONS,
   getAllRegionOptions,
@@ -145,7 +146,7 @@ export function RegionCountiesFormSection({
           <div className='flex flex-col gap-2'>
             {countyLabel && (
               <label className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
-                {countyLabel}
+                {formatInputLabel(countyLabel)}
               </label>
             )}
             <div

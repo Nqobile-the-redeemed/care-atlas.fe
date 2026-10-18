@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { SiteIcon } from '../SiteIcon'
+import { formatInputLabel } from '@/lib/formatInputLabel'
 
 interface StandaloneTextInputProps {
   name: string
@@ -41,6 +42,7 @@ export function StandaloneTextInput({
   required,
   autoComplete
 }: StandaloneTextInputProps) {
+  const displayLabel = formatInputLabel(label || name)
   const messageType = error ? 'error' : 'neutral'
 
   const borderColor = {
@@ -133,12 +135,9 @@ export function StandaloneTextInput({
 
   return (
     <div className={`flex flex-grow flex-col gap-2 ${className || ''}`}>
-      <label
-        htmlFor={name}
-        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-      >
+      <label htmlFor={name} className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
         {required && <span className='mr-1 text-red-500'>*</span>}
-        {label || name}
+        {displayLabel}
       </label>
 
       <div
@@ -149,7 +148,7 @@ export function StandaloneTextInput({
             type='button'
             onClick={handleDecrement}
             className={`p-3 text-gray-500 hover:text-blue-600 focus:outline-none dark:text-slate-400 dark:hover:text-blue-300 ${error ? 'text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300' : ''}`}
-            aria-label={`Decrease ${label || name}`}
+            aria-label={`Decrease ${displayLabel}`}
             disabled={disabled || readOnly}
           >
             <SiteIcon name='minus' className='h-4 w-4' />
@@ -171,7 +170,7 @@ export function StandaloneTextInput({
             className={`w-full border-none bg-transparent py-2.5 text-slate-900 placeholder:text-slate-400 focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500 ${isNumeric ? 'pl-2 text-center' : 'px-4'} ${isNumeric && getSuffix() ? 'pr-12' : isNumeric ? 'pr-2' : 'px-4'} ${isDateLike ? 'accent-blue-600 dark:[color-scheme:dark]' : ''} ${error ? 'pr-10' : ''} ${disabled ? 'cursor-not-allowed opacity-50' : readOnly ? 'cursor-default' : ''} `}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? `${name}-error` : undefined}
-            aria-label={isNumeric ? `${label || name} in ${valueType === 'gbp' ? 'GBP' : valueType}` : undefined}
+            aria-label={isNumeric ? `${displayLabel} in ${valueType === 'gbp' ? 'GBP' : valueType}` : undefined}
           />
           {error && !isNumeric && (
             <div className='pointer-events-none absolute top-1/2 right-3 -translate-y-1/2'>
@@ -190,7 +189,7 @@ export function StandaloneTextInput({
             type='button'
             onClick={handleIncrement}
             className={`p-3 text-gray-500 hover:text-blue-600 focus:outline-none dark:text-slate-400 dark:hover:text-blue-300 ${error ? 'text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300' : ''}`}
-            aria-label={`Increase ${label || name}`}
+            aria-label={`Increase ${displayLabel}`}
             disabled={disabled || readOnly}
           >
             <SiteIcon name='plus' className='h-4 w-4' />

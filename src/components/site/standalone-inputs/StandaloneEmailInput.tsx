@@ -2,6 +2,8 @@
 
 import React from 'react'
 
+import { formatInputLabel } from '@/lib/formatInputLabel'
+
 interface StandaloneEmailInputProps {
   name: string
   value: string
@@ -43,12 +45,9 @@ export function StandaloneEmailInput({
 
   return (
     <div className={`flex flex-grow flex-col gap-2 ${className || ''}`}>
-      <label
-        htmlFor={name}
-        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-      >
+      <label htmlFor={name} className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
         {required && <span className='mr-1 text-red-500'>*</span>}
-        {label}
+        {formatInputLabel(label)}
       </label>
       <input
         id={name}

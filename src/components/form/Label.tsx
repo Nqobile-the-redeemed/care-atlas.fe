@@ -1,6 +1,8 @@
 import React, { FC, ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 
+import { formatInputLabel } from '@/lib/formatInputLabel'
+
 interface LabelProps {
   htmlFor?: string
   children: ReactNode
@@ -8,6 +10,8 @@ interface LabelProps {
 }
 
 const Label: FC<LabelProps> = ({ htmlFor, children, className }) => {
+  const content = typeof children === 'string' ? formatInputLabel(children) : children
+
   return (
     <label
       htmlFor={htmlFor}
@@ -19,7 +23,7 @@ const Label: FC<LabelProps> = ({ htmlFor, children, className }) => {
         className
       )}
     >
-      {children}
+      {content}
     </label>
   )
 }

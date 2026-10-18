@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 
 import { randomBlueShade, getContrastColor } from './utils/colorUtils'
+import { formatInputLabel } from '@/lib/formatInputLabel'
 
 import type { MultiSelectOption, AddNewOptionProps, AddOptionRequest, CreatedOptionResponse } from './utils/types'
 
@@ -264,11 +265,8 @@ export function StandaloneMultiSelect({
   return (
     <div ref={dropdownRef} className={`relative flex w-full flex-col gap-2 ${className || ''}`}>
       {label && (
-        <label
-          className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-          htmlFor={name}
-        >
-          {label}
+        <label className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300' htmlFor={name}>
+          {formatInputLabel(label)}
         </label>
       )}
 

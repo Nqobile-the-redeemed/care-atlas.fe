@@ -2,6 +2,8 @@
 
 import React from 'react'
 
+import { formatInputLabel } from '@/lib/formatInputLabel'
+
 interface CheckboxOption {
   code: string
   name: string
@@ -54,11 +56,8 @@ export function StandaloneMultiSelectCheckbox({
 
   return (
     <div className={`flex flex-grow flex-col gap-2 ${className || ''}`}>
-      <label
-        htmlFor={name}
-        className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-      >
-        {label || name}
+      <label htmlFor={name} className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
+        {formatInputLabel(label || name)}
       </label>
 
       <div

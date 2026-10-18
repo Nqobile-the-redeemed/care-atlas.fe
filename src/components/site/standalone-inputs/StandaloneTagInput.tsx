@@ -3,6 +3,7 @@
 import React, { useState, KeyboardEvent } from 'react'
 
 import { SiteIcon } from '../SiteIcon'
+import { formatInputLabel } from '@/lib/formatInputLabel'
 
 interface StandaloneTagInputProps {
   name: string
@@ -54,11 +55,8 @@ export function StandaloneTagInput({
   return (
     <div className={`flex flex-col gap-2 ${className || ''}`}>
       {label && (
-        <label
-          htmlFor={name}
-          className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'
-        >
-          {label}
+        <label htmlFor={name} className='font-neue text-gray-mediumGray text-xs font-semibold dark:text-slate-300'>
+          {formatInputLabel(label)}
         </label>
       )}
 
