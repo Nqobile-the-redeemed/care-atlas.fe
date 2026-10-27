@@ -6,6 +6,11 @@ export { StandaloneMultiSelect } from './StandaloneMultiSelect'
 export { StandaloneMultiSelectCheckbox } from './StandaloneMultiSelectCheckbox'
 export { StandaloneTagInput } from './StandaloneTagInput'
 export { RegionCountiesFormSection } from './RegionCountiesFormSection'
+export { StandalonePaymentDialog } from './StandalonePaymentDialog'
+export { StandalonePaymentSummary } from './StandalonePaymentSummary'
+export { StandaloneSecurePaymentField } from './StandaloneSecurePaymentField'
+
+export type { StandalonePaymentSummaryItem } from './StandalonePaymentSummary'
 
 export type {
   Option,
