@@ -1,5 +1,7 @@
 'use client'
 
+import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
+
 export type AnalyticsValue = string | number | boolean
 export type AnalyticsParams = Record<string, AnalyticsValue | null | undefined>
 
@@ -21,6 +23,8 @@ function sanitiseParams(params: AnalyticsParams) {
 
 /** Send a GA4 event without sending names, email addresses, messages, or other form content. */
 export function trackEvent(name: string, params: AnalyticsParams = {}) {
+  if (name === 'tender_opened') recordTrackingEvent('tender_view')
+  if (name === 'care_atlas_handoff_started') recordTrackingEvent('signup_clicked')
   if (typeof window === 'undefined' || !safeEventName.test(name) || typeof window.gtag !== 'function') return
 
   window.gtag('event', name, sanitiseParams(params))

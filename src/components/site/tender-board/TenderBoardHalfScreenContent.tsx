@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
 import { useFormik, type FormikProps } from 'formik'
 
 import {
@@ -48,6 +49,9 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
   const [slots, setSlots] = useState<BookingSlot[]>([])
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null)
   const [bookingOptionsLoading, setBookingOptionsLoading] = useState(false)
+  useEffect(() => {
+    if (leadKind === 'booking') recordTrackingEvent('booking_started')
+  }, [leadKind])
   const [flowStep, setFlowStep] = useState<FlowStep>('form')
   const [pendingSubmission, setPendingSubmission] = useState<PendingSubmission | null>(null)
   const [selectedRegions, setSelectedRegions] = useState<string[]>([])
@@ -304,6 +308,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
         {handoffUrl && (
           <a
             href={handoffUrl}
+            onClick={() => recordTrackingEvent('signup_clicked')}
             className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
           >
             Continue to Orbit Mirai

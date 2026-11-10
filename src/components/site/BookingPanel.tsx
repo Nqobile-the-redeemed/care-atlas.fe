@@ -9,6 +9,7 @@ import {
   getBookingEventTypes
 } from '@/lib/api/bookings'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
+import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
 import { trackEvent } from '@/components/analytics/trackEvent'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -33,6 +34,9 @@ function groupSlots(slots: BookingSlot[]) {
 }
 
 export function BookingPanel() {
+  useEffect(() => {
+    recordTrackingEvent('booking_started')
+  }, [])
   const [eventTypes, setEventTypes] = useState<BookingEventType[]>([])
   const [selectedEventSlug, setSelectedEventSlug] = useState('')
   const [slots, setSlots] = useState<BookingSlot[]>([])

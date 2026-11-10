@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
+import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
 import { trackEvent } from './trackEvent'
 
 declare global {
@@ -21,6 +22,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
   const pathname = usePathname()
 
   useEffect(() => {
+    recordTrackingEvent('landing_view')
     if (!window.gtag || !pathname) return
 
     window.gtag('event', 'page_view', {
@@ -29,6 +31,12 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
       page_title: document.title
     })
   }, [pathname])
+
+  useEffect(() => {
+    const capture = () => recordTrackingEvent('landing_view')
+    window.addEventListener('care-atlas:cookie-consent-changed', capture)
+    return () => window.removeEventListener('care-atlas:cookie-consent-changed', capture)
+  }, [])
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
