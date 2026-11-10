@@ -25,6 +25,7 @@ import {
 } from '@/lib/api/tenders'
 import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
+import { marketingAttribution } from '@/lib/marketingAttribution'
 import { trackEvent } from '@/components/analytics/trackEvent'
 
 import { SiteIcon } from './SiteIcon'
@@ -909,6 +910,14 @@ export function TenderBoardClient({
   const [activeTenderId, setActiveTenderId] = useState(
     () => initialTender?.id ?? initialTenderId ?? searchParams.get('tender') ?? ''
   )
+  useEffect(() => {
+    const capture = () => {
+      marketingAttribution()
+    }
+    capture()
+    window.addEventListener('care-atlas:cookie-consent-changed', capture)
+    return () => window.removeEventListener('care-atlas:cookie-consent-changed', capture)
+  }, [])
   const initialTenderOpenedRef = useRef(false)
   const valueFilterTimerRef = useRef<number | null>(null)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -1098,6 +1107,12 @@ export function TenderBoardClient({
     if (viewMode !== 'list') next.set('view', viewMode)
     if (activeTenderId && !initialTender && !initialTenderId) next.set('tender', activeTenderId)
 
+    // Keep campaign context while the board updates its filters and selected tender.
+    const current = new URLSearchParams(window.location.search)
+    for (const key of ['om_click', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'action']) {
+      const value = current.get(key)
+      if (value) next.set(key, value)
+    }
     const query = next.toString()
     const sharedTenderId = initialTender?.id ?? initialTenderId
     const routePath = sharedTenderId ? `/tenders/${encodeURIComponent(sharedTenderId)}` : '/tenders'
@@ -1132,17 +1147,17 @@ export function TenderBoardClient({
       initialTender?.id === activeTenderId ? initialTender : tenders.find(tender => tender.id === activeTenderId)
     if (listedTender) {
       initialTenderOpenedRef.current = true
-      openTenderWorkspace(listedTender)
+      openTenderWorkspace(listedTender, searchParams.get('action') === 'booking' ? 'booking' : undefined)
       return
     }
 
     void getPublicTender(activeTenderId)
       .then(response => {
         initialTenderOpenedRef.current = true
-        openTenderWorkspace(response.data)
+        openTenderWorkspace(response.data, searchParams.get('action') === 'booking' ? 'booking' : undefined)
       })
       .catch(() => setError('The tender link could not be opened. It may no longer be available.'))
-  }, [activeTenderId, initialTender, loading, openTenderWorkspace, tenders])
+  }, [activeTenderId, initialTender, loading, openTenderWorkspace, searchParams, tenders])
 
   function applyCurrentFilters(next?: Partial<AppliedTenderFilters>) {
     const nextFilters = {

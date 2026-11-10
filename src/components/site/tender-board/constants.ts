@@ -12,6 +12,7 @@ export const emptyTenderBoardForm: TenderBoardForm = {
   preferredSlot: '',
   company: '',
   message: '',
+  whatsappTenderAlerts: false,
   consent: false,
   website: ''
 }

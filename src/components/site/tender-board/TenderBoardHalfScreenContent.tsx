@@ -221,6 +221,7 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
             regions: selectedRegions,
             counties: selectedCounties
           },
+          whatsappTenderAlerts: values.whatsappTenderAlerts,
           consent: values.consent,
           formStartedAt,
           sourceUrl: window.location.href,
@@ -257,11 +258,12 @@ export function TenderBoardHalfScreenContent({ data, onClose }: TenderBoardHalfS
           categories: selectedTender.categories,
           regions: selectedRegions.length > 0 ? selectedRegions : selectedTender.regions,
           counties: selectedCounties,
-          channels: ['email', 'whatsapp'],
+          channels: values.whatsappTenderAlerts ? ['email', 'whatsapp'] : ['email'],
           notes: ''
         },
         company: values.company,
         message: values.message,
+        whatsappTenderAlerts: values.whatsappTenderAlerts,
         consent: values.consent,
         formStartedAt,
         sourceUrl: window.location.href,

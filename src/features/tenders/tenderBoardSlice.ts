@@ -180,6 +180,7 @@ export const submitTenderBoardLead = createAsyncThunk<
             : 'Tender support booking',
           message: `${workspace.form.message}\n\nTender: ${selectedTender.title}`
         },
+        whatsappTenderAlerts: workspace.form.whatsappTenderAlerts,
         consent: workspace.form.consent,
         formStartedAt: workspace.formStartedAt,
         sourceUrl: payload.sourceUrl,
@@ -216,11 +217,12 @@ export const submitTenderBoardLead = createAsyncThunk<
       tenderPreferences: {
         categories: selectedTender.categories,
         regions: selectedTender.regions,
-        channels: ['email', 'whatsapp'],
+        channels: workspace.form.whatsappTenderAlerts ? ['email', 'whatsapp'] : ['email'],
         notes: ''
       },
       company: workspace.form.company,
       message: workspace.form.message,
+      whatsappTenderAlerts: workspace.form.whatsappTenderAlerts,
       consent: workspace.form.consent,
       formStartedAt: workspace.formStartedAt,
       sourceUrl: payload.sourceUrl,

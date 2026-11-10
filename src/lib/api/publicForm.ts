@@ -1,3 +1,5 @@
+import { marketingAttribution } from '../marketingAttribution'
+
 export type PublicFormSecurityPayload = {
   consent: boolean
   formStartedAt: number
@@ -13,6 +15,7 @@ export function appendPublicFormMeta(formData: FormData, payload: PublicFormSecu
   formData.set('consent', payload.consent ? '1' : '0')
   formData.set('form_started_at', String(payload.formStartedAt))
   formData.set('source_url', payload.sourceUrl)
+  formData.set('marketing_attribution', JSON.stringify(marketingAttribution(payload.sourceUrl)))
   formData.set('web_source', WEB_SOURCE)
   formData.set('website', payload.website ?? '')
 

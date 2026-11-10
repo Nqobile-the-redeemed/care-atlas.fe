@@ -25,6 +25,7 @@ export type TenderBoardForm = {
   preferredSlot: string
   company: string
   message: string
+  whatsappTenderAlerts?: boolean
   consent: boolean
   website: string
 }

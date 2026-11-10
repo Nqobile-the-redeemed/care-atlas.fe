@@ -178,6 +178,21 @@ export function TenderBoardLeadForm({
         />
         <label className='flex gap-3 text-sm leading-6 text-gray-600'>
           <input
+            type='checkbox'
+            name='whatsappTenderAlerts'
+            checked={Boolean(formik.values.whatsappTenderAlerts)}
+            onChange={event => {
+              void formik.setFieldValue('whatsappTenderAlerts', event.target.checked)
+            }}
+            className='mt-1.5 h-5 w-5 rounded border-gray-300'
+          />
+          <span>
+            Sign up for WhatsApp tender alerts. Use the phone number above with its country code (for example
+            +447700900123). No OrbitMirai account is needed. Reply STOP at any time.
+          </span>
+        </label>
+        <label className='flex gap-3 text-sm leading-6 text-gray-600'>
+          <input
             required
             type='checkbox'
             checked={formik.values.consent}

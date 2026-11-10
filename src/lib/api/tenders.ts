@@ -102,6 +102,7 @@ export type TenderLeadPayload = {
     country?: string
   }
   message: string
+  whatsappTenderAlerts?: boolean
   consent: boolean
   formStartedAt: number
   sourceUrl: string
@@ -317,6 +318,7 @@ export async function sendTenderLead(tenderId: string, kind: TenderLeadKind, pay
   if (payload.address) {
     formData.set('address', JSON.stringify(payload.address))
   }
+  formData.set('whatsapp_tender_alerts', payload.whatsappTenderAlerts ? '1' : '0')
   formData.set('message', payload.message)
   formData.set('details', JSON.stringify({ page: 'public tender board', lead_kind: kind }))
   appendPublicFormMeta(formData, {

@@ -1,3 +1,4 @@
+import { marketingAttribution } from '../marketingAttribution'
 import { apiRequest } from './client'
 import { WEB_SOURCE } from './publicForm'
 
@@ -76,6 +77,7 @@ export type BookingPayload = {
     regions?: string[]
     counties?: string[]
   }
+  whatsappTenderAlerts?: boolean
   consent: boolean
   formStartedAt: number
   sourceUrl: string
@@ -126,9 +128,11 @@ export async function createPublicBooking(payload: BookingPayload) {
         company_name: payload.customer.companyName
       },
       intake: payload.intake,
+      whatsapp_tender_alerts: payload.whatsappTenderAlerts ?? false,
       consent: payload.consent,
       form_started_at: payload.formStartedAt,
       source_url: payload.sourceUrl,
+      marketing_attribution: marketingAttribution(payload.sourceUrl),
       web_source: WEB_SOURCE,
       website: payload.website ?? '',
       recaptcha_token: payload.recaptchaToken,

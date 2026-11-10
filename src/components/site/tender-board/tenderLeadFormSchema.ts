@@ -6,7 +6,18 @@ import { emptyTenderBoardForm } from './constants'
 export const TenderBoardFormYup: Yup.ObjectSchema<TenderBoardForm> = Yup.object({
   name: Yup.string().required('Full name is required').default(''),
   email: Yup.string().email('Enter a valid email address').required('Email is required').default(''),
-  phone: Yup.string().required('Phone number is required').default(''),
+  phone: Yup.string()
+    .required('Phone number is required')
+    .when('whatsappTenderAlerts', {
+      is: true,
+      then: schema =>
+        schema.matches(
+          /^\+[1-9][0-9]{7,14}$/,
+          'For WhatsApp alerts, enter a number with country code, for example +447700900123'
+        )
+    })
+    .default(''),
+  whatsappTenderAlerts: Yup.boolean().default(false),
   whatsapp: Yup.string().ensure().default(''),
   preferredContactMethod: Yup.string<'email' | 'phone' | 'whatsapp'>()
     .oneOf(['email', 'phone', 'whatsapp'], 'Invalid contact method')

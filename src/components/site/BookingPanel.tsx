@@ -115,6 +115,13 @@ export function BookingPanel() {
       nextErrors.email = 'Enter a valid email address.'
     }
 
+    if (
+      formData.get('whatsappTenderAlerts') &&
+      !/^\+[1-9][0-9]{7,14}$/.test(String(formData.get('phone') ?? '').trim())
+    ) {
+      nextErrors.phone = 'For WhatsApp alerts, enter a number with country code, for example +447700900123.'
+    }
+
     if (!selectedSlot) {
       nextErrors.slot = 'Choose a consultation time.'
     }
@@ -165,6 +172,7 @@ export function BookingPanel() {
           regions,
           counties
         },
+        whatsappTenderAlerts: Boolean(formData.get('whatsappTenderAlerts')),
         consent: true,
         formStartedAt: formStartedAt.current,
         sourceUrl: window.location.href,
@@ -372,6 +380,13 @@ export function BookingPanel() {
         </div>
 
         <div>
+          <label className='flex gap-3 text-sm leading-6 text-gray-600'>
+            <input type='checkbox' name='whatsappTenderAlerts' className='mt-1.5 h-5 w-5 rounded border-gray-300' />
+            <span>
+              Sign up for WhatsApp tender alerts using the phone number above. Include your country code (for example
+              +447700900123). No OrbitMirai account is needed. Reply STOP at any time.
+            </span>
+          </label>
           <label className='flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 text-sm leading-6 text-gray-700'>
             <input
               type='checkbox'
