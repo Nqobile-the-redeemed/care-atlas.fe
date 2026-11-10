@@ -2,7 +2,8 @@
 
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { readCookieConsentPreferences } from '@/lib/cookieConsent'
 
 import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
 import { trackEvent } from './trackEvent'
@@ -20,17 +21,34 @@ type GoogleAnalyticsProps = {
 
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   const pathname = usePathname()
+  const [allowed, setAllowed] = useState(false)
+  useEffect(() => {
+    const update = () => {
+      const analytics = readCookieConsentPreferences()?.analytics ?? false
+      setAllowed(analytics)
+      ;(window as unknown as Record<string, unknown>)[`ga-disable-${measurementId}`] = !analytics
+      window.gtag?.('consent', 'update', {
+        analytics_storage: analytics ? 'granted' : 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      })
+    }
+    update()
+    window.addEventListener('care-atlas:cookie-consent-changed', update)
+    return () => window.removeEventListener('care-atlas:cookie-consent-changed', update)
+  }, [measurementId])
 
   useEffect(() => {
     recordTrackingEvent('landing_view')
-    if (!window.gtag || !pathname) return
+    if (!allowed || !window.gtag || !pathname) return
 
     window.gtag('event', 'page_view', {
-      page_path: `${window.location.pathname}${window.location.search}`,
-      page_location: window.location.href,
+      page_path: window.location.pathname,
+      page_location: window.location.origin + window.location.pathname,
       page_title: document.title
     })
-  }, [pathname])
+  }, [pathname, allowed])
 
   useEffect(() => {
     const capture = () => recordTrackingEvent('landing_view')
@@ -71,17 +89,27 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
     }
   }, [])
 
+  if (!allowed) return null
   return (
     <Script
       id='google-analytics'
       strategy='afterInteractive'
+      onReady={() => {
+        if (!readCookieConsentPreferences()?.analytics) return
+        window.gtag?.('event', 'page_view', {
+          page_path: window.location.pathname,
+          page_location: window.location.origin + window.location.pathname,
+          page_title: document.title
+        })
+      }}
       dangerouslySetInnerHTML={{
         __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){window.dataLayer.push(arguments);}
           window.gtag = gtag;
+          gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
           gtag('js', new Date());
-          gtag('config', '${measurementId}', { send_page_view: false });
+          gtag('config', '${measurementId}', { send_page_view: false, page_location: window.location.origin + window.location.pathname, page_referrer: '' });
           var gaScript = document.createElement('script');
           gaScript.async = true;
           gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=${measurementId}';

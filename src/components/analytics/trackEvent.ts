@@ -1,5 +1,6 @@
 'use client'
 
+import { readCookieConsentPreferences } from '@/lib/cookieConsent'
 import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
 
 export type AnalyticsValue = string | number | boolean
@@ -25,7 +26,13 @@ function sanitiseParams(params: AnalyticsParams) {
 export function trackEvent(name: string, params: AnalyticsParams = {}) {
   if (name === 'tender_opened') recordTrackingEvent('tender_view')
   if (name === 'care_atlas_handoff_started') recordTrackingEvent('signup_clicked')
-  if (typeof window === 'undefined' || !safeEventName.test(name) || typeof window.gtag !== 'function') return
+  if (
+    typeof window === 'undefined' ||
+    !readCookieConsentPreferences()?.analytics ||
+    !safeEventName.test(name) ||
+    typeof window.gtag !== 'function'
+  )
+    return
 
   window.gtag('event', name, sanitiseParams(params))
 }

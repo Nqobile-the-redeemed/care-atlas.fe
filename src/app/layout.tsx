@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
+import ConsentScripts from '@/components/analytics/ConsentScripts'
 import './globals.css'
 
 import { SidebarProvider } from '@/context/SidebarContext'
@@ -46,6 +46,7 @@ const microsoftClarityScript = MICROSOFT_CLARITY_ID
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "${MICROSOFT_CLARITY_ID}");
+      window.clarity("consentv2", { analytics_Storage: "granted", ad_Storage: "denied" });
     });
   `
   : null
@@ -99,46 +100,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en-GB'>
-      <head>
-        {googleTagManagerScript && (
-          <Script
-            id='google-tag-manager'
-            strategy='beforeInteractive'
-            dangerouslySetInnerHTML={{ __html: googleTagManagerScript }}
-          />
-        )}
-      </head>
       <body className='bg-white dark:bg-gray-900'>
         <GoogleAnalytics measurementId={GOOGLE_ANALYTICS_ID} />
-        {GOOGLE_TAG_MANAGER_ID && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GOOGLE_TAG_MANAGER_ID}`}
-              height='0'
-              width='0'
-              style={{ display: 'none', visibility: 'hidden' }}
-              title='Google Tag Manager'
-            />
-          </noscript>
-        )}
-        <Script id='meta-pixel' strategy='lazyOnload' dangerouslySetInnerHTML={{ __html: metaPixelScript }} />
-        {microsoftClarityScript && (
-          <Script
-            id='microsoft-clarity'
-            strategy='lazyOnload'
-            dangerouslySetInnerHTML={{ __html: microsoftClarityScript }}
-          />
-        )}
-        <noscript>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            height='1'
-            width='1'
-            style={{ display: 'none' }}
-            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-            alt=''
-          />
-        </noscript>
+        <ConsentScripts
+          tagManagerScript={googleTagManagerScript}
+          metaScript={metaPixelScript}
+          clarityScript={microsoftClarityScript}
+        />
         <StoreProvider>
           <ThemeProvider>
             <SidebarProvider>{children}</SidebarProvider>
