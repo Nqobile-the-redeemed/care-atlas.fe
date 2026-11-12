@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { readCookieConsentPreferences } from '@/lib/cookieConsent'
 
 import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
+import { activityPage } from '@/lib/marketingActivity'
 import { trackEvent } from './trackEvent'
 
 declare global {
@@ -44,9 +45,9 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
     if (!allowed || !window.gtag || !pathname) return
 
     window.gtag('event', 'page_view', {
-      page_path: window.location.pathname,
-      page_location: window.location.origin + window.location.pathname,
-      page_title: document.title
+      page_path: `/${activityPage()}`,
+      page_location: `${window.location.origin}/${activityPage()}`,
+      page_title: activityPage()
     })
   }, [pathname, allowed])
 
@@ -66,8 +67,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
 
       trackEvent(element.dataset.analyticsEvent || 'ui_click', {
         element_type: element.tagName.toLowerCase(),
-        element_id: element.id || undefined,
-        element_label: element.dataset.analyticsLabel || element.getAttribute('aria-label') || undefined
+        element_id: element.dataset.analyticsControl || undefined
       })
     }
 

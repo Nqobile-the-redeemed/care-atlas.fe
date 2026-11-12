@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import ConsentScripts from '@/components/analytics/ConsentScripts'
+import ActivityTracking from '@/components/analytics/ActivityTracking'
 import './globals.css'
 
 import { SidebarProvider } from '@/context/SidebarContext'
@@ -102,6 +103,7 @@ export default function RootLayout({
     <html lang='en-GB'>
       <body className='bg-white dark:bg-gray-900'>
         <GoogleAnalytics measurementId={GOOGLE_ANALYTICS_ID} />
+        <ActivityTracking />
         <ConsentScripts
           tagManagerScript={googleTagManagerScript}
           metaScript={metaPixelScript}

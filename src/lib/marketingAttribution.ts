@@ -1,12 +1,17 @@
 import { readCookieConsentPreferences } from './cookieConsent'
 import { trackingVisitId } from './trackingVisit'
+import { activityContext } from './marketingActivity'
 
 const key = 'care-atlas:marketing-click'
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const maxAge = 24 * 60 * 60 * 1000
 
 /** Campaign attribution is optional and follows the existing analytics consent choice. */
-export function marketingAttribution(sourceUrl?: string): { om_click?: string; visit_id?: string } {
+export function marketingAttribution(sourceUrl?: string): {
+  om_click?: string
+  visit_id?: string
+  session_token?: string
+} {
   if (typeof window === 'undefined') return {}
   try {
     if (!readCookieConsentPreferences()?.analytics) {
@@ -15,7 +20,10 @@ export function marketingAttribution(sourceUrl?: string): { om_click?: string; v
       return {}
     }
     const visitId = trackingVisitId()
-    const visit = visitId ? { visit_id: visitId } : {}
+    const activity = activityContext()
+    const visit = visitId
+      ? { visit_id: visitId, ...(activity?.visitId === visitId ? { session_token: activity.token } : {}) }
+      : {}
     const current = new URL(sourceUrl ?? window.location.href, window.location.origin).searchParams.get('om_click')
     if (current && uuid.test(current)) {
       window.sessionStorage.setItem(key, JSON.stringify({ click: current, capturedAt: Date.now() }))

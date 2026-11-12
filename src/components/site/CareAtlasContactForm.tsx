@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, useRef, useState } from 'react'
+import { FormEvent, useRef, useState, useEffect } from 'react'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { trackEvent } from '@/components/analytics/trackEvent'
+import { recordActivity } from '@/lib/marketingActivity'
 import { submitEnquiry } from '@/features/enquiries/enquiriesSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -55,6 +56,15 @@ export function CareAtlasContactForm() {
   const dispatch = useAppDispatch()
   const submission = useAppSelector(state => state.enquiries.submissions.contact)
   const formStartedAt = useRef(Math.floor(Date.now() / 1000))
+  useEffect(() => {
+    recordActivity('inquiry_page_viewed')
+  }, [])
+  const activityAttempt = useRef<string | null>(null)
+  const activityStarted = useRef(false)
+  const activity = (stage: string) => {
+    activityAttempt.current ??= crypto.randomUUID()
+    recordActivity(`inquiry_${stage}`, { attemptId: activityAttempt.current })
+  }
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues | 'consent', string>>>({})
   const [submitted, setSubmitted] = useState(false)
   const [securityError, setSecurityError] = useState('')
@@ -63,6 +73,7 @@ export function CareAtlasContactForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    activity('submit_attempted')
 
     const form = event.currentTarget
     const formData = new FormData(form)
@@ -83,6 +94,7 @@ export function CareAtlasContactForm() {
     })
 
     if (Object.keys(nextErrors).length > 0) {
+      activity('validation_failed')
       return
     }
 
@@ -115,12 +127,14 @@ export function CareAtlasContactForm() {
       ).unwrap()
 
       setSubmitted(true)
+      activity('submitted')
       trackEvent('contact_form_success')
       form.reset()
       setRegions([])
       setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
+      activity('submit_failed')
       trackEvent('contact_form_error')
       setSubmitted(false)
       if (error instanceof Error && error.message.includes('reCAPTCHA')) {
@@ -144,7 +158,18 @@ export function CareAtlasContactForm() {
         </div>
       )}
 
-      <form className='mt-6 grid gap-5' noValidate onSubmit={handleSubmit}>
+      <form
+        className='mt-6 grid gap-5'
+        noValidate
+        onSubmit={handleSubmit}
+        onFocusCapture={() => {
+          if (!activityStarted.current) {
+            activityStarted.current = true
+            activity('form_started')
+          }
+        }}
+        onBlurCapture={() => activity('step_completed')}
+      >
         <input type='text' name='website' tabIndex={-1} autoComplete='off' aria-hidden='true' className='hidden' />
 
         <div className='grid gap-5 md:grid-cols-2'>

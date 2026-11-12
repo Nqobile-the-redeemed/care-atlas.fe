@@ -1,4 +1,5 @@
 import { readCookieConsentPreferences } from './cookieConsent'
+import { activityContext } from './marketingActivity'
 
 const key = 'care-atlas:analytics-visit'
 const idleLimit = 30 * 60 * 1000
@@ -6,6 +7,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /** A consented browser session, not a persistent person identifier. */
 export function trackingVisitId(): string | undefined {
+  if (process.env.NEXT_PUBLIC_ACTIVITY_ANALYTICS_ENABLED === 'true') return activityContext()?.visitId
   if (typeof window === 'undefined') return
   try {
     if (

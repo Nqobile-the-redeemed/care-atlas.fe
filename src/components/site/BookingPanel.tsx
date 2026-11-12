@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/bookings'
 import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha'
 import { recordTrackingEvent } from '@/lib/recordTrackingEvent'
+import { recordActivity } from '@/lib/marketingActivity'
 import { trackEvent } from '@/components/analytics/trackEvent'
 import { SiteIcon } from './SiteIcon'
 import { RegionCountiesFormSection } from './standalone-inputs'
@@ -34,8 +35,15 @@ function groupSlots(slots: BookingSlot[]) {
 }
 
 export function BookingPanel() {
+  const activityAttempt = useRef<string | null>(null)
+  const activityStarted = useRef(false)
+  const activity = (stage: string, control?: string) => {
+    activityAttempt.current ??= crypto.randomUUID()
+    recordActivity(`booking_${stage}`, { attemptId: activityAttempt.current, control })
+  }
   useEffect(() => {
     recordTrackingEvent('booking_started')
+    recordActivity('booking_page_viewed')
   }, [])
   const [eventTypes, setEventTypes] = useState<BookingEventType[]>([])
   const [selectedEventSlug, setSelectedEventSlug] = useState('')
@@ -139,6 +147,7 @@ export function BookingPanel() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    activity('submit_attempted')
     const form = event.currentTarget
     const formData = new FormData(form)
     const nextErrors = validate(formData)
@@ -152,7 +161,10 @@ export function BookingPanel() {
       outcome: Object.keys(nextErrors).length === 0 ? 'accepted' : 'validation_error'
     })
 
-    if (Object.keys(nextErrors).length > 0 || !selectedSlot) return
+    if (Object.keys(nextErrors).length > 0 || !selectedSlot) {
+      activity('validation_failed')
+      return
+    }
 
     try {
       setStatus('submitting')
@@ -186,6 +198,7 @@ export function BookingPanel() {
       })
 
       setStatus('success')
+      activity('submitted')
       trackEvent('booking_success', { booking_type: selectedEventSlug })
       setHandoffUrl(response.data.handoff?.url ?? null)
       setMessage(
@@ -199,6 +212,7 @@ export function BookingPanel() {
       setCounties([])
       formStartedAt.current = Math.floor(Date.now() / 1000)
     } catch (error) {
+      activity('submit_failed')
       trackEvent('booking_error', { booking_type: selectedEventSlug })
       setStatus('error')
       setMessage(error instanceof Error ? error.message : 'The booking could not be confirmed.')
@@ -251,7 +265,33 @@ export function BookingPanel() {
         </div>
       )}
 
-      <form className='mt-6 grid gap-5' noValidate onSubmit={handleSubmit}>
+      <form
+        className='mt-6 grid gap-5'
+        noValidate
+        onSubmit={handleSubmit}
+        onFocusCapture={() => {
+          if (!activityStarted.current) {
+            activityStarted.current = true
+            activity('form_started')
+          }
+        }}
+        onBlurCapture={event => {
+          const target = event.target
+          if (
+            target instanceof HTMLInputElement ||
+            target instanceof HTMLTextAreaElement ||
+            target instanceof HTMLSelectElement
+          )
+            activity(
+              'step_completed',
+              target instanceof HTMLTextAreaElement
+                ? 'message'
+                : target instanceof HTMLInputElement && target.type === 'checkbox'
+                  ? 'consent'
+                  : 'identity'
+            )
+        }}
+      >
         <input type='text' name='website' tabIndex={-1} autoComplete='off' aria-hidden='true' className='hidden' />
 
         <div>

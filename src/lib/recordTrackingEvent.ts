@@ -6,6 +6,7 @@ export type TrackingObservation = 'landing_view' | 'tender_view' | 'signup_click
 
 /** Record consented sessions and stages, without form contents or full URLs. */
 export function recordTrackingEvent(name: TrackingObservation) {
+  if (process.env.NEXT_PUBLIC_ACTIVITY_ANALYTICS_ENABLED === 'true') return
   if (process.env.NEXT_PUBLIC_FIRST_PARTY_ANALYTICS_ENABLED !== 'true' || typeof window === 'undefined') return
   const { om_click: clickId, visit_id: visitId } = marketingAttribution()
   if (!clickId && !visitId) return

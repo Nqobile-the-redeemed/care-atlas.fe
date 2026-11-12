@@ -1,6 +1,8 @@
 'use client'
 
 import type { Dispatch, FormEvent, SetStateAction } from 'react'
+import { useEffect, useRef } from 'react'
+import { recordActivity } from '@/lib/marketingActivity'
 import type { FormikProps } from 'formik'
 import type { BookingEventType, BookingSlot } from '@/lib/api/bookings'
 import type { TenderLeadKind } from '@/lib/api/tenders'
@@ -63,15 +65,47 @@ export function TenderBoardLeadForm({
   submitting,
   onSubmit
 }: TenderBoardLeadFormProps) {
+  const activityAttempt = useRef<string | null>(null)
+  const activityStarted = useRef(false)
+  const attempted = useRef(false)
+  useEffect(() => {
+    activityAttempt.current = null
+    activityStarted.current = false
+    attempted.current = false
+    recordActivity(leadKind === 'booking' ? 'booking_page_viewed' : 'inquiry_page_viewed')
+  }, [leadKind, selectedTender?.id])
+  const activity = (stage: string, control?: string) => {
+    activityAttempt.current ??= crypto.randomUUID()
+    recordActivity(`${leadKind === 'booking' ? 'booking' : 'inquiry'}_${stage}`, {
+      attemptId: activityAttempt.current,
+      procurementId: selectedTender?.id,
+      control
+    })
+  }
+  useEffect(() => {
+    if (notice && !error && attempted.current && activityAttempt.current) {
+      recordActivity(`${leadKind === 'booking' ? 'booking' : 'inquiry'}_submitted`, {
+        attemptId: activityAttempt.current,
+        procurementId: selectedTender?.id
+      })
+      attempted.current = false
+    }
+  }, [notice, error, leadKind, selectedTender?.id])
   const handleSubmit = async (_event: FormEvent<HTMLFormElement>) => {
     _event.preventDefault()
+    attempted.current = true
+    activity('submit_attempted')
     trackEvent('tender_lead_submitted', { lead_kind: leadKind })
     const touched: Partial<Record<keyof TenderBoardForm, boolean>> = {}
     ;(Object.keys(formik.values) as Array<keyof TenderBoardForm>).forEach(key => {
       touched[key] = true
     })
     formik.setTouched(touched)
-    await formik.validateForm()
+    const errors = await formik.validateForm()
+    if (Object.keys(errors).length > 0) {
+      activity('validation_failed')
+      return
+    }
     await onSubmit(formik.values)
   }
 
@@ -86,7 +120,17 @@ export function TenderBoardLeadForm({
         }}
       />
 
-      <form className='mt-5 space-y-5' onSubmit={handleSubmit}>
+      <form
+        className='mt-5 space-y-5'
+        onSubmit={handleSubmit}
+        onFocusCapture={() => {
+          if (!activityStarted.current) {
+            activityStarted.current = true
+            activity('form_started')
+          }
+        }}
+        onBlurCapture={() => activity('step_completed', 'identity')}
+      >
         <input
           className='hidden'
           tabIndex={-1}

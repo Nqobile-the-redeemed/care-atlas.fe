@@ -1,5 +1,6 @@
 import { apiRequest } from './client'
 import { appendPublicFormMeta } from './publicForm'
+import { marketingAttribution } from '../marketingAttribution'
 
 export type EnquirySubmission = {
   name: string
@@ -35,6 +36,7 @@ export async function sendEnquiry(payload: EnquirySubmission) {
   formData.set('enquiry_type', payload.enquiryType)
   formData.set('comment', payload.comment)
   formData.set('details', JSON.stringify(payload.details))
+  formData.set('marketing_attribution', JSON.stringify(marketingAttribution(payload.sourceUrl)))
   appendPublicFormMeta(formData, payload)
 
   payload.attachments.forEach(file => formData.append('attachments[]', file))
