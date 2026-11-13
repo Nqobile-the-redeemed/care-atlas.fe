@@ -1,3 +1,5 @@
+import { businessPhone } from '@/lib/businessContact'
+
 export type SiteLink = {
   label: string
   href: string
@@ -99,7 +101,7 @@ export const site = {
   name: 'Care Atlas',
   legalName: 'CARE ATLAS',
   email: 'admin@careatlas.co.uk',
-  phone: process.env.NEXT_PUBLIC_CARE_ATLAS_PHONE || '+44 7400 492608',
+  phone: businessPhone,
   address: 'UK-wide remote and on-site consultancy support',
   summary:
     'Care Atlas helps UK care providers, supported living operators, founders, and care professionals launch, stabilise, improve, and grow stronger care services.',

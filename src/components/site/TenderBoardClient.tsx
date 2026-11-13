@@ -1,5 +1,7 @@
 'use client'
 
+import { tenderRegionOptions } from '@/lib/geography/tenderRegions'
+
 import {
   useCallback,
   useEffect,
@@ -931,7 +933,7 @@ export function TenderBoardClient({
   const [savedTenderPrompt, setSavedTenderPrompt] = useState<PublicTender | null>(null)
   const [savedTenderIds, setSavedTenderIds] = useState<Set<string>>(new Set())
 
-  const regions = useMemo(() => [...filterOptions.regions].sort(), [filterOptions.regions])
+  const regions = useMemo(() => tenderRegionOptions(filterOptions.regions), [filterOptions.regions])
   const subcategories = useMemo(() => [...(filterOptions.subcategories ?? [])].sort(), [filterOptions.subcategories])
   const taxonomyNodes = useMemo(() => filterOptions.taxonomy ?? [], [filterOptions.taxonomy])
   const keywordOptions = useMemo(() => [...(filterOptions.keywords ?? [])].sort(), [filterOptions.keywords])
