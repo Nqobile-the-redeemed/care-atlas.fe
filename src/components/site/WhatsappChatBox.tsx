@@ -5,11 +5,12 @@ import { CARE_ATLAS_RECAPTCHA_ACTIONS, getRecaptchaToken } from '@/lib/recaptcha
 import { ApiError } from '@/lib/api/client'
 import { verifyCareAtlasWhatsappIntent } from '@/lib/api/whatsapp'
 import { trackEvent } from '@/components/analytics/trackEvent'
+import { businessNumber, businessWhatsappUrl } from '@/lib/businessContact'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
 import { SiteIcon } from './SiteIcon'
 import { Button } from './ui'
 
-const whatsappNumber = process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_NUMBER ?? ''
+const whatsappNumber = businessNumber
 const defaultMessage =
   process.env.NEXT_PUBLIC_CARE_ATLAS_WHATSAPP_MESSAGE ?? 'Hello Care Atlas, I would like to make an enquiry.'
 const DISMISSED_STORAGE_KEY = 'care-atlas:whatsapp-hidden'
@@ -48,7 +49,7 @@ const options = [
 ]
 
 function buildWhatsappUrl(message: string) {
-  return `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
+  return businessWhatsappUrl(message)
 }
 
 function wait(ms: number) {

@@ -30,7 +30,7 @@ const preferenceRows = [
   {
     key: 'analytics' as const,
     title: 'Analytics cookies',
-    description: 'Help us understand which pages and tender tools are useful.'
+    description: 'Measure visits, page activity and tender form progress to help us improve Care Atlas.'
   },
   {
     key: 'marketing' as const,
@@ -96,7 +96,7 @@ export function CookieConsent() {
               <h2 className='text-lg font-semibold text-gray-950'>Your cookie choices</h2>
               <p className='mt-2 max-w-3xl text-sm leading-6 text-gray-600'>
                 We use essential cookies to keep Care Atlas secure and working. With your permission, we also use
-                optional cookies to understand performance and improve your experience.{' '}
+                optional analytics and marketing cookies to measure visits, tender activity and campaigns.{' '}
                 <Link href='/cookies' className='text-brand-700 font-semibold hover:underline'>
                   Read our Cookie Policy
                 </Link>

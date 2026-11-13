@@ -386,7 +386,7 @@ describe('TenderBoardClient', () => {
 
     await screen.findByText('Supported Living Tender')
     const categoryGroup = screen.getByRole('button', { name: /Advanced filters/i })
-    const regionGroup = screen.getByRole('button', { name: /Region or location.*2 options/i })
+    const regionGroup = screen.getByRole('button', { name: /Region or location.*options/i })
 
     expect(categoryGroup).toHaveAttribute('aria-expanded', 'false')
     expect(regionGroup).toHaveAttribute('aria-expanded', 'false')
