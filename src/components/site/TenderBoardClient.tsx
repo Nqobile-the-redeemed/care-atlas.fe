@@ -23,7 +23,8 @@ import {
   type TenderKeywordGroup,
   type TenderLeadKind,
   type TenderPagination,
-  type TenderTaxonomyNode
+  type TenderTaxonomyNode,
+  type TenderClassificationSelections
 } from '@/lib/api/tenders'
 import { preloadRecaptcha } from '@/lib/recaptcha'
 import { useHalfScreenModal } from '@/context/HalfScreenModalContext'
@@ -37,6 +38,13 @@ import {
   readCareSpecifications
 } from './tender-board/TenderCareSpecificationFilters'
 import { TenderPagination as TenderPageControls } from './tender-board/TenderPagination'
+import {
+  TenderClassificationFilters,
+  appendTenderClassificationUrlState,
+  emptyTenderClassificationSelections,
+  readTenderClassificationSelections,
+  tenderClassificationSelectionCount
+} from './tender-board/TenderClassificationFilters'
 import { Button, ButtonLink } from './ui'
 import {
   TenderBoardFilters,
@@ -77,6 +85,7 @@ type AppliedTenderFilters = Pick<TenderBoardFiltersState, 'keyword'> & {
   valueMaxMinor?: number
   includeValueUnspecified: boolean
   sort: 'deadline' | 'newest'
+  classificationFilters: TenderClassificationSelections
 }
 
 type FilterPanelProps = {
@@ -135,6 +144,9 @@ type FilterPanelProps = {
   onValueChange: (field: 'valueMinMinor' | 'valueMaxMinor', value: number) => void
   onIncludeValueUnspecifiedChange: (value: boolean) => void
   onClear: () => void
+  classificationFilters: TenderClassificationSelections
+  classificationOptions: TenderFilters
+  onClassificationChange: (value: TenderClassificationSelections) => void
 }
 
 function dedupeTenders(tenders: PublicTender[]) {
@@ -624,7 +636,10 @@ function FilterPanel({
   onBooleanChange,
   onValueChange,
   onIncludeValueUnspecifiedChange,
-  onClear
+  onClear,
+  classificationFilters,
+  classificationOptions,
+  onClassificationChange
 }: FilterPanelProps) {
   const rangeStops = normalizedValueStops(valueBounds)
   const minimum = rangeStops[0] ?? 0
@@ -636,6 +651,7 @@ function FilterPanel({
     Number(Boolean(publishedTo)) +
     Number(Boolean(deadlineFrom)) +
     Number(Boolean(deadlineTo)) +
+    tenderClassificationSelectionCount(classificationFilters) +
     Number(smeSuitable) +
     Number(valueMinMinor !== undefined || valueMaxMinor !== undefined)
 
@@ -828,6 +844,12 @@ function FilterPanel({
                 Suitable for SMEs
               </label>
             </div>
+            <TenderClassificationFilters
+              selections={classificationFilters}
+              options={classificationOptions}
+              facets={facets}
+              onChange={onClassificationChange}
+            />
           </div>
         </FilterGroup>
       </div>
@@ -858,6 +880,9 @@ export function TenderBoardClient({
   const [stage, setStage] = useState(() => searchParams.getAll('stage'))
   const [procedureType, setProcedureType] = useState(() => searchParams.getAll('procedureType'))
   const [procurementType, setProcurementType] = useState(() => searchParams.getAll('procurementType'))
+  const [classificationFilters, setClassificationFilters] = useState(() =>
+    readTenderClassificationSelections(searchParams)
+  )
   const [publishedFrom, setPublishedFrom] = useState(() => searchParams.get('publishedFrom') ?? '')
   const [publishedTo, setPublishedTo] = useState(() => searchParams.get('publishedTo') ?? '')
   const [deadlineFrom, setDeadlineFrom] = useState(() => searchParams.get('deadlineFrom') ?? '')
@@ -893,6 +918,7 @@ export function TenderBoardClient({
     stage: searchParams.getAll('stage'),
     procedureType: searchParams.getAll('procedureType'),
     procurementType: searchParams.getAll('procurementType'),
+    classificationFilters: readTenderClassificationSelections(searchParams),
     publishedFrom: searchParams.get('publishedFrom') || undefined,
     publishedTo: searchParams.get('publishedTo') || undefined,
     deadlineFrom: searchParams.get('deadlineFrom') || undefined,
@@ -956,6 +982,7 @@ export function TenderBoardClient({
     filters.stage.length +
     filters.procedureType.length +
     filters.procurementType.length +
+    tenderClassificationSelectionCount(filters.classificationFilters) +
     Number(Boolean(filters.publishedFrom)) +
     Number(Boolean(filters.publishedTo)) +
     Number(Boolean(filters.deadlineFrom)) +
@@ -1094,6 +1121,7 @@ export function TenderBoardClient({
     filters.stage.forEach(value => next.append('stage', value))
     filters.procedureType.forEach(value => next.append('procedureType', value))
     filters.procurementType.forEach(value => next.append('procurementType', value))
+    appendTenderClassificationUrlState(next, filters.classificationFilters)
     if (filters.publishedFrom) next.set('publishedFrom', filters.publishedFrom)
     if (filters.publishedTo) next.set('publishedTo', filters.publishedTo)
     if (filters.deadlineFrom) next.set('deadlineFrom', filters.deadlineFrom)
@@ -1174,6 +1202,7 @@ export function TenderBoardClient({
       stage,
       procedureType,
       procurementType,
+      classificationFilters,
       publishedFrom: publishedFrom || undefined,
       publishedTo: publishedTo || undefined,
       deadlineFrom: deadlineFrom || undefined,
@@ -1211,6 +1240,7 @@ export function TenderBoardClient({
     setStage([])
     setProcedureType([])
     setProcurementType([])
+    setClassificationFilters(emptyTenderClassificationSelections())
     setPublishedFrom('')
     setPublishedTo('')
     setDeadlineFrom('')
@@ -1236,6 +1266,7 @@ export function TenderBoardClient({
       stage: [],
       procedureType: [],
       procurementType: [],
+      classificationFilters: emptyTenderClassificationSelections(),
       includeValueUnspecified: true,
       sort: DEFAULT_SORT
     })
@@ -1590,6 +1621,12 @@ export function TenderBoardClient({
               resultCount={contextualFilters.total}
               facets={contextualFilters.facets}
               activeFilterCount={activeFilterCount}
+              classificationFilters={classificationFilters}
+              classificationOptions={filterOptions}
+              onClassificationChange={value => {
+                setClassificationFilters(value)
+                applyCurrentFilters({ classificationFilters: value })
+              }}
               onAudienceToggle={value => toggleAdvancedList('audience', value, setAudience)}
               onRegionToggle={value => toggleFilter('region', value)}
               onSubcategoryToggle={value => toggleFilter('subcategory', value)}
@@ -1687,6 +1724,9 @@ export function TenderBoardClient({
                 resultCount={contextualFilters.total}
                 facets={contextualFilters.facets}
                 activeFilterCount={activeFilterCount}
+                classificationFilters={classificationFilters}
+                classificationOptions={filterOptions}
+                onClassificationChange={setClassificationFilters}
                 onAudienceToggle={value => toggleAdvancedList('audience', value, setAudience, false)}
                 onRegionToggle={value => toggleFilter('region', value, false)}
                 onSubcategoryToggle={value => toggleFilter('subcategory', value, false)}

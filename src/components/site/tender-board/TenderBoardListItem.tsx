@@ -51,6 +51,16 @@ function TenderBadges({ tender }: { tender: PublicTender }) {
       <span className='rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-600'>
         {tender.category}
       </span>
+      {tender.lifecycleStageLabel && (
+        <span className='rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800'>
+          {tender.lifecycleStageLabel}
+        </span>
+      )}
+      {tender.bidStatusLabel && (
+        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tender.bidStatus === 'feedback_only' ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-emerald-200 bg-emerald-50 text-emerald-900'}`}>
+          {tender.bidStatusLabel}
+        </span>
+      )}
       {tender.states.map(state => (
         <span
           key={state}
