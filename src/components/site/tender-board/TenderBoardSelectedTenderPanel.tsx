@@ -16,6 +16,16 @@ type TenderBoardSelectedTenderPanelProps = {
   onSendEnquiry: () => void
 }
 
+function applicationSignupHref(tenderId: string) {
+  const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://app.orbitmirai.com/sign-up'
+  const target = new URL(configured, 'https://app.orbitmirai.com')
+  target.searchParams.set('package', 'tender_basics')
+  target.searchParams.set('source', 'care_atlas')
+  target.searchParams.set('redirectTo', `/tenders?highlight=${encodeURIComponent(tenderId)}&action=apply`)
+  target.searchParams.set('tender', tenderId)
+  return target.toString()
+}
+
 export function TenderBoardSelectedTenderPanel({
   selectedTender,
   detailsLoading,
@@ -25,10 +35,13 @@ export function TenderBoardSelectedTenderPanel({
   if (!selectedTender) return null
 
   const detailedTender = hasTenderDetails(selectedTender) ? selectedTender : null
+  const servicePricing = selectedTender.servicePricing
   return (
     <>
       {selectedTender.bidStatusLabel && (
-        <p className={`mt-4 rounded-lg border p-3 text-sm font-semibold ${selectedTender.bidStatus === 'feedback_only' ? 'border-amber-300 bg-amber-50 text-amber-950' : 'border-blue-200 bg-blue-50 text-blue-950'}`}>
+        <p
+          className={`mt-4 rounded-lg border p-3 text-sm font-semibold ${selectedTender.bidStatus === 'feedback_only' ? 'border-amber-300 bg-amber-50 text-amber-950' : 'border-blue-200 bg-blue-50 text-blue-950'}`}
+        >
           {selectedTender.bidStatusLabel}
         </p>
       )}
@@ -38,9 +51,11 @@ export function TenderBoardSelectedTenderPanel({
           <p className='mt-1 font-semibold text-gray-950'>{selectedTender.buyer ?? 'Not stated'}</p>
         </div>
         <div className='rounded-lg bg-gray-50 p-3'>
-          <p className='text-xs text-gray-500'>Support fee from</p>
+          <p className='text-xs text-gray-500'>Single tender service</p>
           <p className='mt-1 font-semibold text-gray-950'>
-            {money(selectedTender.indicativePricing.upfrontFeeMinor, selectedTender.indicativePricing.currency)}
+            {servicePricing
+              ? `${money(servicePricing.singleTenderPence, servicePricing.currency)} + VAT`
+              : 'View current pricing in Orbit Mirai'}
           </p>
         </div>
         <div className='rounded-lg bg-gray-50 p-3'>
@@ -63,7 +78,40 @@ export function TenderBoardSelectedTenderPanel({
         </div>
       </div>
 
+      <section className='border-brand-200 bg-brand-50 mt-4 rounded-lg border p-4'>
+        <p className='text-brand-800 text-xs font-semibold tracking-wide uppercase'>Tender Application Service</p>
+        <div className='mt-3 grid gap-3 sm:grid-cols-2'>
+          <div>
+            <p className='text-xs text-gray-600'>Single tender</p>
+            <p className='mt-1 font-semibold text-gray-950'>
+              {servicePricing
+                ? `${money(servicePricing.singleTenderPence, servicePricing.currency)} + VAT`
+                : 'View current pricing in Orbit Mirai'}
+            </p>
+          </div>
+          <div>
+            <p className='text-xs text-gray-600'>Bulk applications (2+)</p>
+            <p className='mt-1 font-semibold text-gray-950'>
+              {servicePricing
+                ? `${money(servicePricing.bulkUnitPence, servicePricing.currency)} + VAT each`
+                : 'Available in Orbit Mirai'}
+            </p>
+          </div>
+        </div>
+        <p className='text-brand-900 mt-3 text-sm font-semibold'>No success fee.</p>
+        <p className='mt-2 text-xs leading-5 text-gray-600'>
+          Care Atlas provides a managed tender-writing and application service. Pricing excludes VAT. Tender awards are
+          not guaranteed. Engagements require scope assessment and a tender-specific service agreement.
+        </p>
+      </section>
+
       <div className='mt-4 flex flex-col gap-2 sm:flex-row lg:flex-col'>
+        <a
+          href={applicationSignupHref(selectedTender.id)}
+          className='bg-brand-600 hover:bg-brand-700 inline-flex min-h-11 w-full items-center justify-center rounded-lg px-5 text-sm font-semibold text-white'
+        >
+          Apply for Tender
+        </a>
         <Button onClick={onBookMeeting} size='sm' fullWidth leftIcon={<SiteIcon name='calendar' className='h-4 w-4' />}>
           Book meeting
         </Button>
@@ -119,19 +167,27 @@ export function TenderBoardSelectedTenderPanel({
           <dl className='mt-3 grid grid-cols-2 gap-3 text-sm'>
             <div>
               <dt className='text-xs text-gray-500'>Opportunity stage</dt>
-              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.lifecycleStageLabel ?? 'Not classified'}</dd>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.lifecycleStageLabel ?? 'Not classified'}
+              </dd>
             </div>
             <div>
               <dt className='text-xs text-gray-500'>Who can respond now</dt>
-              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.bidStatusLabel ?? 'Availability unknown'}</dd>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.bidStatusLabel ?? 'Availability unknown'}
+              </dd>
             </div>
             <div>
               <dt className='text-xs text-gray-500'>Award procedure</dt>
-              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.procedureRouteLabel ?? 'Not classified'}</dd>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.procedureRouteLabel ?? 'Not classified'}
+              </dd>
             </div>
             <div>
               <dt className='text-xs text-gray-500'>Purchasing arrangement</dt>
-              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.commercialVehicleLabels?.join(', ') || 'Standalone or not classified'}</dd>
+              <dd className='mt-1 font-semibold text-gray-950'>
+                {detailedTender.commercialVehicleLabels?.join(', ') || 'Standalone or not classified'}
+              </dd>
             </div>
             <div>
               <dt className='text-xs text-gray-500'>Stage</dt>

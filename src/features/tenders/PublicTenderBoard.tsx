@@ -42,12 +42,17 @@ function formatTerm(tender: TenderPreview) {
   return `${formatDate(tender.contractStartDate)} - ${formatDate(tender.contractEndDate)}`
 }
 
-function signupHref() {
+function signupHref(tenderId?: string) {
   const configured = process.env.NEXT_PUBLIC_ORBIT_MIRAI_SIGNUP_URL ?? 'https://portal.orbitmirai.com/sign-up'
   const target = new URL(configured, window.location.origin)
   target.searchParams.set('package', 'tender_basics')
   target.searchParams.set('source', 'care_atlas')
-  target.searchParams.set('returnTo', '/tenders')
+  if (tenderId) {
+    target.searchParams.set('redirectTo', `/tenders?highlight=${encodeURIComponent(tenderId)}&action=apply`)
+    target.searchParams.set('tender', tenderId)
+  } else {
+    target.searchParams.set('returnTo', '/tenders')
+  }
 
   const current = new URLSearchParams(window.location.search)
   current.forEach((value, key) => {
@@ -171,25 +176,28 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
           </section>
 
           <section className='mt-6 border-t border-gray-200 pt-5'>
-            <h3 className='text-sm font-semibold text-gray-950'>Indicative Care Atlas support</h3>
+            <h3 className='text-sm font-semibold text-gray-950'>Tender Application Service</h3>
             <div className='mt-3 grid gap-3 sm:grid-cols-2'>
               <div className='rounded-lg border border-gray-200 p-4'>
-                <p className='text-xs text-gray-500'>Upfront fee</p>
+                <p className='text-xs text-gray-500'>Single tender</p>
                 <p className='mt-1 font-semibold text-gray-950'>
-                  From {formatMoney(tender.indicativePricing.upfrontFeeMinor)}
+                  {tender.servicePricing
+                    ? `${formatMoney(tender.servicePricing.singleTenderPence)} + VAT`
+                    : 'View current pricing in Orbit Mirai'}
                 </p>
               </div>
               <div className='rounded-lg border border-gray-200 p-4'>
-                <p className='text-xs text-gray-500'>Success fee</p>
+                <p className='text-xs text-gray-500'>Bulk applications (2+)</p>
                 <p className='mt-1 font-semibold text-gray-950'>
-                  {tender.indicativePricing.successFeeMinor === null
-                    ? 'Assessment required'
-                    : `From ${formatMoney(tender.indicativePricing.successFeeMinor)}`}
+                  {tender.servicePricing
+                    ? `${formatMoney(tender.servicePricing.bulkUnitPence)} + VAT each`
+                    : 'Available in Orbit Mirai'}
                 </p>
               </div>
             </div>
             <p className='mt-3 text-xs leading-5 text-gray-500'>
-              Prices exclude VAT, are indicative, do not guarantee success and require a separate engagement agreement.
+              No success fee. Tender awards are not guaranteed. Engagements require scope assessment and a
+              tender-specific service agreement.
             </p>
           </section>
         </div>
@@ -197,10 +205,10 @@ function TenderPanel({ tender, onClose }: { tender: TenderPreview; onClose: () =
         <footer className='border-t border-gray-200 bg-gray-50 p-5'>
           <button
             type='button'
-            onClick={() => window.location.assign(signupHref())}
+            onClick={() => window.location.assign(signupHref(tender.id))}
             className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
           >
-            Start 14-day free trial
+            Apply for Tender
             <SiteIcon name='arrow' className='h-4 w-4' />
           </button>
           <p className='mt-3 text-center text-xs text-gray-500'>
@@ -367,8 +375,8 @@ export function PublicTenderBoard() {
                       'Deadline',
                       'Contract term',
                       'Summary',
-                      'Upfront fee',
-                      'Success fee',
+                      'Single tender service',
+                      'Bulk service',
                       'Action'
                     ].map(heading => (
                       <th key={heading} scope='col' className='px-4 py-3 text-xs font-semibold'>
@@ -412,23 +420,25 @@ export function PublicTenderBoard() {
                         <p className='line-clamp-2 leading-6 text-gray-600'>{tender.summary || 'Not stated'}</p>
                       </td>
                       <td className='w-36 px-4 py-4 font-medium text-gray-900'>
-                        From {formatMoney(tender.indicativePricing.upfrontFeeMinor)}
+                        {tender.servicePricing
+                          ? `${formatMoney(tender.servicePricing.singleTenderPence)} + VAT`
+                          : 'View in Orbit Mirai'}
                       </td>
                       <td className='w-40 px-4 py-4 text-gray-700'>
-                        {tender.indicativePricing.successFeeMinor === null
-                          ? 'Assessment required'
-                          : `From ${formatMoney(tender.indicativePricing.successFeeMinor)}`}
+                        {tender.servicePricing
+                          ? `${formatMoney(tender.servicePricing.bulkUnitPence)} + VAT each`
+                          : 'Available in Orbit Mirai'}
                       </td>
                       <td className='w-40 px-4 py-4'>
                         <button
                           type='button'
                           onClick={event => {
                             event.stopPropagation()
-                            window.location.assign(signupHref())
+                            window.location.assign(signupHref(tender.id))
                           }}
                           className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 min-h-10 rounded-lg px-3 text-xs font-semibold text-white focus:ring-4 focus:outline-hidden'
                         >
-                          Get bid support
+                          Apply for Tender
                         </button>
                       </td>
                     </tr>
@@ -472,10 +482,10 @@ export function PublicTenderBoard() {
                   </button>
                   <button
                     type='button'
-                    onClick={() => window.location.assign(signupHref())}
+                    onClick={() => window.location.assign(signupHref(tender.id))}
                     className='bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/20 mt-4 min-h-11 w-full rounded-lg px-4 text-sm font-semibold text-white focus:ring-4 focus:outline-hidden'
                   >
-                    Get bid support
+                    Apply for Tender
                   </button>
                 </article>
               ))}

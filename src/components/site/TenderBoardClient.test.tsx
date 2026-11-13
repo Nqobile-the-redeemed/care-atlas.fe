@@ -22,6 +22,56 @@ vi.mock('@/lib/recaptcha', () => ({
 }))
 
 vi.mock('@/lib/api/tenders', () => ({
+  TENDER_CLASSIFICATION_DIMENSIONS: [
+    {
+      key: 'lifecycleStage',
+      parameter: 'lifecycle_stage',
+      optionKey: 'lifecycleStages',
+      facetKey: 'lifecycleStages',
+      label: 'Opportunity stage',
+      help: ''
+    },
+    {
+      key: 'engagementType',
+      parameter: 'engagement_type',
+      optionKey: 'engagementTypes',
+      facetKey: 'engagementTypes',
+      label: 'Engagement type',
+      help: ''
+    },
+    {
+      key: 'procedureRoute',
+      parameter: 'procedure_route',
+      optionKey: 'procedureRoutes',
+      facetKey: 'procedureRoutes',
+      label: 'How it is awarded',
+      help: ''
+    },
+    {
+      key: 'commercialVehicleTags',
+      parameter: 'commercial_vehicle_tags',
+      optionKey: 'commercialVehicleTags',
+      facetKey: 'commercialVehicleTags',
+      label: 'Purchasing arrangement',
+      help: ''
+    },
+    {
+      key: 'specialRegimeTags',
+      parameter: 'special_regime_tags',
+      optionKey: 'specialRegimeTags',
+      facetKey: 'specialRegimeTags',
+      label: 'Special regime',
+      help: ''
+    },
+    {
+      key: 'bidStatus',
+      parameter: 'bid_status',
+      optionKey: 'bidStatuses',
+      facetKey: 'bidStatuses',
+      label: 'Who can respond now',
+      help: ''
+    }
+  ],
   getPublicTenders: vi.fn(async () => ({
     meta: {
       pagination: {
@@ -130,10 +180,22 @@ vi.mock('@/lib/api/tenders', () => ({
       contractEndDate: null,
       states: [],
       indicativePricing: {
-        upfrontFeeMinor: 250000,
+        upfrontFeeMinor: 100000,
         successFeeMinor: null,
         currency: 'GBP',
         reviewed: true
+      },
+      servicePricing: {
+        version: 'tender-offer-v1',
+        currency: 'GBP',
+        taxIncluded: false,
+        singleTenderPence: 100000,
+        bulkUnitPence: 89900,
+        bulkMinimumQuantity: 2,
+        monthlyPence: 500000,
+        monthlyAllowanceUnits: 10,
+        eligibleDirectUrgencyPence: 20000,
+        successFeePence: 0
       },
       locked: false,
       lastSeenAt: null,
@@ -360,7 +422,7 @@ describe('TenderBoardClient', () => {
 
     expect(screen.getByRole('slider', { name: 'Minimum contract value' })).toBeInTheDocument()
     expect(screen.getByRole('slider', { name: 'Maximum contract value' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Set nearest contract value to £500k' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set nearest contract value to £500K' })).toBeInTheDocument()
     expect(screen.getByText('Minimum')).toBeInTheDocument()
     expect(screen.getByText('Maximum')).toBeInTheDocument()
     expect(screen.getByLabelText('Published from')).toHaveClass('min-w-0')
@@ -406,6 +468,13 @@ describe('TenderBoardClient', () => {
     expect(await screen.findByText('Full detailed description')).toBeInTheDocument()
     expect(await screen.findByText('Original notice')).toBeInTheDocument()
     expect(await screen.findByText('Response portal')).toBeInTheDocument()
+    expect(screen.getByText('No success fee.')).toBeInTheDocument()
+    expect(screen.getAllByText('£1,000 + VAT')).not.toHaveLength(0)
+    expect(screen.getByText('£899 + VAT each')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Apply for Tender' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('redirectTo=%2Ftenders%3Fhighlight%3Dtender-1%26action%3Dapply')
+    )
 
     await user.click(screen.getByRole('button', { name: /booking/i }))
 

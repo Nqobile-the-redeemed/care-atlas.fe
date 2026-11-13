@@ -27,6 +27,18 @@ export type PublicTender = {
     currency: string
     reviewed: boolean
   }
+  servicePricing?: {
+    version: string
+    currency: string
+    taxIncluded: boolean
+    singleTenderPence: number
+    bulkUnitPence: number
+    bulkMinimumQuantity: number
+    monthlyPence: number
+    monthlyAllowanceUnits: number
+    eligibleDirectUrgencyPence: number
+    successFeePence: number
+  }
   locked: boolean
   lastSeenAt: string | null
   publicPath?: string
@@ -216,12 +228,54 @@ export type TenderClassificationSelections = Record<
 >
 
 export const TENDER_CLASSIFICATION_DIMENSIONS = [
-  { key: 'lifecycleStage', parameter: 'lifecycle_stage', optionKey: 'lifecycleStages', facetKey: 'lifecycleStages', label: 'Opportunity stage', help: 'Separate engagement, live tenders and completed notices.' },
-  { key: 'engagementType', parameter: 'engagement_type', optionKey: 'engagementTypes', facetKey: 'engagementTypes', label: 'Engagement type', help: 'Choose the kind of early supplier feedback.' },
-  { key: 'procedureRoute', parameter: 'procedure_route', optionKey: 'procedureRoutes', facetKey: 'procedureRoutes', label: 'How it is awarded', help: 'The normalised procurement procedure.' },
-  { key: 'commercialVehicleTags', parameter: 'commercial_vehicle_tags', optionKey: 'commercialVehicleTags', facetKey: 'commercialVehicleTags', label: 'Purchasing arrangement', help: 'Framework and dynamic arrangements can overlap.' },
-  { key: 'specialRegimeTags', parameter: 'special_regime_tags', optionKey: 'specialRegimeTags', facetKey: 'specialRegimeTags', label: 'Special regime', help: 'Threshold and procurement-regime classifications.' },
-  { key: 'bidStatus', parameter: 'bid_status', optionKey: 'bidStatuses', facetKey: 'bidStatuses', label: 'Who can respond now', help: 'Whether suppliers can bid, join, or only give feedback.' }
+  {
+    key: 'lifecycleStage',
+    parameter: 'lifecycle_stage',
+    optionKey: 'lifecycleStages',
+    facetKey: 'lifecycleStages',
+    label: 'Opportunity stage',
+    help: 'Separate engagement, live tenders and completed notices.'
+  },
+  {
+    key: 'engagementType',
+    parameter: 'engagement_type',
+    optionKey: 'engagementTypes',
+    facetKey: 'engagementTypes',
+    label: 'Engagement type',
+    help: 'Choose the kind of early supplier feedback.'
+  },
+  {
+    key: 'procedureRoute',
+    parameter: 'procedure_route',
+    optionKey: 'procedureRoutes',
+    facetKey: 'procedureRoutes',
+    label: 'How it is awarded',
+    help: 'The normalised procurement procedure.'
+  },
+  {
+    key: 'commercialVehicleTags',
+    parameter: 'commercial_vehicle_tags',
+    optionKey: 'commercialVehicleTags',
+    facetKey: 'commercialVehicleTags',
+    label: 'Purchasing arrangement',
+    help: 'Framework and dynamic arrangements can overlap.'
+  },
+  {
+    key: 'specialRegimeTags',
+    parameter: 'special_regime_tags',
+    optionKey: 'specialRegimeTags',
+    facetKey: 'specialRegimeTags',
+    label: 'Special regime',
+    help: 'Threshold and procurement-regime classifications.'
+  },
+  {
+    key: 'bidStatus',
+    parameter: 'bid_status',
+    optionKey: 'bidStatuses',
+    facetKey: 'bidStatuses',
+    label: 'Who can respond now',
+    help: 'Whether suppliers can bid, join, or only give feedback.'
+  }
 ] as const
 
 export type PublicTenderQuery = {

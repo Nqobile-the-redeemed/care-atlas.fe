@@ -26,6 +26,18 @@ export type TenderPreview = {
     currency: string
     reviewed: boolean
   }
+  servicePricing?: {
+    version: string
+    currency: string
+    taxIncluded: boolean
+    singleTenderPence: number
+    bulkUnitPence: number
+    bulkMinimumQuantity: number
+    monthlyPence: number
+    monthlyAllowanceUnits: number
+    eligibleDirectUrgencyPence: number
+    successFeePence: number
+  }
   locked: true
   lastSeenAt: string | null
 }
