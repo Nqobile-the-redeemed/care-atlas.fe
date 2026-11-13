@@ -27,6 +27,11 @@ export function TenderBoardSelectedTenderPanel({
   const detailedTender = hasTenderDetails(selectedTender) ? selectedTender : null
   return (
     <>
+      {selectedTender.bidStatusLabel && (
+        <p className={`mt-4 rounded-lg border p-3 text-sm font-semibold ${selectedTender.bidStatus === 'feedback_only' ? 'border-amber-300 bg-amber-50 text-amber-950' : 'border-blue-200 bg-blue-50 text-blue-950'}`}>
+          {selectedTender.bidStatusLabel}
+        </p>
+      )}
       <div className='mt-4 grid grid-cols-2 gap-3 text-sm'>
         <div className='rounded-lg bg-gray-50 p-3'>
           <p className='text-xs text-gray-500'>Buyer</p>
@@ -112,6 +117,22 @@ export function TenderBoardSelectedTenderPanel({
         <section className='mt-5 border-t border-gray-200 pt-5'>
           <h3 className='text-base font-semibold text-gray-950'>Tender details</h3>
           <dl className='mt-3 grid grid-cols-2 gap-3 text-sm'>
+            <div>
+              <dt className='text-xs text-gray-500'>Opportunity stage</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.lifecycleStageLabel ?? 'Not classified'}</dd>
+            </div>
+            <div>
+              <dt className='text-xs text-gray-500'>Who can respond now</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.bidStatusLabel ?? 'Availability unknown'}</dd>
+            </div>
+            <div>
+              <dt className='text-xs text-gray-500'>Award procedure</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.procedureRouteLabel ?? 'Not classified'}</dd>
+            </div>
+            <div>
+              <dt className='text-xs text-gray-500'>Purchasing arrangement</dt>
+              <dd className='mt-1 font-semibold text-gray-950'>{detailedTender.commercialVehicleLabels?.join(', ') || 'Standalone or not classified'}</dd>
+            </div>
             <div>
               <dt className='text-xs text-gray-500'>Stage</dt>
               <dd className='mt-1 font-semibold text-gray-950 capitalize'>

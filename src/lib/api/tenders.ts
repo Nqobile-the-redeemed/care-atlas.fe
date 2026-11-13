@@ -31,6 +31,18 @@ export type PublicTender = {
   lastSeenAt: string | null
   publicPath?: string
   canonicalUrl?: string
+  lifecycleStage?: string | null
+  lifecycleStageLabel?: string | null
+  engagementType?: string | null
+  engagementTypeLabel?: string | null
+  procedureRoute?: string | null
+  procedureRouteLabel?: string | null
+  commercialVehicleTags?: string[]
+  commercialVehicleLabels?: string[]
+  specialRegimeTags?: string[]
+  specialRegimeLabels?: string[]
+  bidStatus?: string | null
+  bidStatusLabel?: string | null
 }
 
 export type TenderPagination = {
@@ -146,6 +158,12 @@ export type TenderFilters = {
   stages?: string[]
   procedureTypes?: string[]
   procurementTypes?: string[]
+  lifecycleStages?: TenderFilterOption[]
+  engagementTypes?: TenderFilterOption[]
+  procedureRoutes?: TenderFilterOption[]
+  commercialVehicleTags?: TenderFilterOption[]
+  specialRegimeTags?: TenderFilterOption[]
+  bidStatuses?: TenderFilterOption[]
   total?: number
   ranges?: {
     value?: {
@@ -172,11 +190,39 @@ export type TenderFilters = {
       | 'procurementTypes'
       | 'framework'
       | 'dynamicMarket'
-      | 'smeSuitable',
+      | 'smeSuitable'
+      | 'lifecycleStages'
+      | 'engagementTypes'
+      | 'procedureRoutes'
+      | 'commercialVehicleTags'
+      | 'specialRegimeTags'
+      | 'bidStatuses',
       Array<{ value: string | boolean; count: number }>
     >
   >
 }
+
+export type TenderFilterOption = { value: string; label: string }
+export type TenderClassificationDimension =
+  | 'lifecycleStage'
+  | 'engagementType'
+  | 'procedureRoute'
+  | 'commercialVehicleTags'
+  | 'specialRegimeTags'
+  | 'bidStatus'
+export type TenderClassificationSelections = Record<
+  TenderClassificationDimension,
+  { include: string[]; exclude: string[] }
+>
+
+export const TENDER_CLASSIFICATION_DIMENSIONS = [
+  { key: 'lifecycleStage', parameter: 'lifecycle_stage', optionKey: 'lifecycleStages', facetKey: 'lifecycleStages', label: 'Opportunity stage', help: 'Separate engagement, live tenders and completed notices.' },
+  { key: 'engagementType', parameter: 'engagement_type', optionKey: 'engagementTypes', facetKey: 'engagementTypes', label: 'Engagement type', help: 'Choose the kind of early supplier feedback.' },
+  { key: 'procedureRoute', parameter: 'procedure_route', optionKey: 'procedureRoutes', facetKey: 'procedureRoutes', label: 'How it is awarded', help: 'The normalised procurement procedure.' },
+  { key: 'commercialVehicleTags', parameter: 'commercial_vehicle_tags', optionKey: 'commercialVehicleTags', facetKey: 'commercialVehicleTags', label: 'Purchasing arrangement', help: 'Framework and dynamic arrangements can overlap.' },
+  { key: 'specialRegimeTags', parameter: 'special_regime_tags', optionKey: 'specialRegimeTags', facetKey: 'specialRegimeTags', label: 'Special regime', help: 'Threshold and procurement-regime classifications.' },
+  { key: 'bidStatus', parameter: 'bid_status', optionKey: 'bidStatuses', facetKey: 'bidStatuses', label: 'Who can respond now', help: 'Whether suppliers can bid, join, or only give feedback.' }
+] as const
 
 export type PublicTenderQuery = {
   careSpecifications?: Record<string, string[]>
@@ -201,6 +247,7 @@ export type PublicTenderQuery = {
   framework?: boolean
   dynamicMarket?: boolean
   smeSuitable?: boolean
+  classificationFilters?: TenderClassificationSelections
   page?: number
   perPage?: number
   sort?: 'deadline' | 'newest'
@@ -274,6 +321,10 @@ function appendAdvancedTenderFilters(params: URLSearchParams, filters: PublicTen
   if (filters.framework !== undefined) params.set('framework', filters.framework ? '1' : '0')
   if (filters.dynamicMarket !== undefined) params.set('dynamic_market', filters.dynamicMarket ? '1' : '0')
   if (filters.smeSuitable !== undefined) params.set('sme_suitable', filters.smeSuitable ? '1' : '0')
+  TENDER_CLASSIFICATION_DIMENSIONS.forEach(({ key, parameter }) => {
+    filters.classificationFilters?.[key].include.forEach(value => params.append(`${parameter}[]`, value))
+    filters.classificationFilters?.[key].exclude.forEach(value => params.append(`exclude_${parameter}[]`, value))
+  })
 }
 
 export type TenderTaxonomyNode = {
